@@ -1,0 +1,42 @@
+.ucg-search-panel {
+  padding: 16px 20px 0;
+  position: relative;
+  overflow: auto;
+}
+.ucg-search-panel .ucg-search-btn {
+  position: absolute;
+  right: 50px;
+  bottom: 20px;
+}
+.ucg-search-panel .ucg-search-btn .u-button {
+  width: 70px;
+  min-width: 50px;
+  margin-right: 10px;
+  padding: 4px;
+}
+.ucg-search-panel .ucg-search-btn .u-button:last-of-type {
+  margin-right: 0;
+}
+.ucg-search-panel .ucg-search-btn .u-button.button-transparent {
+  background: transparent;
+  color: #505766;
+  border-color: transparent;
+}
+.ucg-search-panel .ucg-search-btn .u-button.button-transparent:hover {
+  background-color: rgba(85, 100, 122, 0.15);
+}
+.ucg-search-panel .ucg-search-btn .u-button.button-transparent i.uf {
+  padding-right: 0;
+}
+.ucg-search-panel .ucg-search-content {
+  padding-right: 200px;
+  overflow-x: hidden;
+}
+.ucg-search-panel .u-panel {
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
+}
+.ucg-search-panel .u-panel .u-panel-body {
+  padding: 0;
+}

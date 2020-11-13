@@ -1,0 +1,18 @@
+.mix-ma-content-wrap {
+  position: relative;
+}
+.mix-ma-content-wrap.footer-bottom {
+  padding-bottom: 50px;
+}
+.mix-ma-content-wrap.view-card {
+  margin: 20px;
+  box-shadow: 0px 2px 4px 0px #dee9f4;
+  border: 1px solid #dee9f4;
+  background: #fff;
+}
+.mix-ma-content-wrap .content-con-wrap {
+  padding: 20px 0;
+}
+.mix-ma-content-wrap.has-content-top .content-con-wrap {
+  padding-top: 16px;
+}

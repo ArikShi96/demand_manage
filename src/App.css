@@ -1,0 +1,34 @@
+.ant-menu-submenu-title i.iconfont,
+.ant-menu-item i.iconfont{
+  padding-right:5px;
+}
+.addemandlist{
+  width:90%;
+}
+.ant-row{
+  display: flex !important;
+}
+.ant-form-item-control-wrapper{
+  width:80%;
+}
+.ant-form-item-label{
+  width:130px;
+}
+.asideadmin{
+  background: #001529;
+}
+button.ant-btn-sm{
+  font-size:12px;
+  margin-right:7px;
+}
+.flexbox{
+  display:flex;
+}
+.dynamicStatus{
+  width:58%;
+  display:flex;
+  justify-content: space-between;
+}
+.app{
+  background: #F6F9FC;
+}

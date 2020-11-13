@@ -1,0 +1,29 @@
+{
+  "files": {
+    "main.css": "./static/css/main.9157f1ef.chunk.css",
+    "main.js": "./static/js/main.cb6f3814.chunk.js",
+    "main.js.map": "./static/js/main.cb6f3814.chunk.js.map",
+    "runtime-main.js": "./static/js/runtime-main.c73ebb0e.js",
+    "runtime-main.js.map": "./static/js/runtime-main.c73ebb0e.js.map",
+    "static/css/2.37d55ad5.chunk.css": "./static/css/2.37d55ad5.chunk.css",
+    "static/js/2.05732531.chunk.js": "./static/js/2.05732531.chunk.js",
+    "static/js/2.05732531.chunk.js.map": "./static/js/2.05732531.chunk.js.map",
+    "index.html": "./index.html",
+    "precache-manifest.8f7afa5f2113b086626994eb0bdae495.js": "./precache-manifest.8f7afa5f2113b086626994eb0bdae495.js",
+    "service-worker.js": "./service-worker.js",
+    "static/css/2.37d55ad5.chunk.css.map": "./static/css/2.37d55ad5.chunk.css.map",
+    "static/css/main.9157f1ef.chunk.css.map": "./static/css/main.9157f1ef.chunk.css.map",
+    "static/js/2.05732531.chunk.js.LICENSE.txt": "./static/js/2.05732531.chunk.js.LICENSE.txt",
+    "static/media/date.svg": "./static/media/date.ad33d4ff.svg",
+    "static/media/iconfont.css": "./static/media/iconfont.ba957f58.ttf",
+    "static/media/iuap-logo.svg": "./static/media/iuap-logo.ab454582.svg",
+    "static/media/product.svg": "./static/media/product.6321749d.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.c73ebb0e.js",
+    "static/css/2.37d55ad5.chunk.css",
+    "static/js/2.05732531.chunk.js",
+    "static/css/main.9157f1ef.chunk.css",
+    "static/js/main.cb6f3814.chunk.js"
+  ]
+}

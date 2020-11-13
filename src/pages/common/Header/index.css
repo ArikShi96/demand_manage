@@ -1,0 +1,41 @@
+.mix-ma-page-header {
+  height: 42px;
+  padding: 5px 20px;
+  background: #FFFFFF;
+  font-size: 14px;
+  border-bottom: 1px solid #D7E6EF;
+  position: relative;
+  z-index: 9;
+  text-align: center;
+}
+.mix-ma-page-header > * {
+  vertical-align: top;
+}
+.mix-ma-page-header .header-back {
+  font-size: 14px;
+  line-height: 30px;
+  margin-right: 5px;
+  float: left;
+}
+.mix-ma-page-header .page-header-title {
+  color: #212121;
+  font-weight: 600;
+  line-height: 32px;
+  display: inline-block;
+}
+.mix-ma-page-header .page-header-content {
+  position: absolute;
+  top: 3px;
+  right: 20px;
+  line-height: 32px;
+}
+.mix-ma-page-header .page-header-content .u-form-control-search {
+  width: 200px;
+}
+.mix-ma-page-header .page-header-content > * {
+  display: inline-block;
+  vertical-align: middle;
+}
+.mix-ma-header-pos-box {
+  height: 20px;
+}

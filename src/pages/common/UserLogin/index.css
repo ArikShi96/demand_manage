@@ -1,0 +1,61 @@
+.mix-user-login a {
+  vertical-align: bottom;
+  padding: 5px 5px;
+  color: #3D3D3D;
+  text-align: center;
+  font-size: 14px;
+}
+.mix-user-login a:hover {
+  color: #e53935;
+}
+.mix-user-login .user-info {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  cursor: pointer;
+}
+.mix-user-login .user-img {
+  border: 1px solid #ffa100;
+  border-radius: 15px;
+  height: 30px;
+  width: 30px;
+  margin-right: 10px;
+}
+.mix-user-login .user-name {
+  line-height: 30px;
+  margin-right: 10px;
+}
+.mix-user-name-menu .u-dropdown-menu-item {
+  vertical-align: middle;
+  color: #3D3D3D;
+  font-size: 14px;
+}
+.mix-user-name-menu .u-dropdown-menu-item:hover {
+  color: #e53935;
+}
+.mix-user-name-menu .u-dropdown-menu-item:first-child {
+  margin-top: 5px;
+}
+.mix-user-name-menu .u-dropdown-menu-submenu {
+  z-index: 10;
+}
+.mix-user-name-menu li {
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  position: relative;
+  display: block;
+  padding: 0 16px 0 28px;
+  line-height: 42px;
+  height: 42px;
+  text-overflow: ellipsis;
+  clear: both;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.user-name-header {
+  display: inline-block;
+  padding: 5px;
+  line-height: 21px;
+}

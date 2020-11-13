@@ -1,0 +1,7 @@
+.a-box{
+    display: inline-block;
+}
+
+.a-box a{
+    margin-left: 8px;
+}

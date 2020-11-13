@@ -1,0 +1,224 @@
+.ucg-ma-grid-wrapper .u-grid.ucf-example-grid {
+  background: #fff;
+  overflow: hidden;
+}
+.ucg-ma-grid-wrapper .u-grid.ucf-example-grid table {
+  table-layout: fixed;
+}
+.ucg-ma-grid-wrapper .u-grid.ucf-example-grid .table-menu {
+  height: 16px;
+  line-height: 1;
+}
+.ucg-ma-grid-wrapper .u-grid.ucf-example-grid th.column-number-right,
+.ucg-ma-grid-wrapper .u-grid.ucf-example-grid td.column-number-right {
+  text-align: right !important;
+}
+.ucg-ma-grid-wrapper .u-input-group {
+  border-spacing: 0;
+}
+.ucg-ma-grid-wrapper .u-radio-group {
+  line-height: 14px;
+}
+.ucg-ma-grid-wrapper .u-table tr {
+  transition: none;
+}
+.ucg-ma-grid-wrapper .u-table tr:nth-child(2n) {
+  background: #FAFAFA;
+}
+.ucg-ma-grid-wrapper .u-table tr:nth-child(2n + 1) {
+  background: #ffffff;
+}
+.ucg-ma-grid-wrapper .u-table tr:hover,
+.ucg-ma-grid-wrapper .u-table tr.u-table-row-hover {
+  background: #EBECF0;
+}
+.ucg-ma-grid-wrapper .u-table tr.u-table-row.selected,
+.ucg-ma-grid-wrapper .u-table tr.u-table-row.ref-multiple-table-row-selected {
+  background: #EBECF0;
+}
+.ucg-ma-grid-wrapper .u-table th,
+.ucg-ma-grid-wrapper .u-table td {
+  padding: 10px 8px;
+  height: 40px;
+}
+.ucg-ma-grid-wrapper .u-table th {
+  overflow: visible;
+  background-clip: padding-box;
+  word-break: keep-all;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+.ucg-ma-grid-wrapper .u-table tr.filterable th {
+  padding: 0 2px;
+  height: 39px;
+}
+.ucg-ma-grid-wrapper .ucg-grid-empty {
+  color: #BEBEBE;
+  font-size: 12px;
+  line-height: 20px;
+}
+.ucg-ma-grid-wrapper .ucg-grid-empty-img {
+  width: 163px;
+  height: 163px;
+  margin-top: 130px;
+}
+.ucg-ma-grid-wrapper .ucg-grid-empty-text {
+  height: 19px;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.25);
+  line-height: 19px;
+  margin-top: 26px;
+}
+.ucg-ma-grid-wrapper.noborder .u-table thead tr {
+  border: none !important;
+}
+.ucg-ma-grid-wrapper.noborder .u-table td {
+  border: none;
+}
+.ucg-ma-grid-wrapper .u-tag {
+  margin: 0;
+}
+.ucg-ma-grid-wrapper .u-row-hover .u-button {
+  margin-right: 8px;
+  min-width: 68px;
+  padding: 4px;
+}
+.ucg-ma-grid-wrapper .u-row-hover .u-button:last-of-type {
+  margin-right: 0;
+}
+.ucg-grid-action a {
+  margin-right: 5px;
+}
+.ucg-grid-action a:last-child {
+  margin-right: 0;
+}
+.u-table-filter-column-pop-cont-item > span {
+  margin: 0 !important;
+}
+.ucg-ma-grid-header,
+.ucg-ma-grid-footer {
+  padding: 5px 0 16px;
+}
+.u-table .u-table-content {
+  border: none;
+  border-top: 1px solid #505766;
+}
+.u-table .u-table-thead th {
+  padding: 9px 8px 8px 20px;
+  background-color: #F7F9FD;
+  font-size: 12px;
+  line-height: 17px;
+  color: #333333;
+  font-weight: bold;
+  font-family: Microsoft YaHei,Arial;
+}
+.u-table .u-table-tbody tr {
+  background-color: #FFFFFF;
+}
+.u-table .u-table-tbody tr:hover {
+  background-color: #EDF1F7;
+}
+.u-table .u-table-tbody .u-table-row.u-table-row-hover {
+  background-color: #EDF1F7 !important;
+}
+.u-table tr:nth-child(2n) {
+  background-color: #fff;
+}
+.u-table .u-table-tbody tr.has-checked {
+  background-color: #EDF1F7 !important;
+}
+.u-table .u-table-tbody td {
+  padding: 7px 8px 7px 20px;
+  font-size: 12px;
+  line-height: 26px;
+  color: #333333;
+}
+/*选择框*/
+.u-table .u-table-fixed-left {
+  box-shadow: none;
+}
+.u-table .u-table-fixed-left .u-table-thead th {
+  padding-left: 20px;
+}
+.u-table .u-table-content .u-checkbox .u-checkbox-label:before {
+  width: 14px;
+  height: 14px;
+  box-shadow: none;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  border-color: #CCCCCC;
+}
+.u-table .u-table-content .u-checkbox.is-checked .u-checkbox-label:before {
+  width: 14px;
+  height: 14px;
+  box-shadow: none;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  border-color: #CCCCCC;
+}
+.u-table .u-table-content .u-checkbox .u-checkbox-label:after {
+  width: 14px;
+  height: 14px;
+  /*top: -7px;*/
+  left: 0.5px;
+  box-shadow: none;
+  text-align: start;
+}
+.u-table .u-table-content .u-checkbox.is-checked .u-checkbox-label:after {
+  font-size: 12px;
+  line-height: 14px;
+  color: #EE2223;
+  text-align: start;
+}
+/*按钮*/
+.u-table .u-table-content .u-table-tbody .action-btn {
+  height: 26px;
+  line-height: 26px;
+  padding: 0 12px;
+  background-color: #505766;
+  border-radius: 3px;
+  font-size: 12px;
+  color: #ffffff;
+}
+.u-table .u-table-content .u-table-tbody .action-btn:disabled:hover {
+  background-color: #505766;
+  color: #ffffff;
+}
+.u-table .u-table-content .u-table-tbody .action-btn:disabled {
+  background-color: #505766;
+  color: #ffffff;
+}
+/*action-btn*/
+.u-table .u-table-tbody .action-btns-container {
+  display: block;
+}
+.u-table .u-table-tbody .action-btns-container:before {
+  display: table;
+  content: '';
+}
+.u-table .u-table-tbody .action-btns-container:after {
+  display: table;
+  content: '';
+  clear: both;
+}
+.u-table .u-table-tbody .action-btns-container .action-btn {
+  float: left;
+  height: 26px;
+  line-height: 26px;
+  padding: 0 12px;
+  background-color: #505766;
+  border-radius: 3px;
+  font-size: 12px;
+  color: #ffffff;
+  margin-right: 12px;
+  visibility: hidden;
+}
+.u-table .u-table-tbody tr:hover .action-btns-container .action-btn {
+  visibility: visible;
+}
+.u-table-placeholder {
+  border-bottom: none;
+}

@@ -1,0 +1,16 @@
+.mix-grid-actions {
+  position: relative;
+  text-align: left;
+}
+.mix-grid-actions.actions-align-right {
+  text-align: right;
+}
+.mix-grid-actions.actions-align-left {
+  text-align: left;
+}
+.mix-grid-action-item {
+  margin-right: 20px;
+}
+.mix-grid-action-item:last-of-type {
+  margin-right: 0;
+}

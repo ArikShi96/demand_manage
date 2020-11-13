@@ -1,0 +1,50 @@
+.mix-portal-header {
+  height: 50px;
+  overflow-x: hidden;
+  background: #eee;
+}
+.mix-portal-header.mix-portal-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+.mix-portal-header .portal-header-logo {
+  float: left;
+  width: 202px;
+  height: 100%;
+  text-align: center;
+  line-height: 50px;
+  background: #E53935;
+  overflow: hidden;
+}
+.mix-portal-header .portal-logo {
+  font-size: 60px;
+  color: #ffffff;
+}
+.mix-portal-header .portal-name {
+  margin-left: 16px;
+  font-size: 20px;
+  color: #ffffff;
+  line-height: 28px;
+  position: relative;
+  vertical-align: middle;
+}
+.mix-portal-header .portal-name:before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -7px;
+  width: 1px;
+  height: 28px;
+  background: #FFF;
+}
+.mix-portal-header .portal-header-content {
+  overflow-x: hidden;
+  height: 100%;
+}
+.mix-portal-header .user-info-container {
+  float: right;
+  margin-right: 25px;
+  height: 50px;
+}

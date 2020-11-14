@@ -22,7 +22,7 @@ body {
 }
 
 .u-navbar-side-container {
-  width: 202px;
+  width: 240px;
   transition: all 0.3s ease-in-out;
   position: fixed;
   top: 50px;
@@ -145,7 +145,7 @@ body {
 }
 
 #content {
-  margin-left: 202px;
+  margin-left: 240px;
   transition: all 0.3s ease-in;
   margin-top: 50px;
 }

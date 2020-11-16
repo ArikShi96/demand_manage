@@ -4,9 +4,10 @@ import { Button } from 'tinper-bee';
 import Header from "../common/Header";
 import "bee-button/build/Button.css";
 
-class QuestionDetail extends React.Component {
+class ArticleDetail extends React.Component {
   state = {
-    detail: {}
+    detail: {},
+    hide: true
   };
 
   componentDidMount() {
@@ -16,57 +17,80 @@ class QuestionDetail extends React.Component {
   fetchDetail = () => { }
 
   navigateBack = () => {
-    this.props.history.push(`/QuestionList`);
+    this.props.history.push(`/ArticleList`);
+  }
+
+  toggleHide = () => {
+    this.setState({
+      hide: !this.state.hide
+    })
   }
 
   render() {
-    const { detail } = this.state;
+    const { detail, hide } = this.state;
     const { className } = this.props;
     return (
       <div className={className}>
-        <Header title="问答详情" />
-        <div className='detail-wrap'>
-          <div className='label'>问答类型</div>
-          <div className='content'>123</div>
-        </div>
-        <div className='detail-wrap'>
-          <div className='label'>相关商品</div>
-          <div className='content'>123</div>
-        </div>
-        <div className='detail-wrap'>
-          <div className='label'>提问时间</div>
-          <div className='content'>123</div>
-        </div>
-        <div className='detail-wrap'>
-          <div className='label'>问题详情</div>
-          <div className='content'>123</div>
-        </div>
-        <div className='detail-wrap'>
-          <div className='label'>回答</div>
-          <div className='content'>123</div>
-        </div>
+        <Header title="文章管理" />
         <div className='action-wrap'>
           <Button colors="primary" onClick={this.navigateBack}>返回</Button>
+          <div className='left-right'>
+            <Button colors="primary" onClick={this.navigateLeft}>上一篇</Button>
+            <Button colors="primary" onClick={this.navigateRight}>下一篇</Button>
+          </div>
+        </div>
+        <div className='article-title'>文章标题</div>
+        <div className='detail-wrap'>
+          <div className='label'>发布人:</div>
+          <div className='content'>123</div>
+        </div>
+        <div className='detail-wrap'>
+          <div className='label'>发布时间:</div>
+          <div className='content'>123</div>
+        </div>
+        <div className="detail-content"> 文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章</div>
+        <div className='button-action'>
+          <Button colors="primary" onClick={this.toggleHide}>{hide ? '显示' : '隐藏'}</Button>
         </div>
       </div>
     );
   }
 }
 
-export default styled(QuestionDetail)`
+export default styled(ArticleDetail)`
 .mix-ma-page-header {
-  background: "#fff";
-  margin-bottom: 40px;
+  background: #ffffff;
+  margin-bottom: 20px;
   padding: 0;
+}
+.action-wrap {
+  padding: 20px 40px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .left-right{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .u-button{
+      margin-left:20px;
+    }
+  }
+}
+.article-title {
+  text-align: center;
+  color: #212121;
+  font-weight: 600;
+  padding: 20px 0;
+  font-size: 18px;
 }
 .detail-wrap {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  padding: 0 60px;
-  margin-bottom: 40px;
+  padding: 0 60px 20px;
   .label {
-    text-align: right;
+    text-align: left;
     min-width: 80px;
     flex-shrink: 0;
     margin-right: 5%;
@@ -75,8 +99,12 @@ export default styled(QuestionDetail)`
     flex: auto;
   }
 }
-.action-wrap {
+.detail-content {
+  text-indent: 2em;
+  line-height: 22px;
+  padding: 16px 60px 32px;
+}
+.button-action {
   text-align: center;
-  margin-top: 40px;
 }
 `;

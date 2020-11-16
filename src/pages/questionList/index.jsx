@@ -1,4 +1,5 @@
 import { FormControl, Select, Pagination, Table } from "tinper-bee";
+import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
 import "bee-datepicker/build/DatePicker.css";
@@ -203,4 +204,5 @@ class SearchModel extends React.Component {
   }
 }
 
-export default SearchModel;
+export default styled(SearchModel)`
+`;

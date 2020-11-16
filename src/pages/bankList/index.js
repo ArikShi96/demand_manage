@@ -10,11 +10,9 @@ import {
     Label,
     Icon,
     Upload,
-    Timeline,
     Switch,
     Radio
 } from 'tinper-bee';
-import DatePicker from 'bee-datepicker'
 import 'bee-form/build/Form.css';
 import 'bee-upload/build/Upload.css';
 import 'bee-form-control/build/FormControl.css';
@@ -30,7 +28,6 @@ import 'bee-icon/build/Icon.css'
 import 'bee-timeline/build/Timeline.css';
 import "./index.css"
 import myapi from '../../api'
-import moment from 'moment';
 import Header from '../common/Header';
 import Content from '../common/Content';
 import FormList from '../common/Form';

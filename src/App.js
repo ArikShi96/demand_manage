@@ -20,28 +20,28 @@ import Addcate from "./pages/addCate/index";
 import Querydata from "./pages/cateManage/query";
 import BlackList from "./pages/blackList/index";
 // 迭代2
-import IsvLevel from "./pages/isvLevel/index"; // 服务商等级
-import TagList from "./pages/tagList/index"; // 标签管理
-import LiveList from "./pages/liveList/index"; // 直播管理
+import IsvLevel from "./pages/isvLevel/index.jsx"; // 服务商等级
+import TagList from "./pages/tagList/index.jsx"; // 标签管理
+import LiveList from "./pages/liveList/index.jsx"; // 直播管理
 import LiveDetail from "./pages/liveList/Detail.jsx";
-import RecommendProduct from "./pages/recommendList/RecommendProduct"; // 推荐管理
-import RecommendKind from "./pages/recommendList/RecommendKind";
-import RecommendDiscount from "./pages/recommendList/RecommendDiscount";
-import RecommendApp from "./pages/recommendList/RecommendApp";
-import RecommendCloud from "./pages/recommendList/RecommendCloud";
-import RecommendMerchant from "./pages/recommendList/RecommendMerchant";
+import RecommendProduct from "./pages/recommendList/RecommendProduct.jsx"; // 推荐管理
+import RecommendKind from "./pages/recommendList/RecommendKind.jsx";
+import RecommendDiscount from "./pages/recommendList/RecommendDiscount.jsx";
+import RecommendApp from "./pages/recommendList/RecommendApp.jsx";
+import RecommendCloud from "./pages/recommendList/RecommendCloud.jsx";
+import RecommendMerchant from "./pages/recommendList/RecommendMerchant.jsx";
 import RecommendMerchantDetail from "./pages/recommendList/RecommendMerchantDetail.jsx";
-import ProductCom from "./pages/commentList/ProductCom"; // 评价管理
+import ProductCom from "./pages/commentList/ProductCom.jsx"; // 评价管理
 import ProductComDetail from "./pages/commentList/ProductComDetail.jsx";
-import OrderCom from "./pages/commentList/OrderCom";
-import SettingCom from "./pages/commentList/SettingCom";
-import Newcomer from "./pages/promotionList/Newcomer"; // 促销
-import FullReduction from "./pages/promotionList/FullReduction";
+import OrderCom from "./pages/commentList/OrderCom.jsx";
+import SettingCom from "./pages/commentList/SettingCom.jsx";
+import Newcomer from "./pages/promotionList/Newcomer.jsx"; // 促销
+import FullReduction from "./pages/promotionList/FullReduction.jsx";
 import FullReductionDetail from "./pages/promotionList/FullReductionDetail.jsx";
-import IntegralManager from "./pages/promotionList/IntegralManager";
-import ArticleList from "./pages/articleList/index"; // 文章
+import IntegralManager from "./pages/promotionList/IntegralManager.jsx";
+import ArticleList from "./pages/articleList/index.jsx"; // 文章
 import ArticleDetail from "./pages/articleList/Detail.jsx";
-import QuestionList from "./pages/questionList/index"; // 问答
+import QuestionList from "./pages/questionList/index.jsx"; // 问答
 import QuestionDetail from "./pages/questionList/Detail.jsx";
 class App extends Component {
   render() {

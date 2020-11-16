@@ -118,59 +118,39 @@ class SearchModel extends React.Component {
   }
 
   /* 搜索 */
-  searchList = (page = 0, size = 10, billStatus = "") => {};
+  searchList = (page = 0, size = 10) => {};
 
   render() {
     const { dataSource, aaa, bbb, ccc, ddd, eee } = this.state;
     const { first, last, prev, next, activePage } = dataSource;
     return (
       <Fragment>
-        <Header style={{ background: "#fff", padding: 0 }} title="问答管理" />
+        <Header style={{ background: "#fff", padding: 0 }} title="文章管理" />
         <Content style={{ width: "100%", overflowX: "auto" }}>
           <SearchPanel
             reset={this.resetSearch.bind(this)}
             search={this.searchList.bind(this, 0, 10)}
           >
             <FormList layoutOpt={{ md: 4, xs: 4 }}>
-              <FormList.Item label="问答关键词" labelCol={100}>
+              <FormList.Item label="文章标题" labelCol={100}>
                 <FormControl
                   className="search-item"
                   value={aaa}
                   onChange={this.handleChange.bind(null, "aaa")}
                 />
               </FormList.Item>
-              <FormList.Item label="商品名称" labelCol={100}>
-                <FormControl
-                  className="search-item"
-                  value={bbb}
-                  onChange={this.handleChange.bind(null, "bbb")}
-                />
-              </FormList.Item>
               <FormList.Item label="服务商" labelCol={100}>
                 <FormControl
                   className="search-item"
-                  value={ccc}
-                  onChange={this.handleChange.bind(null, "ccc")}
+                  value={aaa}
+                  onChange={this.handleChange.bind(null, "bbb")}
                 />
               </FormList.Item>
-              <FormList.Item label="问题类型" labelCol={100}>
+              <FormList.Item label="类型" labelCol={100}>
                 <Select
                   className="search-item"
                   onChange={this.handleChange.bind(null, "ddd")}
                   value={ddd}
-                >
-                  {[{ id: "1", stat: "1" }].map((item) => (
-                    <Option key={item.id} value={item.id}>
-                      {item.stat}
-                    </Option>
-                  ))}
-                </Select>
-              </FormList.Item>
-              <FormList.Item label="问题状态" labelCol={100}>
-                <Select
-                  className="search-item"
-                  onChange={this.handleChange.bind(null, "eee")}
-                  value={eee}
                 >
                   {[{ id: "1", stat: "1" }].map((item) => (
                     <Option key={item.id} value={item.id}>

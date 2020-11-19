@@ -2,7 +2,6 @@ import { Button, Modal } from "tinper-bee";
 import styled from 'styled-components';
 import React from "react";
 import "bee-form-control/build/FormControl.css";
-import "bee-datepicker/build/DatePicker.css";
 import "bee-button/build/Button.css";
 import "bee-select/build/Select.css";
 import "bee-table/build/Table.css";
@@ -42,7 +41,7 @@ class LiveDetail extends React.Component {
       formData: {
         ...this.state.formData,
         dataItem: {
-          ...this.state.formData,
+          ...this.state.formData.dataItem,
           [type]: e,
         }
       }
@@ -73,7 +72,7 @@ class LiveDetail extends React.Component {
       formData: {
         ...this.state.formData,
         dataItem: {
-          ...this.state.formData,
+          ...this.state.formData.dataItem,
           [type]: e,
         }
       }
@@ -122,6 +121,7 @@ class LiveDetail extends React.Component {
         {/* 提示框 - 拒绝 */}
         <Modal
           show={showRejectModal}
+          style={{ marginTop: '20vh' }}
         >
           <Modal.Header closeButton>
             <Modal.Title>拒绝原因</Modal.Title>
@@ -166,6 +166,6 @@ export default styled(LiveDetail)`
 }
 .action-wrap {
   text-align: center;
-  margin-top: 40px;
+  margin: 40px auto;
 }
 `;

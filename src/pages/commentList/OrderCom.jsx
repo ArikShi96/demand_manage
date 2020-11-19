@@ -1,4 +1,4 @@
-import { FormControl, Select, Table, Pagination } from "tinper-bee";
+import { FormControl, Select, Table, Pagination, Modal, Button } from "tinper-bee";
 import DatePicker from 'bee-datepicker'
 import styled from 'styled-components';
 import React, { Fragment } from "react";
@@ -25,7 +25,7 @@ class OrderCom extends React.Component {
       total: 0, // 总数量
       items: 0, // 总页数
       activePage: 1, // 当前页面
-      size: 10, // 每页多少
+      pageSize: 10, // 每页多少
     },
     order_id: '',
     comment: '',
@@ -33,6 +33,8 @@ class OrderCom extends React.Component {
     end_time: '',
     average: '',
     comment_type: '',
+    showDeleteModal: false,
+    deleteItem: '',
   };
 
   columns = [
@@ -45,6 +47,9 @@ class OrderCom extends React.Component {
       title: "评价分数（交付速度、交付质量、商家服务）",
       dataIndex: "average",
       width: "25%",
+      render: (value, item) => {
+        return <span>{`${value}(${item.product_score})`}</span>
+      }
     },
     {
       title: "用户名",
@@ -58,9 +63,9 @@ class OrderCom extends React.Component {
       width: "10%",
       render: (value, item) => {
         if (value === 0 || value === '0') {
-          return <a onClick={this.handleTableAction.bind(this, item, 'toggle')}>隐藏</a>
-        } else {
           return <a onClick={this.handleTableAction.bind(this, item, 'toggle')}>显示</a>
+        } else {
+          return <a onClick={this.handleTableAction.bind(this, item, 'toggle')}>隐藏</a>
         }
       }
     },
@@ -86,7 +91,7 @@ class OrderCom extends React.Component {
     if (dataString && dataString.length > 0) {
       let data = dataString.split('"');
       this.setState({ start_time: data[1], end_time: data[3] });
-    } else {
+    } else if (d.length === 0) {
       this.setState({ start_time: '', end_time: '' });
     }
   };
@@ -105,13 +110,14 @@ class OrderCom extends React.Component {
   };
 
   dataNumSelect = (index, value) => {
-    this.setState({ dataSource: { ...this.state.dataSource, size: value, activePage: 1 } }, () => {
+    this.setState({ dataSource: { ...this.state.dataSource, pageSize: value, activePage: 1 } }, () => {
       this.searchList();
     });
   };
 
   /* 重置 */
   resetSearch() {
+    this.refs.rangePicker.clear();
     this.setState({
       order_id: '',
       comment: '',
@@ -136,7 +142,7 @@ class OrderCom extends React.Component {
         comment_type,
         dataSource
       } = this.state;
-      const { activePage, size } = dataSource;
+      const { activePage } = dataSource;
       const res = await makeAjaxRequest('/newcomment/getallOperateOrder', 'get', {
         page_num: activePage,
         order_id,
@@ -146,15 +152,15 @@ class OrderCom extends React.Component {
         average,
         comment_type
       });
-      res.data.forEach((item, index) => {
+      (res.data || []).forEach((item, index) => {
         item.order = (index + 1)
       })
       this.setState({
         dataSource: {
           ...this.state.dataSource,
-          content: res.data,
+          content: res.data || [],
           total: res.sum || 0,
-          items: Math.floor((res.sum || 0) / this.state.dataSource.size) + 1
+          items: Math.floor((res.sum || 0) / this.state.dataSource.pageSize) + 1
         }
       });
     } catch (err) {
@@ -167,19 +173,46 @@ class OrderCom extends React.Component {
     switch (action) {
       case 'toggle': {
         try {
-          await makeAjaxRequest('/newcomment/hide', 'get', { q_manage_id: item.qManageId });
+          await makeAjaxRequest('/newcomment/hide', 'get', { id: item.id });
+          message.success('操作成功');
+          this.searchList();
+          break;
         } catch (err) {
           message.error(err.message);
         }
       }
       case 'delete': {
+        this.setState({
+          showDeleteModal: true,
+          deleteItem: item
+        })
+        break;
+      }
+      case 'confirmDelete': {
         try {
-          await makeAjaxRequest('/newcomment/dele', 'get', { q_manage_id: item.qManageId });
+          this.hideDeleteModal();
+          await makeAjaxRequest('/newcomment/dele', 'get', { id: item.id });
+          message.success('操作成功');
+          this.searchList();
+          break;
         } catch (err) {
           message.error(err.message);
         }
       }
+      default: {
+        break;
+      }
     }
+  }
+
+  hideDeleteModal = () => {
+    this.setState({
+      showDeleteModal: false
+    })
+  }
+
+  confirmDelete = () => {
+    this.handleTableAction(this.state.deleteItem, 'confirmDelete')
   }
 
   render() {
@@ -188,12 +221,13 @@ class OrderCom extends React.Component {
       order_id,
       comment,
       average,
-      comment_type
+      comment_type,
+      showDeleteModal,
     } = this.state;
-    const { activePage, size, content, total, items } = dataSource;
+    const { activePage, content, total, items } = dataSource;
     return (
       <Fragment>
-        <Header style={{ background: "#fff", padding: 0 }} title="商品评价" />
+        <Header style={{ background: "#fff", padding: 0 }} title="订单评价" />
         <Content className={this.props.className} style={{ width: "100%", overflowX: "auto" }}>
           <SearchPanel
             reset={this.resetSearch.bind(this)}
@@ -214,7 +248,7 @@ class OrderCom extends React.Component {
                   onChange={this.handleChange.bind(null, "comment")}
                 />
               </FormList.Item>
-              <FormList.Item label="" labelCol={100}>
+              <FormList.Item label="评分" labelCol={100}>
                 <Select
                   placeholder="全部评分"
                   className="search-item"
@@ -233,7 +267,7 @@ class OrderCom extends React.Component {
                     ))}
                 </Select>
               </FormList.Item>
-              <FormList.Item label="" labelCol={100}>
+              <FormList.Item label="状态" labelCol={100}>
                 <Select
                   placeholder="全部状态"
                   className="search-item"
@@ -251,6 +285,7 @@ class OrderCom extends React.Component {
               </FormList.Item>
               <FormList.Item label="评价时间" labelCol={100}>
                 <RangePicker
+                  ref="rangePicker"
                   showClear={true}
                   className="search-item"
                   placeholder={'开始时间 ~ 结束时间'}
@@ -279,6 +314,22 @@ class OrderCom extends React.Component {
             items={items}
           />
         </Content>
+        {/* 提示框 - 删除 */}
+        <Modal
+          show={showDeleteModal}
+          style={{ marginTop: '20vh' }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>删除提示</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            确认删除此评论?
+            </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.hideDeleteModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
+            <Button onClick={this.confirmDelete} colors="primary">确认</Button>
+          </Modal.Footer>
+        </Modal>
       </Fragment>
     );
   }

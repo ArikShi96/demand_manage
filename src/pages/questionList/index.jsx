@@ -1,8 +1,7 @@
-import { FormControl, Select, Table, Pagination } from "tinper-bee";
+import { FormControl, Select, Table, Pagination, Modal, Button } from "tinper-bee";
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
-import "bee-datepicker/build/DatePicker.css";
 import "bee-button/build/Button.css";
 import "bee-select/build/Select.css";
 import "bee-table/build/Table.css";
@@ -28,7 +27,9 @@ class QuestionList extends React.Component {
     product_name: '',
     isv_name: '',
     question_type: '',
-    question_status: ''
+    question_status: '',
+    showDeleteModal: false,
+    deleteItem: ''
   };
 
   columns = [
@@ -97,7 +98,9 @@ class QuestionList extends React.Component {
         return (
           <div className="actions">
             <a className='action' onClick={this.handleTableAction.bind(null, item, 'view')}>查看</a>
-            <a className='action' onClick={this.handleTableAction.bind(null, item, 'toggle')}>隐藏</a>
+            <a className='action' onClick={this.handleTableAction.bind(null, item, 'toggle')}>
+              {item.isdisplay === 0 || item.isdisplay === '0' ? '显示' : '隐藏'}
+            </a>
             <a className='action' onClick={this.handleTableAction.bind(null, item, 'delete')}>删除</a>
           </div>
         );
@@ -113,6 +116,8 @@ class QuestionList extends React.Component {
     if (dataString && dataString.length > 0) {
       let data = dataString.split('"');
       this.setState({ startTime: data[1], endTime: data[3] });
+    } else if (d.length === 0) {
+      this.setState({ start_time: '', end_time: '' });
     }
   };
 
@@ -150,13 +155,13 @@ class QuestionList extends React.Component {
       const { question, product_name, isv_name, question_type, question_status, dataSource } = this.state;
       const { activePage } = dataSource;
       const res = await makeAjaxRequest('/question/getallOperate', 'get', { page_num: activePage, question, product_name, isv_name, question_type, question_status });
-      res.data.forEach((item, index) => {
+      (res.data || []).forEach((item, index) => {
         item.order = (index + 1)
       })
       this.setState({
         dataSource: {
           ...this.state.dataSource,
-          content: res.data,
+          content: res.data || [],
           total: res.sum || 0,
           items: Math.floor((res.sum || 0) / this.state.dataSource.pageSize) + 1
         }
@@ -175,15 +180,30 @@ class QuestionList extends React.Component {
       }
       case 'toggle': {
         try {
-          await makeAjaxRequest('/question/operateDisplay', 'get', { q_manage_id: item.qManageId });
+          await makeAjaxRequest('/question/operateDisplay', 'get', {
+            q_manage_id: item.qManageId,
+            isdisplay: item.isdisplay === 0 || item.isdisplay === '0' ? 1 : 0
+          });
+          message.success('操作成功');
+          this.searchList();
         } catch (err) {
           message.error(err.message);
         }
         break;
       }
       case 'delete': {
+        this.setState({
+          showDeleteModal: true,
+          deleteItem: item
+        })
+        break;
+      }
+      case 'confirmDelete': {
         try {
+          this.hideDeleteModal();
           await makeAjaxRequest('/question/operateDele', 'get', { q_manage_id: item.qManageId });
+          message.success('操作成功');
+          this.searchList();
         } catch (err) {
           message.error(err.message);
         }
@@ -195,8 +215,19 @@ class QuestionList extends React.Component {
     }
   }
 
+  hideDeleteModal = () => {
+    this.setState({
+      showDeleteModal: false
+    })
+  }
+
+  confirmDelete = () => {
+    this.handleTableAction(this.state.deleteItem, 'confirmDelete')
+  }
+
   render() {
-    const { dataSource, question, product_name, isv_name, question_type, question_status } = this.state;
+    const { dataSource, question, product_name, isv_name, question_type, question_status, showDeleteModal,
+    } = this.state;
     const { activePage, content, total, items } = dataSource;
     return (
       <Fragment>
@@ -249,7 +280,7 @@ class QuestionList extends React.Component {
                   onChange={this.handleChange.bind(null, "question_status")}
                   value={question_status}
                 >
-                  {[{ id: "0", stat: "已回答" }, { id: "1", stat: "未回答" }].map((item) => (
+                  {[{ id: "1", stat: "已回答" }, { id: "0", stat: "待回答" }].map((item) => (
                     <Option key={item.id} value={item.id}>
                       {item.stat}
                     </Option>
@@ -277,6 +308,22 @@ class QuestionList extends React.Component {
             items={items}
           />
         </Content>
+        {/* 提示框 - 删除 */}
+        <Modal
+          show={showDeleteModal}
+          style={{ marginTop: '20vh' }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>删除提示</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            确认删除此问答?
+            </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.hideDeleteModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
+            <Button onClick={this.confirmDelete} colors="primary">确认</Button>
+          </Modal.Footer>
+        </Modal>
       </Fragment>
     );
   }

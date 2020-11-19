@@ -2,7 +2,6 @@ import { Table, Pagination, Button } from "tinper-bee";
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
-import "bee-datepicker/build/DatePicker.css";
 import "bee-button/build/Button.css";
 import "bee-select/build/Select.css";
 import "bee-table/build/Table.css";
@@ -92,13 +91,13 @@ class RecommendCloud extends React.Component {
       const res = await makeAjaxRequest('/newcomment/getallOperateProduct', 'get', {
         page_num: activePage,
       });
-      res.data.forEach((item, index) => {
+      (res.data || []).forEach((item, index) => {
         item.order = (index + 1)
       })
       this.setState({
         dataSource: {
           ...this.state.dataSource,
-          content: res.data,
+          content: res.data || [],
           total: res.sum || 0,
           items: Math.floor((res.sum || 0) / this.state.dataSource.size) + 1
         }

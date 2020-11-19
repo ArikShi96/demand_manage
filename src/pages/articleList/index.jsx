@@ -1,8 +1,7 @@
-import { FormControl, Select, Table, Pagination } from "tinper-bee";
+import { FormControl, Select, Table, Pagination, Modal, Button } from "tinper-bee";
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
-import "bee-datepicker/build/DatePicker.css";
 import "bee-button/build/Button.css";
 import "bee-select/build/Select.css";
 import "bee-table/build/Table.css";
@@ -27,6 +26,8 @@ class ArticleList extends React.Component {
     isv_name: '',
     article_title: '',
     article_type: '',
+    showDeleteModal: false,
+    deleteItem: '',
   };
 
   columns = [
@@ -37,25 +38,39 @@ class ArticleList extends React.Component {
     },
     {
       title: "服务商",
-      dataIndex: "question",
+      dataIndex: "isvName",
       width: "20%",
     },
     {
       title: "文章标题",
-      dataIndex: "questionType",
+      dataIndex: "articleTitle",
       width: "10%",
     },
     {
       title: "类型",
-      dataIndex: "isvName",
+      dataIndex: "articleType",
       width: "10%",
+      render: (value) => {
+        if (value === 0 || value === '0') {
+          return <span>动态</span>
+        } else {
+          return <span>文库</span>
+        }
+      }
     },
     {
       title: "展示状态",
-      dataIndex: "productName",
+      dataIndex: "isdisplay",
       width: "10%",
+      render: (value) => {
+        if (value === 0 || value === '0') {
+          return <span>隐藏</span>
+        } else {
+          return <span>显示</span>
+        }
+      }
     },
-    { title: "时间", dataIndex: "askTime", width: "20%" },
+    { title: "时间", dataIndex: "createTime", width: "20%" },
     {
       title: "操作",
       dataIndex: "operation",
@@ -64,7 +79,9 @@ class ArticleList extends React.Component {
         return (
           <div className="actions">
             <a className='action' onClick={this.handleTableAction.bind(null, item, 'view')}>查看</a>
-            <a className='action' onClick={this.handleTableAction.bind(null, item, 'toggle')}>隐藏</a>
+            <a className='action' onClick={this.handleTableAction.bind(null, item, 'toggle')}>
+              {item.isdisplay === 0 || item.isdisplay === '0' ? '显示' : '隐藏'}
+            </a>
             <a className='action' onClick={this.handleTableAction.bind(null, item, 'delete')}>删除</a>
           </div>
         );
@@ -98,7 +115,9 @@ class ArticleList extends React.Component {
   /* 重置 */
   resetSearch() {
     this.setState({
-      question: '', product_name: '', isv_name: '', question_type: '', question_status: ''
+      isv_name: '',
+      article_title: '',
+      article_type: '',
     }, () => {
       this.searchList();
     });
@@ -120,13 +139,13 @@ class ArticleList extends React.Component {
         article_title,
         article_type,
       });
-      res.data.forEach((item, index) => {
+      (res.data || []).forEach((item, index) => {
         item.order = (index + 1)
       })
       this.setState({
         dataSource: {
           ...this.state.dataSource,
-          content: res.data,
+          content: res.data || [],
           total: res.sum || 0,
           items: Math.floor((res.sum || 0) / this.state.dataSource.pageSize) + 1
         }
@@ -140,23 +159,54 @@ class ArticleList extends React.Component {
   handleTableAction = async (item, action) => {
     switch (action) {
       case 'view': {
-        this.props.history.push(`/ArticleDetail/${item.id}`);
+        this.props.history.push(`/ArticleDetail/${item.articleId}`);
+        break;
       }
       case 'toggle': {
         try {
-          await makeAjaxRequest('/article/updateIsdisplay', 'get', { article_id: item.id });
+          await makeAjaxRequest('/article/updateIsdisplay', 'get', {
+            article_id: item.articleId,
+            isdisplay: item.isdisplay === 0 || item.isdisplay === '0' ? 1 : 0
+          });
+          message.success('操作成功');
+          this.searchList();
         } catch (err) {
           message.error(err.message);
         }
+        break;
       }
       case 'delete': {
+        this.setState({
+          showDeleteModal: true,
+          deleteItem: item
+        })
+        break;
+      }
+      case 'confirmDelete': {
         try {
-          await makeAjaxRequest('/article/deleOperate', 'get', { article_id: item.id });
+          this.hideDeleteModal();
+          await makeAjaxRequest('/article/deleOperate', 'get', { article_id: item.articleId });
+          message.success('操作成功');
+          this.searchList();
         } catch (err) {
           message.error(err.message);
         }
+        break;
+      }
+      default: {
+        break;
       }
     }
+  }
+
+  hideDeleteModal = () => {
+    this.setState({
+      showDeleteModal: false
+    })
+  }
+
+  confirmDelete = () => {
+    this.handleTableAction(this.state.deleteItem, 'confirmDelete')
   }
 
   render() {
@@ -164,7 +214,8 @@ class ArticleList extends React.Component {
       dataSource,
       isv_name,
       article_title,
-      article_type
+      article_type,
+      showDeleteModal,
     } = this.state;
     const { activePage, content, total, items } = dataSource;
     return (
@@ -225,6 +276,22 @@ class ArticleList extends React.Component {
             items={items}
           />
         </Content>
+        {/* 提示框 - 删除 */}
+        <Modal
+          show={showDeleteModal}
+          style={{ marginTop: '20vh' }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>删除提示</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            确认删除此文章?
+            </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.hideDeleteModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
+            <Button onClick={this.confirmDelete} colors="primary">确认</Button>
+          </Modal.Footer>
+        </Modal>
       </Fragment>
     );
   }

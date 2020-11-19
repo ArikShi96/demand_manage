@@ -7,7 +7,8 @@ import makeAjaxRequest from '../../util/request';
 import { message } from 'antd';
 class QuestionDetail extends React.Component {
   state = {
-    detail: {}
+    detail: {},
+    reply: ""
   };
 
   componentDidMount() {
@@ -18,7 +19,8 @@ class QuestionDetail extends React.Component {
     try {
       const res = await makeAjaxRequest('/question/findOperateOne', 'get', { q_manage_id: this.props.match.params.id });
       this.setState({
-        detail: res.data
+        detail: res.data,
+        reply: res.data2 || ""
       });
     } catch (err) {
       message.error(err.message);
@@ -30,14 +32,14 @@ class QuestionDetail extends React.Component {
   }
 
   render() {
-    const { detail } = this.state;
+    const { detail, reply } = this.state;
     const { className } = this.props;
     return (
       <div className={className}>
         <Header title="问答详情" />
         <div className='detail-wrap'>
           <div className='label'>问答类型</div>
-          <div className='content'>{detail.questionType}</div>
+          <div className='content'>{detail.questionType === 0 || detail.questionType === '0' ? '商品问答' : '店铺问答'}</div>
         </div>
         <div className='detail-wrap'>
           <div className='label'>相关商品</div>
@@ -53,7 +55,7 @@ class QuestionDetail extends React.Component {
         </div>
         <div className='detail-wrap'>
           <div className='label'>回答</div>
-          <div className='content'>{detail.question}</div>
+          <div className='content'>{reply}</div>
         </div>
         <div className='action-wrap'>
           <Button colors="primary" onClick={this.navigateBack}>返回</Button>
@@ -90,6 +92,6 @@ export default styled(QuestionDetail)`
 }
 .action-wrap {
   text-align: center;
-  margin-top: 40px;
+  margin: 40px auto;
 }
 `;

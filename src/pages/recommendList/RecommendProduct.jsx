@@ -1,8 +1,7 @@
-import { FormControl, Select, Table, Pagination, Button } from "tinper-bee";
+import { FormControl, Select, Table, Pagination, Button, Modal } from "tinper-bee";
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
-import "bee-datepicker/build/DatePicker.css";
 import "bee-button/build/Button.css";
 import "bee-select/build/Select.css";
 import "bee-table/build/Table.css";
@@ -27,6 +26,11 @@ class RecommendProduct extends React.Component {
     aaa: '',
     bbb: '',
     ccc: '',
+    formData: {
+      dataItem: {}
+    },
+    showDeleteModal: false,
+    deleteItem: ''
   };
 
   columns = [
@@ -121,13 +125,13 @@ class RecommendProduct extends React.Component {
         ccc
       });
       // const res = { "data": [{ "qManageId": "74e9f34a-3423-415e-b1fc-9fda6d3b866e", "question": "问题2", "questionType": 0, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "深圳市宏数科技有限公司", "productId": "sdfdsfdsfdsfsdf", "productName": "任意的商品名", "askTime": null, "questionStatus": 0, "isdisplay": 1, "userId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "delFlag": 0, "addTime": "2020-11-12 14:48:26", "updateTime": null }, { "qManageId": "1f77de75-f11b-486c-b42c-dcb622163e69", "question": "问题1", "questionType": 0, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "深圳市宏数科技有限公司", "productId": "空", "productName": "空", "askTime": null, "questionStatus": 0, "isdisplay": 1, "userId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "delFlag": 0, "addTime": "2020-11-12 14:48:02", "updateTime": null }, { "qManageId": "sdfdsf", "question": "4", "questionType": 0, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "", "productId": "bc663882-bc56-4910-a4ae-69f9a7863e18", "productName": "", "askTime": "2020-11-10 18:03:54.0", "questionStatus": 1, "isdisplay": 1, "userId": "ab635124-1ac4-491c-90fb-8d7dc8485f16", "delFlag": 0, "addTime": "2020-11-10 18:03:47", "updateTime": null }, { "qManageId": "65456456", "question": "2", "questionType": 0, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "", "productId": "91462e8b-dba5-4256-bf13-3e1d2b884844", "productName": "", "askTime": "2020-11-10 18:03:26.0", "questionStatus": 0, "isdisplay": 1, "userId": "ab635124-1ac4-491c-90fb-8d7dc8485f15", "delFlag": 0, "addTime": "2020-11-10 18:03:39", "updateTime": null }, { "qManageId": "45tretert", "question": "1", "questionType": 1, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "", "productId": "", "productName": "", "askTime": "2020-11-10 16:28:01.0", "questionStatus": 0, "isdisplay": 1, "userId": "ab635124-1ac4-491c-10fb-8d7dc8485f17", "delFlag": 0, "addTime": "2020-11-10 16:28:16", "updateTime": null }, { "qManageId": "dsfdsfdsfadsf", "question": "3", "questionType": 0, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "", "productId": "bc663882-bc56-4910-a4ae-69f9a7863e18", "productName": "", "askTime": "2020-11-10 16:15:35.0", "questionStatus": 0, "isdisplay": 1, "userId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "delFlag": 0, "addTime": "2020-11-10 16:16:52", "updateTime": null }], "new_page_num": 1, "sum": 6, "status": 1, "msg": "查询成功" };
-      res.data.forEach((item, index) => {
+      (res.data || []).forEach((item, index) => {
         item.order = (index + 1)
       })
       this.setState({
         dataSource: {
           ...this.state.dataSource,
-          content: res.data,
+          content: res.data || [],
           total: res.sum || 0,
           items: Math.floor((res.sum || 0) / this.state.dataSource.size) + 1
         }
@@ -137,19 +141,87 @@ class RecommendProduct extends React.Component {
     }
   };
 
-  /* 编辑/删除 */
+  /* 查看/隐藏/删除 */
   handleTableAction = async (item, action) => {
     switch (action) {
       case 'edit': {
+        this.showAdd(true, item);
+        break;
       }
       case 'delete': {
+        this.setState({
+          showDeleteModal: true,
+          deleteItem: item
+        })
+        break;
+      }
+
+      case 'confirmDelete': {
         try {
-          await makeAjaxRequest('/newcomment/dele', 'get', { q_manage_id: item.qManageId });
+          this.hideDeleteModal();
+          await makeAjaxRequest('/xxx', 'get', { id: item.id });
+          message.success('操作成功');
+          this.searchList();
         } catch (err) {
           message.error(err.message);
         }
       }
     }
+  }
+
+  showAdd = (isEdit, item) => {
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        showAddModal: true,
+        title: isEdit ? '编辑商品' : '新增商品',
+        dataItem: item || {}
+      }
+    })
+  }
+
+  hideAddModal = () => {
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        showAddModal: false,
+      }
+    })
+  }
+
+  handleFormDataChange = (type, e) => {
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        dataItem: {
+          ...this.state.formData.dataItem,
+          [type]: e,
+        }
+      }
+    })
+  }
+
+  submit = async () => {
+    try {
+      this.hideAddModal();
+      await makeAjaxRequest('/xx', 'post', {}, {
+        isv_id: this.state.formData.dataItem.isv_id
+      });
+      message.success('操作成功');
+      this.searchList();
+    } catch (err) {
+      message.error(err.message);
+    }
+  }
+
+  hideDeleteModal = () => {
+    this.setState({
+      showDeleteModal: false
+    })
+  }
+
+  confirmDelete = async () => {
+    this.handleTableAction(this.state.deleteItem, 'confirmDelete')
   }
 
   render() {
@@ -158,8 +230,11 @@ class RecommendProduct extends React.Component {
       aaa,
       bbb,
       ccc,
+      formData,
+      showDeleteModal,
     } = this.state;
     const { activePage, content, total, items } = dataSource;
+    const { showAddModal, dataItem } = formData;
     return (
       <Fragment>
         <Header style={{ background: "#fff", padding: 0 }} title="热销商品列表" />
@@ -207,7 +282,7 @@ class RecommendProduct extends React.Component {
             </FormList>
           </SearchPanel>
           <div className='action-wrap'>
-            <Button colors="primary" onClick={this.showAdd}>新增</Button>
+            <Button colors="primary" onClick={this.showAdd.bind(this, false)}>新增</Button>
           </div>
           <Table rowKey="order" columns={this.columns} data={content} />
           <Pagination
@@ -228,6 +303,80 @@ class RecommendProduct extends React.Component {
             items={items}
           />
         </Content>
+        {/* 提示框 - 新增 */}
+        <Modal
+          show={showAddModal}
+          style={{ marginTop: '20vh' }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>{formData.title}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <FormList.Item label="选择分类" labelCol={100}>
+              <Select
+                placeholder="选择一级分类"
+                className="search-item"
+                onChange={this.handleFormDataChange.bind(null, "first")}
+                value={dataItem.first}
+              >
+                {[].map((item) => (
+                  <Option key={item.id} value={item.id}>
+                    {item.stat}
+                  </Option>
+                ))}
+              </Select>
+            </FormList.Item>
+            <FormList.Item label="选择分类" labelCol={100}>
+              <Select
+                placeholder="选择二级分类"
+                className="search-item"
+                onChange={this.handleFormDataChange.bind(null, "second")}
+                value={dataItem.second}
+              >
+                {[].map((item) => (
+                  <Option key={item.id} value={item.id}>
+                    {item.stat}
+                  </Option>
+                ))}
+              </Select>
+            </FormList.Item>
+            <FormList.Item label="选择商品" labelCol={100}>
+              <Select
+                placeholder="选择商品"
+                className="search-item"
+                onChange={this.handleFormDataChange.bind(null, "pro")}
+                value={dataItem.pro}
+              >
+                {[].map((item) => (
+                  <Option key={item.id} value={item.id}>
+                    {item.stat}
+                  </Option>
+                ))}
+              </Select>
+            </FormList.Item>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.hideAddModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
+            <Button onClick={this.submit} colors="primary">确认</Button>
+          </Modal.Footer>
+        </Modal>
+        {/* 提示框 - 删除 */}
+        <Modal
+          show={showDeleteModal}
+          style={{ marginTop: '20vh' }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>删除提示</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            删除后,此商品将不再在前端显示.
+            确认删除此商品?
+            </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.hideDeleteModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
+            <Button onClick={this.confirmDelete} colors="primary">确认</Button>
+          </Modal.Footer>
+        </Modal>
       </Fragment>
     );
   }

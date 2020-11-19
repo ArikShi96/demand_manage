@@ -1,6 +1,6 @@
 const API = require("../api");
 
-export default function makeAjaxRequest(
+export default async function makeAjaxRequest(
   url,
   method,
   query,
@@ -24,19 +24,24 @@ export default function makeAjaxRequest(
     params.body = JSON.stringify(body || {});
   }
 
-  return fetch(encodeUrlWithQuery(`/market${url}`, query), params).then((response) => {
-    if (response.ok) {
-      const contentType = response.headers.get("Content-type");
-      if (contentType && contentType.includes("application/json")) {
-        return response.json();
-      } else {
-        return response.text();
-      }
+  const response = await fetch(
+    encodeUrlWithQuery(`/market${url}`, query),
+    params
+  );
+
+  if (response.ok) {
+    const contentType = response.headers.get("Content-type");
+    if (contentType && contentType.includes("application/json")) {
+      return response.json();
+    } else {
+      return response.text();
     }
-    const error = new Error(response.statusText);
+  } else {
+    const data = await response.json();
+    const error = new Error(data.msg);
     error.response = response;
     throw error;
-  });
+  }
 }
 
 function encodeUrlWithQuery(url, query) {

@@ -2,7 +2,6 @@ import { FormControl, Select, Button } from "tinper-bee";
 import React, { Fragment } from "react";
 import styled from 'styled-components';
 import "bee-form-control/build/FormControl.css";
-import "bee-datepicker/build/DatePicker.css";
 import "bee-button/build/Button.css";
 import "bee-select/build/Select.css";
 import "bee-table/build/Table.css";
@@ -107,7 +106,7 @@ class RecommendFooter extends React.Component {
               value={ccc}
               onChange={this.handleChange.bind(null, "ccc")}
             />
-            <img className='image' src="https://d1icd6shlvmxi6.cloudfront.net/gsc/CZA62A/18/84/7e/18847e0fb47244b881430a4c08bc7e42/images/底部信息管理/u3672.png?token=340f0ded576ab2181dc98746b0eb01c048b40079dcbbdb1beaa9235f5e7e25fb" alt="" />
+            <img className='image' src="/market/market/dist/images/footer/beianhao.png" alt="" />
             <FormControl
               className="input-item"
               value={ddd}

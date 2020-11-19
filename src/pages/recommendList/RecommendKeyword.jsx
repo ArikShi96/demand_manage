@@ -5,7 +5,6 @@ import Header from "../common/Header";
 import "bee-button/build/Button.css";
 import { FormControl } from "tinper-bee";
 import "bee-form-control/build/FormControl.css";
-import "bee-datepicker/build/DatePicker.css";
 import "bee-button/build/Button.css";
 import "bee-select/build/Select.css";
 import "bee-table/build/Table.css";
@@ -33,7 +32,7 @@ class IntegralManager extends React.Component {
 
   fetchDetail = async () => {
     try {
-      const res = await makeAjaxRequest('/index/kw/getall', 'POST');
+      const res = await makeAjaxRequest('/index/kw/getall', 'post');
       this.setState({
         ...res.data
       });
@@ -47,6 +46,37 @@ class IntegralManager extends React.Component {
       [type]: e,
     });
   };
+
+  submit = async () => {
+    try {
+      const {
+        home_title,
+        home_keywords,
+        home_description,
+        first_title,
+        first_keywords,
+        first_description,
+        second_title,
+        second_keywords,
+        second_description
+      } = this.state;
+      await makeAjaxRequest('/index/kw/save', 'post', {
+        home_title,
+        home_keywords,
+        home_description,
+        first_title,
+        first_keywords,
+        first_description,
+        second_title,
+        second_keywords,
+        second_description
+      });
+      this.fetchDetail();
+      message.success('操作成功');
+    } catch (err) {
+      message.error(err.message);
+    }
+  }
 
   render() {
     const { className } = this.props;
@@ -206,6 +236,6 @@ export default styled(IntegralManager)`
 }
 .action-wrap {
   text-align: center;
-  margin-top: 40px;
+  margin: 40px auto;
 }
 `;

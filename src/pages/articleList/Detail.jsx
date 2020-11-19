@@ -8,7 +8,8 @@ import { message } from 'antd';
 class ArticleDetail extends React.Component {
   state = {
     detail: {},
-    hide: true
+    front_article_id: '',
+    behind_article_id: '',
   };
 
   componentDidMount() {
@@ -19,7 +20,9 @@ class ArticleDetail extends React.Component {
     try {
       const res = await makeAjaxRequest('/article/queryOperate', 'get', { article_id: this.props.match.params.id });
       this.setState({
-        detail: res.data
+        detail: res.data,
+        front_article_id: res.front_article_id,
+        behind_article_id: res.behind_article_id,
       });
     } catch (err) {
       message.error(err.message);
@@ -30,14 +33,28 @@ class ArticleDetail extends React.Component {
     this.props.history.push(`/ArticleList`);
   }
 
-  toggleHide = () => {
-    this.setState({
-      hide: !this.state.hide
-    })
+  toggleHide = async () => {
+    try {
+      await makeAjaxRequest('/article/updateIsdisplay', 'get', {
+        article_id: this.props.match.params.id,
+        isdisplay: this.state.detail.isdisplay === 0 || this.state.detail.isdisplay === '0' ? 1 : 0
+      });
+      message.success('操作成功');
+      this.fetchDetail();
+    } catch (err) {
+      message.error(err.message);
+    }
+  }
+
+  navigate = (articleId) => {
+    this.props.history.push(`/ArticleDetail/${articleId}`);
+    window.setTimeout(() => {
+      this.fetchDetail();
+    }, 100)
   }
 
   render() {
-    const { detail, hide } = this.state;
+    const { detail, front_article_id, behind_article_id } = this.state;
     const { className } = this.props;
     return (
       <div className={className}>
@@ -45,22 +62,23 @@ class ArticleDetail extends React.Component {
         <div className='action-wrap'>
           <Button colors="primary" onClick={this.navigateBack}>返回</Button>
           <div className='left-right'>
-            <Button colors="primary" onClick={this.navigateLeft}>上一篇</Button>
-            <Button colors="primary" onClick={this.navigateRight}>下一篇</Button>
+            <Button colors="primary" onClick={this.navigate.bind(this, front_article_id)} disabled={!front_article_id}>上一篇</Button>
+            <Button colors="primary" onClick={this.navigate.bind(this, behind_article_id)} disabled={!behind_article_id}>下一篇</Button>
           </div>
         </div>
-        <div className='article-title'>文章标题</div>
+        <div className='article-title'>{detail.articleTitle}</div>
         <div className='detail-wrap'>
           <div className='label'>发布人:</div>
-          <div className='content'>123</div>
+          <div className='content'>{detail.isvName}</div>
         </div>
         <div className='detail-wrap'>
           <div className='label'>发布时间:</div>
-          <div className='content'>123</div>
+          <div className='content'>{detail.updateTime}</div>
         </div>
-        <div className="detail-content"> 文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章详情文章</div>
+        <div className={`detail-content visible`}>{detail.content}</div>
+        <div className='status-wrap'>{`当前状态: ${detail.isdisplay ? '显示' : '隐藏'}`}</div>
         <div className='button-action'>
-          <Button colors="primary" onClick={this.toggleHide}>{hide ? '显示' : '隐藏'}</Button>
+          <Button colors="primary" onClick={this.toggleHide}>{detail.isdisplay ? '隐藏' : '显示'}</Button>
         </div>
       </div>
     );
@@ -116,6 +134,16 @@ export default styled(ArticleDetail)`
   text-indent: 2em;
   line-height: 22px;
   padding: 16px 60px 32px;
+  height: 200px;
+  overflow: hidden;
+  &.visible {
+    min-height: 200px;
+    height: auto;
+    overflow: visible;
+  }
+}
+.status-wrap {
+  padding-left: 60px;
 }
 .button-action {
   text-align: center;

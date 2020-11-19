@@ -1,8 +1,7 @@
-import { Table, Pagination, Button } from "tinper-bee";
+import { Table, Pagination, Button, Modal, FormControl } from "tinper-bee";
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
-import "bee-datepicker/build/DatePicker.css";
 import "bee-button/build/Button.css";
 import "bee-select/build/Select.css";
 import "bee-table/build/Table.css";
@@ -10,6 +9,7 @@ import "bee-pagination/build/Pagination.css";
 import "bee-tabs/build/Tabs.css";
 import Header from "../common/Header";
 import Content from "../common/Content";
+import FormList from "../common/Form";
 import makeAjaxRequest from '../../util/request';
 import { message } from 'antd';
 class RecommendMerchant extends React.Component {
@@ -21,6 +21,11 @@ class RecommendMerchant extends React.Component {
       activePage: 1, // 当前页面
       size: 10, // 每页多少
     },
+    formData: {
+      dataItem: {}
+    },
+    showDeleteModal: false,
+    deleteItem: ''
   };
 
   columns = [
@@ -87,13 +92,13 @@ class RecommendMerchant extends React.Component {
       const res = await makeAjaxRequest('/', 'get', {
         page_num: activePage,
       });
-      res.data.forEach((item, index) => {
+      (res.data || []).forEach((item, index) => {
         item.order = (index + 1)
       })
       this.setState({
         dataSource: {
           ...this.state.dataSource,
-          content: res.data,
+          content: res.data || [],
           total: res.sum || 0,
           items: Math.floor((res.sum || 0) / this.state.dataSource.size) + 1
         }
@@ -106,9 +111,24 @@ class RecommendMerchant extends React.Component {
   /* 查看/隐藏/删除 */
   handleTableAction = async (item, action) => {
     switch (action) {
+      case 'edit': {
+        this.showAdd(true, item);
+        break;
+      }
       case 'delete': {
+        this.setState({
+          showDeleteModal: true,
+          deleteItem: item
+        })
+        break;
+      }
+
+      case 'confirmDelete': {
         try {
-          await makeAjaxRequest('/index/recommendisv/dele', 'get', { isv_recommend_id: item.isvId });
+          this.hideDeleteModal();
+          await makeAjaxRequest('/xxx', 'get', { id: item.id });
+          message.success('操作成功');
+          this.searchList();
         } catch (err) {
           message.error(err.message);
         }
@@ -116,17 +136,75 @@ class RecommendMerchant extends React.Component {
     }
   }
 
+  showAdd = (isEdit, item) => {
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        showAddModal: true,
+        title: isEdit ? '编辑友情链接' : '新增友情链接',
+        dataItem: item || {}
+      }
+    })
+  }
+
+  hideAddModal = () => {
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        showAddModal: false,
+      }
+    })
+  }
+
+  handleFormDataChange = (type, e) => {
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        dataItem: {
+          ...this.state.formData.dataItem,
+          [type]: e,
+        }
+      }
+    })
+  }
+
+  submit = async () => {
+    try {
+      this.hideAddModal();
+      await makeAjaxRequest('/xx', 'post', {}, {
+        isv_id: this.state.formData.dataItem.isv_id
+      });
+      message.success('操作成功');
+      this.searchList();
+    } catch (err) {
+      message.error(err.message);
+    }
+  }
+
+  hideDeleteModal = () => {
+    this.setState({
+      showDeleteModal: false
+    })
+  }
+
+  confirmDelete = async () => {
+    this.handleTableAction(this.state.deleteItem, 'confirmDelete')
+  }
+
   render() {
     const {
       dataSource,
+      formData,
+      showDeleteModal,
     } = this.state;
     const { activePage, content, total, items } = dataSource;
+    const { showAddModal, dataItem } = formData;
     return (
       <Fragment>
         <Header style={{ background: "#fff", padding: 0 }} title="友情链接管理" />
         <Content className={this.props.className} style={{ width: "100%", overflowX: "auto" }}>
           <div className='action-wrap'>
-            <Button colors="primary" onClick={this.showAdd}>新增</Button>
+            <Button colors="primary" onClick={this.showAdd.bind(this, false)}>新增</Button>
           </div>
           <Table rowKey="order" columns={this.columns} data={content} />
           <Pagination
@@ -147,6 +225,60 @@ class RecommendMerchant extends React.Component {
             items={items}
           />
         </Content>
+        {/* 提示框 - 新增 */}
+        <Modal
+          show={showAddModal}
+          style={{ marginTop: '20vh' }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>{formData.title}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <FormList.Item label="名称" labelCol={100}>
+              <FormControl
+                className="search-item"
+                value={dataItem.name}
+                onChange={this.handleFormDataChange.bind(null, "name")}
+                style={{ width: 250 }}
+              />
+            </FormList.Item>
+            <FormList.Item label="链接" labelCol={100}>
+              <FormControl
+                className="search-item"
+                value={dataItem.link}
+                onChange={this.handleFormDataChange.bind(null, "link")}
+                style={{ width: 250 }}
+              />
+            </FormList.Item>
+            <FormList.Item label="排序" labelCol={100}>
+              <FormControl
+                className="search-item"
+                value={dataItem.sort}
+                onChange={this.handleFormDataChange.bind(null, "sort")}
+                style={{ width: 250 }}
+              />
+            </FormList.Item>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.hideAddModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
+            <Button onClick={this.submit} colors="primary">确认</Button>
+          </Modal.Footer>
+        </Modal>
+        {/* 提示框 - 删除 */}
+        <Modal
+          show={showDeleteModal}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>删除提示</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            确认删除此链接?
+            </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.hideDeleteModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
+            <Button onClick={this.confirmDelete} colors="primary">确认</Button>
+          </Modal.Footer>
+        </Modal>
       </Fragment>
     );
   }

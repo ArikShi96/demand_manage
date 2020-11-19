@@ -1,4 +1,4 @@
-import { FormControl, Select, Pagination, Table, Modal, Button } from "tinper-bee";
+import { FormControl, Select, Pagination, Table, Modal, Button, Radio } from "tinper-bee";
 import React, { Fragment } from "react";
 import styled from 'styled-components';
 import DatePicker from 'bee-datepicker'
@@ -14,6 +14,8 @@ import Header from "../common/Header";
 import Content from "../common/Content";
 import FormList from "../common/Form";
 import SearchPanel from "../common/SearchPanel";
+import makeAjaxRequest from '../../util/request';
+import { message } from 'antd';
 
 const { RangePicker } = DatePicker;
 const format = "YYYY-MM-DD";
@@ -23,20 +25,18 @@ class Newcomer extends React.Component {
   state = {
     dataSource: {
       content: [],
-      last: false,
-      totalElements: 0,
-      totalPages: 0,
-      firstPage: true,
-      lastPage: false,
-      number: 0,
-      size: 10,
-      sort: [],
-      numberOfElements: 0,
-      first: true,
+      total: 0, // 总数量
+      items: 0, // 总页数
+      activePage: 1, // 当前页面
+      size: 10, // 每页多少
     },
     startTime: '',
     endTime: '',
-    showModal: false,
+    formData: {
+      dataItem: {}
+    },
+    deleteItem: '',
+    showDeleteModal: false,
   };
 
   columns = [
@@ -102,13 +102,10 @@ class Newcomer extends React.Component {
   changeDate = (d, dataString) => {
     if (dataString && dataString.length > 0) {
       let data = dataString.split('"');
-      this.setState({ startTime: data[1], endTime: data[3] });
+      this.setState({ start_time: data[1], end_time: data[3] });
+    } else if (d.length === 0) {
+      this.setState({ start_time: '', end_time: '' });
     }
-  };
-
-  handleSelect = (e) => {
-    this.setState({ activePage: e });
-    this.searchList(e - 1);
   };
 
   handleChange = (type, e) => {
@@ -125,7 +122,7 @@ class Newcomer extends React.Component {
   };
 
   dataNumSelect = (index, value) => {
-    this.setState({ dataSource: { ...this.state.dataSource, size: value, activePage: 1 } }, () => {
+    this.setState({ dataSource: { ...this.state.dataSource, pageSize: value, activePage: 1 } }, () => {
       this.searchList();
     });
   };
@@ -133,27 +130,140 @@ class Newcomer extends React.Component {
   /* 重置 */
   resetSearch() {
     this.setState({
-      question: '', product_name: '', isv_name: '', question_type: '', question_status: ''
     }, () => {
       this.searchList();
     });
   }
 
   /* 搜索 */
-  searchList = (page = 0, size = 10) => {
+  searchList = async () => {
+    try {
+      const {
+        dataSource
+      } = this.state;
+      const { activePage } = dataSource;
+      const res = await makeAjaxRequest('/index/navigation/list', 'get', {
+        page_num: activePage,
+      });
+      const data = res.data || [];
+      data.forEach((item, index) => {
+        item.order = (index + 1)
+      })
+      this.setState({
+        dataSource: {
+          ...this.state.dataSource,
+          content: data,
+          total: res.sum || 0,
+          items: Math.floor((res.sum || 0) / this.state.dataSource.pageSize) + 1
+        }
+      });
+    } catch (err) {
+      message.error(err.message);
+    }
   };
 
-  /* Modal */
-  hideModal = () => {
-    this.setState({ showModal: false });
+  /* 查看/隐藏/删除 */
+  handleTableAction = async (item, action) => {
+    switch (action) {
+      case 'add': {
+        this.showAdd(false);
+        break;
+      }
+      case 'edit': {
+        this.showAdd(true, item);
+        break;
+      }
+      case 'view': {
+        this.showAdd(false);
+        break;
+      }
+      case 'confirmDelete': {
+        try {
+          this.hideDeleteModal();
+          await makeAjaxRequest('/index/recommendisv/dele', 'get', { isv_recommend_id: item.isvId });
+          message.success('操作成功');
+          this.searchList();
+        } catch (err) {
+          message.error(err.message);
+        }
+        break;
+      }
+    }
   }
-  confirmModal = () => {
-    this.hideModal();
+
+  showAdd = (isEdit, item) => {
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        showAddModal: true,
+        title: isEdit ? '编辑顶部导航' : '新增顶部导航',
+        dataItem: item || {}
+      }
+    })
+  }
+
+  hideAddModal = () => {
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        showAddModal: false,
+      }
+    })
+  }
+
+  handleFormDataChange = (type, e) => {
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        dataItem: {
+          ...this.state.formData.dataItem,
+          [type]: e.target ? e.target.value : e,
+        }
+      }
+    })
+  }
+
+  submit = async () => {
+    const { dataItem } = this.state.formData;
+    const { in_id, username, navigation_url } = dataItem;
+    try {
+      this.hideAddModal();
+      if (in_id) {
+        await makeAjaxRequest('/index/navigation/editQuerSave', 'post', {
+          in_id, username, navigation_url
+        });
+      } else {
+        await makeAjaxRequest('/index/navigation/save', 'post', {
+          username, navigation_url
+        });
+      }
+      message.success('操作成功');
+      this.searchList();
+    } catch (err) {
+      message.error(err.message);
+    }
+  }
+
+  hideDeleteModal = () => {
+    this.setState({
+      showDeleteModal: false
+    })
+  }
+
+  confirmDelete = async () => {
+    this.handleTableAction(this.state.deleteItem, 'confirmDelete')
   }
 
   render() {
-    const { dataSource, aaa, bbb } = this.state;
-    const { activePage, size, content, total, items } = dataSource;
+    const {
+      dataSource,
+      aaa,
+      bbb,
+      formData,
+      showDeleteModal,
+    } = this.state;
+    const { activePage, content, total, items } = dataSource;
+    const { showAddModal, dataItem } = formData;
     return (
       <Fragment>
         <Header style={{ background: "#fff", padding: 0 }} title="新人专享" />
@@ -191,6 +301,7 @@ class Newcomer extends React.Component {
                 labelCol={100}
               >
                 <RangePicker
+                  ref="rangePicker"
                   className="search-item"
                   placeholder={'开始时间 ~ 结束时间'}
                   format={format}
@@ -200,7 +311,7 @@ class Newcomer extends React.Component {
             </FormList>
           </SearchPanel>
           <div className='action-wrap'>
-            <Button colors="primary" onClick={this.showAdd}>新建</Button>
+            <Button colors="primary" onClick={this.handleTableAction.bind(this, null, 'add')}>新建</Button>
           </div>
           <Table columns={this.columns} data={content} />
           <Pagination
@@ -220,23 +331,91 @@ class Newcomer extends React.Component {
             total={total}
             items={items}
           />
-          {/* 提示框 */}
-          <Modal
-            show={this.state.showModal}
-          >
-            <Modal.Header closeButton>
-              <Modal.Title>提示</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              确认停止发放?新注册用户将无法收到优惠券
-            </Modal.Body>
-            <Modal.Footer>
-              <Button onClick={this.hideModal.bind(this)} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-              <Button onClick={this.confirmModal.bind(this)} colors="primary">确认</Button>
-            </Modal.Footer>
-          </Modal>
         </Content>
-      </Fragment>
+        {/* 提示框 - 新增 */}
+        <Modal
+          show={showAddModal}
+          style={{ marginTop: '15vh' }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>{formData.title}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <FormList.Item label="优惠券名称" labelCol={100}>
+              <FormControl
+                className="search-item"
+                value={dataItem.aaa}
+                onChange={this.handleFormDataChange.bind(null, "aaa")}
+                style={{ width: 250 }}
+              />
+            </FormList.Item>
+            <FormList.Item label="有效期" labelCol={100}>
+              <Radio.RadioGroup
+                value={dataItem.bbb}
+                onChange={this.handleFormDataChange.bind(null, "bbb")}
+              >
+                <Radio value='0'>一直有效</Radio>
+                <Radio value='1'>有效日期</Radio>
+              </Radio.RadioGroup>
+            </FormList.Item>
+            <FormList.Item label="活动起止时间" labelCol={100}>
+              <RangePicker
+                ref="rangePicker"
+                className="search-item"
+                placeholder={'开始时间 ~ 结束时间'}
+                format={format}
+                onChange={this.handleFormDataChange.bind(null, "ccc")}
+              />
+            </FormList.Item>
+            <FormList.Item label="活动说明" labelCol={100}>
+              <FormControl
+                className="search-item"
+                value={dataItem.ddd}
+                onChange={this.handleFormDataChange.bind(null, "ddd")}
+                style={{ width: 250 }}
+              />
+            </FormList.Item>
+            <FormList.Item label="优惠金额" labelCol={100}>
+              <FormControl
+                className="search-item"
+                value={dataItem.eee}
+                onChange={this.handleFormDataChange.bind(null, "eee")}
+                style={{ width: 250 }}
+              />
+              <div>此类型的优惠可以抵销的金额</div>
+            </FormList.Item>
+            <FormList.Item label="最小订单金额" labelCol={100}>
+              <FormControl
+                className="search-item"
+                value={dataItem.fff}
+                onChange={this.handleFormDataChange.bind(null, "fff")}
+                style={{ width: 250 }}
+              />
+              <div>只有商品总金额达到这个数的订单才能使用这种优惠</div>
+            </FormList.Item>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.hideAddModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
+            <Button onClick={this.submit} colors="primary">确认</Button>
+          </Modal.Footer>
+        </Modal>
+        {/* 提示框 */}
+        <Modal
+          show={showDeleteModal}
+          style={{ marginTop: '20vh' }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>提示</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            确认停止发放?新注册用户将无法收到优惠券
+            </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.hideDeleteModal.bind(this)} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
+            <Button onClick={this.confirmDelete.bind(this)} colors="primary">确认</Button>
+          </Modal.Footer>
+        </Modal>
+      </Fragment >
     );
   }
 }

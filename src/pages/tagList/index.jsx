@@ -1,9 +1,7 @@
 import { FormControl, Select, Table, Pagination, Button, Modal } from "tinper-bee";
-import DatePicker from 'bee-datepicker'
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
-import "bee-datepicker/build/DatePicker.css";
 import "bee-button/build/Button.css";
 import "bee-select/build/Select.css";
 import "bee-table/build/Table.css";
@@ -28,13 +26,10 @@ class TagList extends React.Component {
     formData: {
       dataItem: {}
     },
+    labelName: '',
+    labelType: '',
     showDeleteModal: false,
-    tag_name: '',
-    comment: '',
-    start_time: '',
-    end_time: '',
-    tag_type: '',
-    comment_type: '',
+    deleteItem: '',
   };
 
   columns = [
@@ -45,17 +40,17 @@ class TagList extends React.Component {
     },
     {
       title: "标签名称",
-      dataIndex: "tag_name",
+      dataIndex: "labelName",
       width: "20%",
     },
     {
       title: "标签类型",
-      dataIndex: "ProductName",
+      dataIndex: "labelType",
       width: "20%",
     },
     {
       title: "创建时间",
-      dataIndex: "comment",
+      dataIndex: "addTime",
       width: "30%",
     },
     {
@@ -81,7 +76,7 @@ class TagList extends React.Component {
     if (dataString && dataString.length > 0) {
       let data = dataString.split('"');
       this.setState({ start_time: data[1], end_time: data[3] });
-    } else {
+    } else if (d.length === 0) {
       this.setState({ start_time: '', end_time: '' });
     }
   };
@@ -108,11 +103,11 @@ class TagList extends React.Component {
   /* 重置 */
   resetSearch() {
     this.setState({
-      tag_name: '',
+      labelName: '',
       comment: '',
       start_time: '',
       end_time: '',
-      tag_type: '',
+      labelType: '',
       comment_type: '',
     }, () => {
       this.searchList();
@@ -123,32 +118,24 @@ class TagList extends React.Component {
   searchList = async () => {
     try {
       const {
-        tag_name,
-        comment,
-        start_time,
-        end_time,
-        tag_type,
-        comment_type,
+        labelName,
+        labelType,
         dataSource
       } = this.state;
-      const { activePage } = dataSource;
-      const res = await makeAjaxRequest('/newcomment/getallOperateProduct', 'get', {
-        page_num: activePage,
-        tag_name,
-        comment,
-        start_time,
-        end_time,
-        tag_type,
-        comment_type
+      const { activePage, pageSize } = dataSource;
+      const res = await makeAjaxRequest('/label/getLabelList', 'post', {}, {
+        start: activePage,
+        limit: pageSize,
+        labelName,
+        labelType,
       });
-      // const res = { "data": [{ "qManageId": "74e9f34a-3423-415e-b1fc-9fda6d3b866e", "question": "问题2", "questionType": 0, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "深圳市宏数科技有限公司", "productId": "sdfdsfdsfdsfsdf", "productName": "任意的商品名", "askTime": null, "questionStatus": 0, "isdisplay": 1, "userId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "delFlag": 0, "addTime": "2020-11-12 14:48:26", "updateTime": null }, { "qManageId": "1f77de75-f11b-486c-b42c-dcb622163e69", "question": "问题1", "questionType": 0, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "深圳市宏数科技有限公司", "productId": "空", "productName": "空", "askTime": null, "questionStatus": 0, "isdisplay": 1, "userId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "delFlag": 0, "addTime": "2020-11-12 14:48:02", "updateTime": null }, { "qManageId": "sdfdsf", "question": "4", "questionType": 0, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "", "productId": "bc663882-bc56-4910-a4ae-69f9a7863e18", "productName": "", "askTime": "2020-11-10 18:03:54.0", "questionStatus": 1, "isdisplay": 1, "userId": "ab635124-1ac4-491c-90fb-8d7dc8485f16", "delFlag": 0, "addTime": "2020-11-10 18:03:47", "updateTime": null }, { "qManageId": "65456456", "question": "2", "questionType": 0, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "", "productId": "91462e8b-dba5-4256-bf13-3e1d2b884844", "productName": "", "askTime": "2020-11-10 18:03:26.0", "questionStatus": 0, "isdisplay": 1, "userId": "ab635124-1ac4-491c-90fb-8d7dc8485f15", "delFlag": 0, "addTime": "2020-11-10 18:03:39", "updateTime": null }, { "qManageId": "45tretert", "question": "1", "questionType": 1, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "", "productId": "", "productName": "", "askTime": "2020-11-10 16:28:01.0", "questionStatus": 0, "isdisplay": 1, "userId": "ab635124-1ac4-491c-10fb-8d7dc8485f17", "delFlag": 0, "addTime": "2020-11-10 16:28:16", "updateTime": null }, { "qManageId": "dsfdsfdsfadsf", "question": "3", "questionType": 0, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "", "productId": "bc663882-bc56-4910-a4ae-69f9a7863e18", "productName": "", "askTime": "2020-11-10 16:15:35.0", "questionStatus": 0, "isdisplay": 1, "userId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "delFlag": 0, "addTime": "2020-11-10 16:16:52", "updateTime": null }], "new_page_num": 1, "sum": 6, "status": 1, "msg": "查询成功" };
-      res.data.forEach((item, index) => {
+      (res.data || []).forEach((item, index) => {
         item.order = (index + 1)
       })
       this.setState({
         dataSource: {
           ...this.state.dataSource,
-          content: res.data,
+          content: res.data || [],
           total: res.sum || 0,
           items: Math.floor((res.sum || 0) / this.state.dataSource.pageSize) + 1
         }
@@ -161,13 +148,30 @@ class TagList extends React.Component {
   /* 新增/编辑/删除 */
   handleTableAction = async (item, action) => {
     switch (action) {
-      case 'view': {
+      case 'edit': {
         this.showAdd(true, item);
+        break;
       }
       case 'delete': {
         this.setState({
-          showDeleteModal: true
-        });
+          showDeleteModal: true,
+          deleteItem: item
+        })
+        break;
+      }
+      case 'confirmDelete': {
+        try {
+          this.hideDeleteModal();
+          await makeAjaxRequest(`/label/delLabel/${item.labelId}`, 'post', {});
+          message.success('操作成功');
+          this.searchList();
+        } catch (err) {
+          message.error(err.message);
+        }
+        break;
+      }
+      default: {
+        break;
       }
     }
   }
@@ -197,7 +201,7 @@ class TagList extends React.Component {
       formData: {
         ...this.state.formData,
         dataItem: {
-          ...this.state.formData,
+          ...this.state.formData.dataItem,
           [type]: e,
         }
       }
@@ -205,7 +209,22 @@ class TagList extends React.Component {
   }
 
   submit = async () => {
+    const { dataItem } = this.state.formData;
+    const { labelName, labelType, labelId } = dataItem;
     try {
+      this.hideAddModal();
+      if (labelId) {
+        await makeAjaxRequest(`/label/updateLabel`, 'post', {}, {
+          labelName,
+          labelType,
+          labelId,
+        });
+      } else {
+        await makeAjaxRequest(`/label/addLabel`, 'post', {}, {
+          labelName,
+          labelType
+        });
+      }
     } catch (err) {
       message.error(err.message);
     }
@@ -217,20 +236,17 @@ class TagList extends React.Component {
     })
   }
 
-  confirmDelete = async () => {
-    try {
-    } catch (err) {
-      message.error(err.message);
-    }
+  confirmDelete = () => {
+    this.handleTableAction(this.state.deleteItem, 'confirmDelete')
   }
 
   render() {
     const {
       dataSource,
-      showDeleteModal,
       formData,
-      tag_name,
-      tag_type,
+      labelName,
+      labelType,
+      showDeleteModal,
     } = this.state;
     const { showAddModal, title, dataItem } = formData;
     const { activePage, content, total, items } = dataSource;
@@ -246,16 +262,16 @@ class TagList extends React.Component {
               <FormList.Item label="标签名称" labelCol={100}>
                 <FormControl
                   className="search-item"
-                  value={tag_name}
-                  onChange={this.handleChange.bind(null, "tag_name")}
+                  value={labelName}
+                  onChange={this.handleChange.bind(null, "labelName")}
                 />
               </FormList.Item>
               <FormList.Item label="标签类型" labelCol={100}>
                 <Select
                   placeholder="选择标签类型"
                   className="search-item"
-                  onChange={this.handleChange.bind(null, "tag_type")}
-                  value={tag_type}
+                  onChange={this.handleChange.bind(null, "labelType")}
+                  value={labelType}
                 >
                   {[
                     { id: "1", stat: "产品标签" },
@@ -294,6 +310,7 @@ class TagList extends React.Component {
         {/* 提示框 - 新增 */}
         <Modal
           show={showAddModal}
+          style={{ marginTop: '20vh' }}
         >
           <Modal.Header closeButton>
             <Modal.Title>{title}</Modal.Title>
@@ -304,8 +321,8 @@ class TagList extends React.Component {
                 <Select
                   placeholder="选择标签类型"
                   className="dialog-input-item"
-                  onChange={this.handleFormDataChange.bind(null, "aaa")}
-                  value={dataItem.aaa}
+                  onChange={this.handleFormDataChange.bind(null, "labelType")}
+                  value={dataItem.labelType}
                   style={{ width: '250px' }}
                 >
                   {[
@@ -321,8 +338,8 @@ class TagList extends React.Component {
               <FormList.Item label="标签名称" labelCol={100}>
                 <FormControl
                   className="dialog-input-item"
-                  value={dataItem.bbb}
-                  onChange={this.handleFormDataChange.bind(null, "bbb")}
+                  value={dataItem.labelName}
+                  onChange={this.handleFormDataChange.bind(null, "labelName")}
                   style={{ width: '250px' }}
                 />
               </FormList.Item>
@@ -330,12 +347,13 @@ class TagList extends React.Component {
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.hideAddModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-            <Button onClick={this.submit} colors="primary">确认</Button>
+            <Button onClick={this.submit} colors="primary" disabled={!dataItem.labelName || !dataItem.labelType}>确认</Button>
           </Modal.Footer>
         </Modal>
         {/* 提示框 - 删除 */}
         <Modal
           show={showDeleteModal}
+          style={{ marginTop: '20vh' }}
         >
           <Modal.Header closeButton>
             <Modal.Title>删除提示</Modal.Title>

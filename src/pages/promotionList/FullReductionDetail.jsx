@@ -80,6 +80,6 @@ export default styled(QuestionDetail)`
 }
 .action-wrap {
   text-align: center;
-  margin-top: 40px;
+  margin: 40px auto;
 }
 `;

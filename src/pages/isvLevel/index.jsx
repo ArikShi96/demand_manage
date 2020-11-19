@@ -1,8 +1,7 @@
-import { Table, Button } from "tinper-bee";
+import { Table, Button, Message } from "tinper-bee";
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
-import "bee-datepicker/build/DatePicker.css";
 import "bee-button/build/Button.css";
 import "bee-select/build/Select.css";
 import "bee-table/build/Table.css";
@@ -12,7 +11,7 @@ import { Input } from 'antd';
 import Header from "../common/Header";
 import Content from "../common/Content";
 import makeAjaxRequest from '../../util/request';
-import { message } from 'antd';
+import { message, Upload } from 'antd';
 class IsvLevel extends React.Component {
   state = {
     dataSource: {
@@ -22,24 +21,54 @@ class IsvLevel extends React.Component {
       activePage: 1, // 当前页面
       pageSize: 10, // 每页多少
     },
-    formData: {}
+    formData: {},
+    flag: true
   };
 
   columns = [
     {
       title: "等级",
-      dataIndex: "aa",
+      dataIndex: "grade",
       width: "10%",
     },
     {
       title: "等级名称",
-      dataIndex: "bb",
+      dataIndex: "gradeName",
       width: "30%",
     },
     {
       title: "图标",
-      dataIndex: "cc",
+      dataIndex: "gradeIcon",
       width: "20%",
+      render: (value, item) => {
+        const uploadProps = {
+          name: 'file',
+          action: `/market/file/upload/img`,
+          accept: 'image/png,image/jpg',
+          showUploadList: false,
+          onChange: (info) => {
+            if (info.file.status === 'done') {
+              let { fileName } = info.file.response
+              if (fileName != '-1') {
+                Message.create({ content: '上传成功', color: 'success' });
+                item.gradeIcon = fileName;
+                this.setState({
+                  flag: true
+                })
+
+              } else {
+                Message.destroy();
+                Message.create({ content: '上传失败', color: 'danger' });
+              }
+            }
+          },
+        };
+        return (
+          <Upload {...uploadProps}>
+            {value ? <img className='grade-icon' src={value} /> : <a href="#" >添加</a>}
+          </Upload>
+        );
+      }
     },
     {
       title: "等级分范围",
@@ -48,7 +77,9 @@ class IsvLevel extends React.Component {
       render: (value, item) => {
         return (
           <div className='range-wrap'>
-            <Input value={item['dd']} /> <span className='divider'></span> <Input value={item['ee']} />
+            <Input value={item['pointsStart']} disabled={item['pointsStart'] === 0} onChange={this.handleChange.bind(this, item, 'pointsStart')} />
+            <span className='divider'></span>
+            <Input value={item['pointsEnd']} onChange={this.handleChange.bind(this, item, 'pointsEnd')} />
           </div>
         );
       }
@@ -59,9 +90,10 @@ class IsvLevel extends React.Component {
     this.searchList();
   }
 
-  handleChange = (type, e) => {
+  handleChange = (item, type, e) => {
+    item[type] = e.target.value;
     this.setState({
-      [type]: e,
+      flag: true
     });
   };
 
@@ -84,14 +116,15 @@ class IsvLevel extends React.Component {
       const {
         dataSource
       } = this.state;
-      const { activePage } = dataSource;
-      const res = await makeAjaxRequest('/index/recommendisv/List', 'get', {
-        page_num: activePage,
+      const { activePage, pageSize } = dataSource;
+      const res = await makeAjaxRequest('/isv/level/list', 'get', {
+        pageIndex: activePage - 1,
+        pageSize,
       });
       this.setState({
         dataSource: {
           ...this.state.dataSource,
-          content: res.data,
+          content: res.data || [],
           total: res.sum || 0,
           items: Math.floor((res.sum || 0) / this.state.dataSource.pageSize) + 1
         }
@@ -103,7 +136,11 @@ class IsvLevel extends React.Component {
 
   submit = async () => {
     try {
-      await makeAjaxRequest('/', 'get', {});
+      await Promise.all(this.state.dataSource.content.map(item => {
+        return makeAjaxRequest('/isv/level/update', 'post', {}, { ...item });
+      }));
+      message.success('操作成功');
+      this.searchList();
     } catch (err) {
       message.error(err.message);
     }

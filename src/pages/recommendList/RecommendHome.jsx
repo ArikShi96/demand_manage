@@ -1,4 +1,4 @@
-import { FormControl, Select, Table, Pagination } from "tinper-bee";
+import { FormControl, Select, Table, Pagination, Modal, Button } from "tinper-bee";
 import DatePicker from 'bee-datepicker'
 import styled from 'styled-components';
 import React, { Fragment } from "react";
@@ -14,7 +14,7 @@ import Content from "../common/Content";
 import FormList from "../common/Form";
 import SearchPanel from "../common/SearchPanel";
 import makeAjaxRequest from '../../util/request';
-import { message } from 'antd';
+import { message, Radio } from 'antd';
 const { RangePicker } = DatePicker;
 const format = "YYYY-MM-DD";
 const Option = Select.Option;
@@ -25,13 +25,17 @@ class RecommendHome extends React.Component {
       total: 0, // 总数量
       items: 0, // 总页数
       activePage: 1, // 当前页面
-      size: 10, // 每页多少
+      pageSize: 10, // 每页多少
     },
     select_time: '',
     start_time: '',
     end_time: '',
     isv_name: '',
     status: '',
+    formData: {
+      dataItem: {},
+      allList: []
+    }
   };
 
   columns = [
@@ -42,25 +46,30 @@ class RecommendHome extends React.Component {
     },
     {
       title: "商家名称",
-      dataIndex: "user_name",
+      dataIndex: "isvName",
       width: "15%",
     },
     {
       title: "申请时间",
-      dataIndex: "ProductName",
+      dataIndex: "applyTime",
       width: "15%",
     },
     {
       title: "状态",
-      dataIndex: "comment",
+      dataIndex: "status",
       width: "10%",
+      render: (value) => {
+        return (
+          <span>{{ 1: '审核中', 2: '已通过', 3: '已拒绝', 0: '已移除' }[value]}</span>
+        )
+      }
     },
     {
       title: "推荐时间",
-      dataIndex: "product_score",
+      dataIndex: "recommendTime",
       width: "15%",
     },
-    { title: "移除时间", dataIndex: "ip_address", width: "15%" },
+    { title: "移除时间", dataIndex: "moveTime", width: "15%" },
     {
       title: "操作",
       dataIndex: "operation",
@@ -68,9 +77,17 @@ class RecommendHome extends React.Component {
       render: (value, item) => {
         return (
           <div className="actions">
-            <a className='action' onClick={this.handleTableAction.bind(null, item, 'view')}>查看</a>
-            <a className='action' onClick={this.handleTableAction.bind(null, item, 'view')}>查看</a>
-            <a className='action' onClick={this.handleTableAction.bind(null, item, 'delete')}>删除</a>
+            {
+              item.status === 2
+              &&
+              <a className='action' onClick={this.handleTableAction.bind(null, item, 'delete')}>移除推荐</a>
+            }
+            <a className='action' onClick={this.handleTableAction.bind(null, item, 'view')}>查看企业信息</a>
+            {
+              item.status === 2
+              &&
+              <a className='action' onClick={this.handleTableAction.bind(null, item, 'home')}>推荐到首页</a>
+            }
           </div>
         );
       },
@@ -79,13 +96,14 @@ class RecommendHome extends React.Component {
 
   componentDidMount() {
     this.searchList();
+    this.fetchListFour();
   }
 
   changeDate = (d, dataString) => {
     if (dataString && dataString.length > 0) {
       let data = dataString.split('"');
       this.setState({ start_time: data[1], end_time: data[3] });
-    } else {
+    } else if (d.length === 0) {
       this.setState({ start_time: '', end_time: '' });
     }
   };
@@ -104,13 +122,14 @@ class RecommendHome extends React.Component {
   };
 
   dataNumSelect = (index, value) => {
-    this.setState({ dataSource: { ...this.state.dataSource, size: value, activePage: 1 } }, () => {
+    this.setState({ dataSource: { ...this.state.dataSource, pageSize: value, activePage: 1 } }, () => {
       this.searchList();
     });
   };
 
   /* 重置 */
   resetSearch() {
+    this.refs.rangePicker.clear();
     this.setState({
       select_time: '',
       start_time: '',
@@ -133,7 +152,7 @@ class RecommendHome extends React.Component {
         status,
         dataSource
       } = this.state;
-      const { activePage, size } = dataSource;
+      const { activePage } = dataSource;
       const res = await makeAjaxRequest('/index/activity/getListOperates', 'get', {
         page_num: activePage,
         select_time,
@@ -142,15 +161,15 @@ class RecommendHome extends React.Component {
         isv_name,
         status,
       });
-      res.data.forEach((item, index) => {
+      (res.data || []).forEach((item, index) => {
         item.order = (index + 1)
       })
       this.setState({
         dataSource: {
           ...this.state.dataSource,
-          content: res.data,
+          content: res.data || [],
           total: res.sum || 0,
-          items: Math.floor((res.sum || 0) / this.state.dataSource.size) + 1
+          items: Math.floor((res.sum || 0) / this.state.dataSource.pageSize) + 1
         }
       });
     } catch (err) {
@@ -162,35 +181,93 @@ class RecommendHome extends React.Component {
   handleTableAction = async (item, action) => {
     switch (action) {
       case 'view': {
-        this.props.history.push(`/RecommendHomeDetail/${item.id}`);
+        this.props.history.push(`/RecommendHomeDetail/${item.isvId}`);
+        break;
       }
-      case 'toggle': {
-        try {
-          await makeAjaxRequest('/newcomment/hide', 'get', { q_manage_id: item.qManageId });
-        } catch (err) {
-          message.error(err.message);
-        }
+      case 'home': {
+        this.setState({
+          formData: {
+            ...this.state.formData,
+            showChangeModal: true,
+            dataItem: item
+          }
+        })
+        break;
       }
       case 'delete': {
         try {
-          await makeAjaxRequest('/newcomment/dele', 'get', { q_manage_id: item.qManageId });
+          await makeAjaxRequest('/index/activity/operateMove', 'get', { index_activity_id: item.indexActivityId });
+          message.success('操作成功');
+          this.searchList();
         } catch (err) {
           message.error(err.message);
         }
+        break;
       }
+      default: {
+        break;
+      }
+    }
+  }
+
+  hideChangeModal = () => {
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        showChangeModal: false
+      }
+    })
+  }
+
+  fetchListFour = async () => {
+    try {
+      const res = await makeAjaxRequest('/index/activity/getListFour', 'get', {});
+      this.setState({
+        formData: {
+          ...this.state.formData,
+          allList: res.data || []
+        }
+      })
+    } catch (err) {
+      message.error(err.message);
+    }
+  }
+
+  onRadioChange = (e) => {
+    this.state.formData.old_indexActivityId = e.target.value;
+    this.forceUpdate();
+  }
+
+  confirmChange = async () => {
+    const { dataItem, old_indexActivityId } = this.state.formData;
+    const selected = this.state.formData.allList.find(item => {
+      return item.indexActivityId === old_indexActivityId
+    })
+    try {
+      this.hideChangeModal();
+      await makeAjaxRequest('/index/activity/operateRec', 'post', {
+        new_indexActivityId: dataItem.indexActivityId,
+        old_indexActivityId,
+        position: selected.position
+      });
+      message.success('操作成功');
+      this.searchList();
+      this.fetchListFour();
+    } catch (err) {
+      message.error(err.message);
     }
   }
 
   render() {
     const {
       select_time,
-      start_time,
-      end_time,
       isv_name,
       status,
       dataSource,
+      formData
     } = this.state;
-    const { activePage, size, content, total, items } = dataSource;
+    const { activePage, content, total, items } = dataSource;
+    const { allList, showChangeModal, old_indexActivityId } = formData;
     return (
       <Fragment>
         <Header style={{ background: "#fff", padding: 0 }} title="首页活动推荐" />
@@ -203,7 +280,7 @@ class RecommendHome extends React.Component {
               <FormList.Item className='time-select-wrap' label="" labelCol={0}>
                 <div className='time-select'>
                   <Select
-                    placeholder=""
+                    placeholder="选择时间类型"
                     className="search-item"
                     onChange={this.handleChange.bind(null, "select_time")}
                     value={select_time}
@@ -218,6 +295,7 @@ class RecommendHome extends React.Component {
                       ))}
                   </Select>
                   <RangePicker
+                    ref="rangePicker"
                     showClear={true}
                     className="search-item"
                     placeholder={'开始时间 ~ 结束时间'}
@@ -233,7 +311,7 @@ class RecommendHome extends React.Component {
                   onChange={this.handleChange.bind(null, "isv_name")}
                 />
               </FormList.Item>
-              <FormList.Item label="" labelCol={100}>
+              <FormList.Item label="状态" labelCol={100}>
                 <Select
                   placeholder="请选择审核状态"
                   className="search-item"
@@ -272,6 +350,30 @@ class RecommendHome extends React.Component {
             items={items}
           />
         </Content>
+        {/* 提示框 - 替换 */}
+        <Modal
+          show={showChangeModal}
+          style={{ marginTop: '20vh' }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>推荐到首页</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Radio.Group onChange={this.onRadioChange} value={old_indexActivityId}>
+              {allList.map((item, index) => {
+                return (
+                  <Radio value={item.indexActivityId}>
+                    <span style={{ marginRight: "40px" }}>推荐位{index + 1}</span>{item.isvName || "空"}
+                  </Radio>
+                );
+              })}
+            </Radio.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.hideChangeModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
+            <Button onClick={this.confirmChange} colors="primary">确认并替换</Button>
+          </Modal.Footer>
+        </Modal>
       </Fragment>
     );
   }

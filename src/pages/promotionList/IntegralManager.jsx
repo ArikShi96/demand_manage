@@ -5,15 +5,13 @@ import Header from "../common/Header";
 import "bee-button/build/Button.css";
 import { FormControl } from "tinper-bee";
 import "bee-form-control/build/FormControl.css";
-import "bee-datepicker/build/DatePicker.css";
 import "bee-button/build/Button.css";
 import "bee-select/build/Select.css";
 import "bee-table/build/Table.css";
 import "bee-pagination/build/Pagination.css";
 import "bee-tabs/build/Tabs.css";
 import makeAjaxRequest from '../../util/request';
-import { message } from 'antd';
-import { Checkbox } from 'antd';
+import { message, Radio, Checkbox } from 'antd';
 class IntegralManager extends React.Component {
   state = {
     newUserPoints: '',
@@ -47,7 +45,15 @@ class IntegralManager extends React.Component {
   };
 
   handleCheckboxChange = (e) => {
+    this.setState({
+      isTime: !this.state.isTime
+    })
+  }
 
+  handleRadioChange = (e) => {
+    this.setState({
+      radioValue: e.target.value
+    })
   }
 
   submit = async () => {
@@ -84,7 +90,8 @@ class IntegralManager extends React.Component {
       loginPoints,
       pointsProportion,
       pointsCommentNum,
-      pointsComment
+      pointsComment,
+      radioValue,
     } = this.state;
     return (
       <div className={className}>
@@ -100,7 +107,7 @@ class IntegralManager extends React.Component {
         </div>
         <div className='detail-wrap'>
           <div className='label'>
-            <Checkbox onChange={this.handleCheckboxChange} />
+            <Checkbox onChange={this.handleCheckboxChange} checked={isTime} />
             <span>固定时间注册赠送积分</span>
           </div>
           <div className='content'>
@@ -162,10 +169,11 @@ class IntegralManager extends React.Component {
         <div className='detail-wrap'>
           <div className='label'>积分清零时间</div>
           <div className='content'>
-            <FormControl className="search-item"
-              value={pointsComment}
-              onChange={this.handleChange.bind(null, "pointsComment")}
-            />
+            <Radio.Group onChange={this.handleRadioChange} value={radioValue}>
+              <Radio value={1}>不限</Radio>
+              <Radio value={2}>每年</Radio>
+              <Radio value={3}>每两年</Radio>
+            </Radio.Group>
           </div>
         </div>
         <div className='action-wrap'>
@@ -212,6 +220,6 @@ export default styled(IntegralManager)`
 }
 .action-wrap {
   text-align: center;
-  margin-top: 40px;
+  margin: 40px auto;
 }
 `;

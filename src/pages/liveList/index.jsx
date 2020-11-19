@@ -42,27 +42,27 @@ class LiveList extends React.Component {
   columns = [
     {
       title: "直播间ID",
-      dataIndex: "id",
+      dataIndex: "liveRoomId",
       width: "10%",
     },
     {
       title: "直播名称",
-      dataIndex: "user_name",
+      dataIndex: "liveName",
       width: "10%",
     },
     {
       title: "服务商",
-      dataIndex: "ProductName",
+      dataIndex: "isvName",
       width: "10%",
     },
     {
       title: "开始时间",
-      dataIndex: "comment",
+      dataIndex: "liveStarttime",
       width: "15%",
     },
     {
       title: "结束时间",
-      dataIndex: "product_score",
+      dataIndex: "liveEndtime",
       width: "15%",
     },
     {
@@ -146,7 +146,7 @@ class LiveList extends React.Component {
     if (dataString && dataString.length > 0) {
       let data = dataString.split('"');
       this.setState({ start_time: data[1], end_time: data[3] });
-    } else {
+    } else if (d.length === 0) {
       this.setState({ start_time: '', end_time: '' });
     }
   };
@@ -172,6 +172,7 @@ class LiveList extends React.Component {
 
   /* 重置 */
   resetSearch() {
+    this.refs.rangePicker.clear();
     this.setState({
       aaa: '',
       bbb: '',
@@ -190,17 +191,19 @@ class LiveList extends React.Component {
       const {
         dataSource
       } = this.state;
-      const { activePage } = dataSource;
-      const res = await makeAjaxRequest('/xxx', 'get', {
-        page_num: activePage,
+      const { activePage, pageSize } = dataSource;
+      const res = await makeAjaxRequest('/live/list', 'get', {
+        pageIndex: activePage - 1,
+        pageSize,
+        queryType: 2
       });
-      res.data.forEach((item, index) => {
+      (res.data.content || []).forEach((item, index) => {
         item.order = (index + 1)
       })
       this.setState({
         dataSource: {
           ...this.state.dataSource,
-          content: res.data,
+          content: res.data.content || [],
           total: res.sum || 0,
           items: Math.floor((res.sum || 0) / this.state.dataSource.pageSize) + 1
         }
@@ -249,7 +252,7 @@ class LiveList extends React.Component {
       }
       case 'delete': {
         try {
-          await makeAjaxRequest('/newcomment/dele', 'get', { q_manage_id: item.qManageId });
+          await makeAjaxRequest('/live/list', 'get', { q_manage_id: item.qManageId });
         } catch (err) {
           message.error(err.message);
         }
@@ -273,7 +276,7 @@ class LiveList extends React.Component {
       formData: {
         ...this.state.formData,
         dataItem: {
-          ...this.state.formData,
+          ...this.state.formData.dataItem,
           [type]: e,
         }
       }
@@ -374,6 +377,7 @@ class LiveList extends React.Component {
               </FormList.Item>
               <FormList.Item label="直播时间" labelCol={100}>
                 <RangePicker
+                  ref="rangePicker"
                   showClear={true}
                   className="search-item"
                   placeholder={'开始时间 ~ 结束时间'}
@@ -409,6 +413,7 @@ class LiveList extends React.Component {
         {/* 提示框 - 拒绝 */}
         <Modal
           show={showRejectModal}
+          style={{ marginTop: '20vh' }}
         >
           <Modal.Header closeButton>
             <Modal.Title>拒绝原因</Modal.Title>

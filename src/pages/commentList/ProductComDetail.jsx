@@ -33,27 +33,19 @@ class ProductComDetail extends React.Component {
     const { className } = this.props;
     return (
       <div className={className}>
-        <Header title="问答详情" />
-        <div className='detail-wrap'>
-          <div className='label'>问答类型</div>
-          <div className='content'>123</div>
+        <Header title="商品评价" />
+        {detail.id && <div className='detail-wrap'>
+          <div className='comment-info'>
+            {`${detail.userName}于${new Date(detail.createTime).toLocaleString()}对${detail.productName}发表评论`}
+          </div>
+          <div className='origin'>{`来源：订单 ${detail.orderId || ''}`}</div>
+          <div className='divider'></div>
+          <div className='comment-content'>{detail.comment}</div>
+          <div className='divider'></div>
+          <div className='reply-info'>{`${detail.operatorName || ''} 于 2020-04-26 17:43:11 回复`}</div>
+          <div className='comment-content'>{`回复内容: ${detail.reply || ''}`}</div>
         </div>
-        <div className='detail-wrap'>
-          <div className='label'>相关商品</div>
-          <div className='content'>123</div>
-        </div>
-        <div className='detail-wrap'>
-          <div className='label'>提问时间</div>
-          <div className='content'>123</div>
-        </div>
-        <div className='detail-wrap'>
-          <div className='label'>问题详情</div>
-          <div className='content'>123</div>
-        </div>
-        <div className='detail-wrap'>
-          <div className='label'>回答</div>
-          <div className='content'>123</div>
-        </div>
+        }
         <div className='action-wrap'>
           <Button colors="primary" onClick={this.navigateBack}>返回</Button>
         </div>
@@ -72,23 +64,19 @@ export default styled(ProductComDetail)`
   padding: 0;
 }
 .detail-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  padding: 0 60px;
-  margin-bottom: 40px;
-  .label {
-    text-align: right;
-    min-width: 80px;
-    flex-shrink: 0;
-    margin-right: 5%;
+  position: relative;
+  padding: 20px;
+  background-color: #ffffff;
+  & > div {
+    margin: 20px 0;
   }
-  .content {
-    flex: auto;
+  .divider {
+    height: 1px;
+    background-color: #cccccc;
   }
 }
 .action-wrap {
   text-align: center;
-  margin-top: 40px;
+  margin: 40px auto;
 }
 `;

@@ -14,6 +14,8 @@ import Header from "../common/Header";
 import Content from "../common/Content";
 import FormList from "../common/Form";
 import SearchPanel from "../common/SearchPanel";
+import { message } from 'antd';
+import makeAjaxRequest from '../../util/request';
 const TabPane = Tabs.TabPane;
 const { RangePicker } = DatePicker;
 const format = "YYYY-MM-DD";
@@ -33,7 +35,14 @@ class FullReduction extends React.Component {
     bbb: '',
     start_time: '',
     end_time: '',
-    showModal: false,
+    formData: {
+      dataItem: {}
+    },
+    confirmItem: '',
+    confirmAction: '',
+    confirmTip: '',
+    showConfirmModal: false,
+    rejectReason: '',
   };
 
   columns = [
@@ -100,12 +109,9 @@ class FullReduction extends React.Component {
     if (dataString && dataString.length > 0) {
       let data = dataString.split('"');
       this.setState({ start_time: data[1], end_time: data[3] });
+    } else if (d.length === 0) {
+      this.setState({ start_time: '', end_time: '' });
     }
-  };
-
-  handleSelect = (e) => {
-    this.setState({ activePage: e });
-    this.searchList(e - 1);
   };
 
   handleChange = (type, e) => {
@@ -131,24 +137,188 @@ class FullReduction extends React.Component {
     });
   };
 
+  /* 重置 */
+  resetSearch() {
+    this.setState({
+    }, () => {
+      this.searchList();
+    });
+  }
+
   /* 搜索 */
-  searchList = () => {
+  searchList = async () => {
+    try {
+      const {
+        dataSource
+      } = this.state;
+      const { activePage } = dataSource;
+      const res = await makeAjaxRequest('/index/navigation/list', 'get', {
+        page_num: activePage,
+      });
+      const data = res.data || [];
+      data.forEach((item, index) => {
+        item.order = (index + 1)
+      })
+      this.setState({
+        dataSource: {
+          ...this.state.dataSource,
+          content: data,
+          total: res.sum || 0,
+          items: Math.floor((res.sum || 0) / this.state.dataSource.pageSize) + 1
+        }
+      });
+    } catch (err) {
+      message.error(err.message);
+    }
   };
 
-  /* Modal */
-  hideModal = () => {
-    this.setState({ showModal: false });
+  /* 查看/隐藏/删除 */
+  handleTableAction = async (item, action) => {
+    switch (action) {
+      case 'edit': {
+        this.showAdd(true, item);
+        break;
+      }
+      case 'add': {
+        this.showAdd(false);
+        break;
+      }
+      case 'view': {
+        this.showAdd(false);
+        break;
+      }
+      case 'open': {
+        this.setState({
+          confirmItem: item,
+          confirmAction: action,
+          confirmTip: '确认开启此活动? 前台用户将可继续参加该活动',
+          showConfirmModal: true,
+          rejectReason: '',
+        })
+        break;
+      }
+      case 'stop': {
+        this.setState({
+          confirmItem: item,
+          confirmAction: action,
+          confirmTip: '确认停止此活动? 前台用户将无法参加此活动',
+          showConfirmModal: true,
+          rejectReason: '',
+        })
+        break;
+      }
+      case 'join': {
+        this.setState({
+          confirmItem: item,
+          confirmAction: action,
+          confirmTip: '确认此服务商报名信息无误?参加此活动',
+          showConfirmModal: true,
+          rejectReason: '',
+        })
+        break;
+      }
+      case 'reject': {
+        this.setState({
+          confirmItem: item,
+          confirmAction: action,
+          confirmTip: '拒绝此服务商的报名',
+          showConfirmModal: true,
+          rejectReason: '',
+        })
+        break;
+      }
+      case 'confirm': {
+        try {
+          this.hideConfirmModal();
+          await makeAjaxRequest('/index/recommendisv/dele', 'get', { isv_recommend_id: item.isvId });
+          message.success('操作成功');
+          this.searchList();
+        } catch (err) {
+          message.error(err.message);
+        }
+        break;
+      }
+    }
   }
-  confirmModal = () => {
-    this.hideModal();
+
+  showAdd = (isEdit, item) => {
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        showAddModal: true,
+        title: isEdit ? '编辑活动' : '新增活动',
+        dataItem: item || {}
+      }
+    })
   }
-  showAdd = (e) => {
-    console.log(e.target);
+
+  hideAddModal = () => {
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        showAddModal: false,
+      }
+    })
+  }
+
+  handleFormDataChange = (type, e) => {
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        dataItem: {
+          ...this.state.formData.dataItem,
+          [type]: e.target ? e.target.value : e,
+        }
+      }
+    })
+  }
+
+  submit = async () => {
+    const { dataItem } = this.state.formData;
+    const { in_id, username, navigation_url } = dataItem;
+    try {
+      this.hideAddModal();
+      if (in_id) {
+        await makeAjaxRequest('/index/navigation/editQuerSave', 'post', {
+          in_id, username, navigation_url
+        });
+      } else {
+        await makeAjaxRequest('/index/navigation/save', 'post', {
+          username, navigation_url
+        });
+      }
+      message.success('操作成功');
+      this.searchList();
+    } catch (err) {
+      message.error(err.message);
+    }
+  }
+
+  hideConfirmModal = () => {
+    this.setState({
+      showConfirmModal: false
+    })
+  }
+
+  confirmAction = async () => {
+    this.handleTableAction(this.state.deleteItem, 'confirm')
   }
 
   render() {
-    const { dataSource, activeTabKey, aaa, bbb } = this.state;
+    const {
+      dataSource,
+      activeTabKey,
+      aaa,
+      bbb,
+      formData,
+      confirmItem,
+      confirmAction,
+      confirmTip,
+      showConfirmModal,
+      rejectReason,
+    } = this.state;
     const { activePage, content, total, items } = dataSource;
+    const { dataItem, showAddModal } = formData;
     return (
       <Fragment>
         <Header style={{ background: "#fff", padding: 0 }} title="活动管理" />
@@ -204,6 +374,7 @@ class FullReduction extends React.Component {
                 labelCol={100}
               >
                 <RangePicker
+                  ref="rangePicker"
                   className="search-item"
                   placeholder={'开始时间 ~ 结束时间'}
                   format={format}
@@ -215,7 +386,7 @@ class FullReduction extends React.Component {
           {activeTabKey === '0'
             &&
             <div className='action-wrap'>
-              <Button colors="primary" onClick={this.showAdd}>新建</Button>
+              <Button colors="primary" onClick={this.handleTableAction.bind(this, null, 'add')}>新建</Button>
             </div>
           }
           <Table columns={this.columns} data={content} />
@@ -236,19 +407,76 @@ class FullReduction extends React.Component {
             total={total}
             items={items}
           />
+          {/* 提示框 - 新增 */}
+          <Modal
+            show={showAddModal}
+            style={{ marginTop: '10vh' }}
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>{formData.title}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <div className='section-title'>活动信息</div>
+              <FormList.Item label="活动名称" labelCol={100}>
+                <FormControl
+                  className="search-item"
+                  value={dataItem.aaa}
+                  onChange={this.handleFormDataChange.bind(null, "aaa")}
+                  style={{ width: 250 }}
+                />
+              </FormList.Item>
+              <FormList.Item label="活动时间" labelCol={100}>
+                <RangePicker
+                  ref="rangePicker"
+                  className="search-item"
+                  placeholder={'开始时间 ~ 结束时间'}
+                  format={format}
+                  onChange={this.handleFormDataChange.bind(null, "bbb")}
+                />
+              </FormList.Item>
+              <FormList.Item label="报名时间" labelCol={100}>
+                <RangePicker
+                  ref="rangePicker"
+                  className="search-item"
+                  placeholder={'开始时间 ~ 结束时间'}
+                  format={format}
+                  onChange={this.handleFormDataChange.bind(null, "ccc")}
+                />
+              </FormList.Item>
+              <FormList.Item label="活动说明" labelCol={100}>
+                <FormControl
+                  className="search-item"
+                  value={dataItem.ddd}
+                  onChange={this.handleFormDataChange.bind(null, "ddd")}
+                  style={{ width: 250 }}
+                />
+              </FormList.Item>
+              <div className='section-title'>活动信息</div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button onClick={this.hideAddModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
+              <Button onClick={this.submit} colors="primary">确认</Button>
+            </Modal.Footer>
+          </Modal>
           {/* 提示框 */}
           <Modal
-            show={this.state.showModal}
+            show={showConfirmModal}
+            style={{ marginTop: '20vh' }}
           >
             <Modal.Header closeButton>
               <Modal.Title>提示</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              确认停止发放?新注册用户将无法收到优惠券
+              <div>{confirmTip}</div>
+              {confirmAction === 'reject' && <FormControl
+                className="search-item"
+                value={rejectReason}
+                onChange={this.handleChange.bind(null, "rejectReason")}
+              />}
             </Modal.Body>
             <Modal.Footer>
-              <Button onClick={this.hideModal.bind(this)} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-              <Button onClick={this.confirmModal.bind(this)} colors="primary">确认</Button>
+              <Button onClick={this.hideConfirmModal.bind(this)} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
+              <Button onClick={this.confirmAction.bind(this)} colors="primary">确认</Button>
             </Modal.Footer>
           </Modal>
         </Content>

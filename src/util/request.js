@@ -1,6 +1,13 @@
-import API from "../../api";
+const API = require("../api");
 
-export function makeAjaxRequest(url, method, query, body, options, headers) {
+export default function makeAjaxRequest(
+  url,
+  method,
+  query,
+  body,
+  options,
+  headers
+) {
   const reqHeaders = {
     Accept: "application/json",
     "Content-Type": "application/json;charset=UTF-8",
@@ -9,6 +16,7 @@ export function makeAjaxRequest(url, method, query, body, options, headers) {
   const params = {
     method: method || "get",
     headers: { ...reqHeaders, ...(headers || {}) },
+    credentials: "include",
     ...(options || {}),
   };
 
@@ -16,7 +24,7 @@ export function makeAjaxRequest(url, method, query, body, options, headers) {
     params.body = JSON.stringify(body || {});
   }
 
-  return fetch(encodeUrlWithQuery(url, query), params).then((response) => {
+  return fetch(encodeUrlWithQuery(`/market${url}`, query), params).then((response) => {
     if (response.ok) {
       const contentType = response.headers.get("Content-type");
       if (contentType && contentType.includes("application/json")) {
@@ -34,7 +42,7 @@ export function makeAjaxRequest(url, method, query, body, options, headers) {
 function encodeUrlWithQuery(url, query) {
   Object.keys(query || {}).forEach((key, index) => {
     url += `${index ? "" : "?"}`;
-    if (query[key]) {
+    if (query[key] || query[key] === 0) {
       url += `${index ? "&" : ""}${key}=${encodeURIComponent(query[key])}`;
     }
   });

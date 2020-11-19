@@ -1,5 +1,7 @@
-import { FormControl, Select, Pagination, Table } from "tinper-bee";
+import { FormControl, Select, Pagination, Table, Modal, Button } from "tinper-bee";
 import React, { Fragment } from "react";
+import styled from 'styled-components';
+import DatePicker from 'bee-datepicker'
 import "bee-form-control/build/FormControl.css";
 import "bee-datepicker/build/DatePicker.css";
 import "bee-button/build/Button.css";
@@ -7,13 +9,17 @@ import "bee-select/build/Select.css";
 import "bee-table/build/Table.css";
 import "bee-pagination/build/Pagination.css";
 import "bee-tabs/build/Tabs.css";
+import 'bee-modal/build/Modal.css';
 import Header from "../common/Header";
 import Content from "../common/Content";
 import FormList from "../common/Form";
 import SearchPanel from "../common/SearchPanel";
 
+const { RangePicker } = DatePicker;
+const format = "YYYY-MM-DD";
 const Option = Select.Option;
-class SearchModel extends React.Component {
+
+class Newcomer extends React.Component {
   state = {
     dataSource: {
       content: [],
@@ -28,6 +34,9 @@ class SearchModel extends React.Component {
       numberOfElements: 0,
       first: true,
     },
+    startTime: '',
+    endTime: '',
+    showModal: false,
   };
 
   columns = [
@@ -108,99 +117,134 @@ class SearchModel extends React.Component {
     });
   };
 
+  // 分页
+  handleSelect = (activePage) => { // page, pageSize
+    this.setState({ dataSource: { ...this.state.dataSource, activePage } }, () => {
+      this.searchList();
+    });
+  };
+
   dataNumSelect = (index, value) => {
-    this.searchList(0, value);
+    this.setState({ dataSource: { ...this.state.dataSource, size: value, activePage: 1 } }, () => {
+      this.searchList();
+    });
   };
 
   /* 重置 */
   resetSearch() {
-    this.setState({});
+    this.setState({
+      question: '', product_name: '', isv_name: '', question_type: '', question_status: ''
+    }, () => {
+      this.searchList();
+    });
   }
 
   /* 搜索 */
-  searchList = (page = 0, size = 10, billStatus = "") => {};
+  searchList = (page = 0, size = 10) => {
+  };
+
+  /* Modal */
+  hideModal = () => {
+    this.setState({ showModal: false });
+  }
+  confirmModal = () => {
+    this.hideModal();
+  }
 
   render() {
-    const { dataSource, aaa, bbb, ccc, ddd, eee } = this.state;
-    const { first, last, prev, next, activePage } = dataSource;
+    const { dataSource, aaa, bbb } = this.state;
+    const { activePage, size, content, total, items } = dataSource;
     return (
       <Fragment>
-        <Header style={{ background: "#fff", padding: 0 }} title="问答管理" />
-        <Content style={{ width: "100%", overflowX: "auto" }}>
+        <Header style={{ background: "#fff", padding: 0 }} title="新人专享" />
+        <Content className={this.props.className} style={{ width: "100%", overflowX: "auto" }}>
           <SearchPanel
             reset={this.resetSearch.bind(this)}
             search={this.searchList.bind(this, 0, 10)}
           >
             <FormList layoutOpt={{ md: 4, xs: 4 }}>
-              <FormList.Item label="问答关键词" labelCol={100}>
+              <FormList.Item label="活动名称" labelCol={100}>
                 <FormControl
                   className="search-item"
                   value={aaa}
                   onChange={this.handleChange.bind(null, "aaa")}
                 />
               </FormList.Item>
-              <FormList.Item label="商品名称" labelCol={100}>
-                <FormControl
+              <FormList.Item label="状态" labelCol={100}>
+                <Select
                   className="search-item"
-                  value={bbb}
                   onChange={this.handleChange.bind(null, "bbb")}
-                />
-              </FormList.Item>
-              <FormList.Item label="服务商" labelCol={100}>
-                <FormControl
-                  className="search-item"
-                  value={ccc}
-                  onChange={this.handleChange.bind(null, "ccc")}
-                />
-              </FormList.Item>
-              <FormList.Item label="问题类型" labelCol={100}>
-                <Select
-                  className="search-item"
-                  onChange={this.handleChange.bind(null, "ddd")}
-                  value={ddd}
+                  value={bbb}
                 >
-                  {[{ id: "1", stat: "1" }].map((item) => (
-                    <Option key={item.id} value={item.id}>
-                      {item.stat}
-                    </Option>
-                  ))}
+                  {[
+                    { id: "0", stat: "全部状态" },
+                    { id: "1", stat: "进行中" },
+                    { id: "2", stat: "已取消" }].map((item) => (
+                      <Option key={item.id} value={item.id}>
+                        {item.stat}
+                      </Option>
+                    ))}
                 </Select>
               </FormList.Item>
-              <FormList.Item label="问题状态" labelCol={100}>
-                <Select
+              <FormList.Item
+                label="活动时间"
+                labelCol={100}
+              >
+                <RangePicker
                   className="search-item"
-                  onChange={this.handleChange.bind(null, "eee")}
-                  value={eee}
-                >
-                  {[{ id: "1", stat: "1" }].map((item) => (
-                    <Option key={item.id} value={item.id}>
-                      {item.stat}
-                    </Option>
-                  ))}
-                </Select>
+                  placeholder={'开始时间 ~ 结束时间'}
+                  format={format}
+                  onChange={this.changeDate}
+                />
               </FormList.Item>
             </FormList>
           </SearchPanel>
-          <Table columns={this.columns} data={dataSource.content} />
+          <div className='action-wrap'>
+            <Button colors="primary" onClick={this.showAdd}>新建</Button>
+          </div>
+          <Table columns={this.columns} data={content} />
           <Pagination
             first
             last
             prev
             next
             maxButtons={5}
+            dataNumSelect={["10"]}
+            dataNum={0}
             boundaryLinks
+            showJump={true}
+            noBorder={true}
             activePage={activePage}
             onSelect={this.handleSelect}
             onDataNumSelect={this.dataNumSelect}
-            showJump={true}
-            noBorder={true}
-            total={dataSource.totalElements}
-            items={dataSource.totalPages}
+            total={total}
+            items={items}
           />
+          {/* 提示框 */}
+          <Modal
+            show={this.state.showModal}
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>提示</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              确认停止发放?新注册用户将无法收到优惠券
+            </Modal.Body>
+            <Modal.Footer>
+              <Button onClick={this.hideModal.bind(this)} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
+              <Button onClick={this.confirmModal.bind(this)} colors="primary">确认</Button>
+            </Modal.Footer>
+          </Modal>
         </Content>
       </Fragment>
     );
   }
 }
 
-export default SearchModel;
+export default styled(Newcomer)`
+.action-wrap {
+  text-align: right;
+  padding: 20px;
+  padding-right: 48px;
+}
+`;

@@ -18,7 +18,7 @@ import { message } from 'antd';
 const { RangePicker } = DatePicker;
 const format = "YYYY-MM-DD";
 const Option = Select.Option;
-class OrderCom extends React.Component {
+class RecommendHome extends React.Component {
   state = {
     dataSource: {
       content: [],
@@ -27,43 +27,40 @@ class OrderCom extends React.Component {
       activePage: 1, // 当前页面
       size: 10, // 每页多少
     },
-    order_id: '',
-    comment: '',
+    select_time: '',
     start_time: '',
     end_time: '',
-    average: '',
-    comment_type: '',
+    isv_name: '',
+    status: '',
   };
 
   columns = [
     {
-      title: "订单号",
-      dataIndex: "order_id",
+      title: "序号",
+      dataIndex: "order",
+      width: "10%",
+    },
+    {
+      title: "商家名称",
+      dataIndex: "user_name",
       width: "15%",
     },
     {
-      title: "评价分数（交付速度、交付质量、商家服务）",
-      dataIndex: "average",
-      width: "25%",
+      title: "申请时间",
+      dataIndex: "ProductName",
+      width: "15%",
     },
-    {
-      title: "用户名",
-      dataIndex: "user_name",
-      width: "10%",
-    },
-    { title: "评论时间", dataIndex: "create_time", width: "20%" },
     {
       title: "状态",
-      dataIndex: "show_status",
+      dataIndex: "comment",
       width: "10%",
-      render: (value, item) => {
-        if (value === 0 || value === '0') {
-          return <a onClick={this.handleTableAction.bind(this, item, 'toggle')}>隐藏</a>
-        } else {
-          return <a onClick={this.handleTableAction.bind(this, item, 'toggle')}>显示</a>
-        }
-      }
     },
+    {
+      title: "推荐时间",
+      dataIndex: "product_score",
+      width: "15%",
+    },
+    { title: "移除时间", dataIndex: "ip_address", width: "15%" },
     {
       title: "操作",
       dataIndex: "operation",
@@ -71,6 +68,8 @@ class OrderCom extends React.Component {
       render: (value, item) => {
         return (
           <div className="actions">
+            <a className='action' onClick={this.handleTableAction.bind(null, item, 'view')}>查看</a>
+            <a className='action' onClick={this.handleTableAction.bind(null, item, 'view')}>查看</a>
             <a className='action' onClick={this.handleTableAction.bind(null, item, 'delete')}>删除</a>
           </div>
         );
@@ -113,12 +112,11 @@ class OrderCom extends React.Component {
   /* 重置 */
   resetSearch() {
     this.setState({
-      order_id: '',
-      comment: '',
+      select_time: '',
       start_time: '',
       end_time: '',
-      average: '',
-      comment_type: '',
+      isv_name: '',
+      status: '',
     }, () => {
       this.searchList();
     });
@@ -128,23 +126,21 @@ class OrderCom extends React.Component {
   searchList = async () => {
     try {
       const {
-        order_id,
-        comment,
+        select_time,
         start_time,
         end_time,
-        average,
-        comment_type,
+        isv_name,
+        status,
         dataSource
       } = this.state;
       const { activePage, size } = dataSource;
-      const res = await makeAjaxRequest('/newcomment/getallOperateOrder', 'get', {
+      const res = await makeAjaxRequest('/index/activity/getListOperates', 'get', {
         page_num: activePage,
-        order_id,
-        comment,
+        select_time,
         start_time,
         end_time,
-        average,
-        comment_type
+        isv_name,
+        status,
       });
       res.data.forEach((item, index) => {
         item.order = (index + 1)
@@ -165,6 +161,9 @@ class OrderCom extends React.Component {
   /* 查看/隐藏/删除 */
   handleTableAction = async (item, action) => {
     switch (action) {
+      case 'view': {
+        this.props.history.push(`/RecommendHomeDetail/${item.id}`);
+      }
       case 'toggle': {
         try {
           await makeAjaxRequest('/newcomment/hide', 'get', { q_manage_id: item.qManageId });
@@ -184,79 +183,73 @@ class OrderCom extends React.Component {
 
   render() {
     const {
+      select_time,
+      start_time,
+      end_time,
+      isv_name,
+      status,
       dataSource,
-      order_id,
-      comment,
-      average,
-      comment_type
     } = this.state;
     const { activePage, size, content, total, items } = dataSource;
     return (
       <Fragment>
-        <Header style={{ background: "#fff", padding: 0 }} title="商品评价" />
+        <Header style={{ background: "#fff", padding: 0 }} title="首页活动推荐" />
         <Content className={this.props.className} style={{ width: "100%", overflowX: "auto" }}>
           <SearchPanel
             reset={this.resetSearch.bind(this)}
             search={this.searchList.bind(this)}
           >
             <FormList layoutOpt={{ md: 4, xs: 4 }}>
-              <FormList.Item label="订单号" labelCol={100}>
-                <FormControl
-                  className="search-item"
-                  value={order_id}
-                  onChange={this.handleChange.bind(null, "order_id")}
-                />
+              <FormList.Item className='time-select-wrap' label="" labelCol={0}>
+                <div className='time-select'>
+                  <Select
+                    placeholder=""
+                    className="search-item"
+                    onChange={this.handleChange.bind(null, "select_time")}
+                    value={select_time}
+                  >
+                    {[
+                      { id: "1", stat: "申请时间" },
+                      { id: "2", stat: "推荐时间" },
+                      { id: "3", stat: "移除时间" }].map((item) => (
+                        <Option key={item.id} value={item.id}>
+                          {item.stat}
+                        </Option>
+                      ))}
+                  </Select>
+                  <RangePicker
+                    showClear={true}
+                    className="search-item"
+                    placeholder={'开始时间 ~ 结束时间'}
+                    format={format}
+                    onChange={this.changeDate}
+                  />
+                </div>
               </FormList.Item>
-              <FormList.Item label="评论内容" labelCol={100}>
+              <FormList.Item label="商家名称" labelCol={100}>
                 <FormControl
                   className="search-item"
-                  value={comment}
-                  onChange={this.handleChange.bind(null, "comment")}
+                  value={isv_name}
+                  onChange={this.handleChange.bind(null, "isv_name")}
                 />
               </FormList.Item>
               <FormList.Item label="" labelCol={100}>
                 <Select
-                  placeholder="全部评分"
+                  placeholder="请选择审核状态"
                   className="search-item"
-                  onChange={this.handleChange.bind(null, "average")}
-                  value={average}
+                  onChange={this.handleChange.bind(null, "status")}
+                  value={status}
                 >
                   {[
-                    { id: "1", stat: "1" },
-                    { id: "2", stat: "2" },
-                    { id: "3", stat: "3" },
-                    { id: "4", stat: "4" },
-                    { id: "5", stat: "5" }].map((item) => (
+                    { id: "1", stat: "待审核" },
+                    { id: "2", stat: "已通过" },
+                    { id: "3", stat: "已拒绝" },
+                    { id: "0", stat: "已移除" }].map((item) => (
                       <Option key={item.id} value={item.id}>
                         {item.stat}
                       </Option>
                     ))}
                 </Select>
-              </FormList.Item>
-              <FormList.Item label="" labelCol={100}>
-                <Select
-                  placeholder="全部状态"
-                  className="search-item"
-                  onChange={this.handleChange.bind(null, "comment_type")}
-                  value={comment_type}
-                >
-                  {[
-                    { id: "0", stat: "显示" },
-                    { id: "1", stat: "隐藏" }].map((item) => (
-                      <Option key={item.id} value={item.id}>
-                        {item.stat}
-                      </Option>
-                    ))}
-                </Select>
-              </FormList.Item>
-              <FormList.Item label="评价时间" labelCol={100}>
-                <RangePicker
-                  showClear={true}
-                  className="search-item"
-                  placeholder={'开始时间 ~ 结束时间'}
-                  format={format}
-                  onChange={this.changeDate}
-                />
               </FormList.Item>
             </FormList>
           </SearchPanel>
@@ -284,7 +277,7 @@ class OrderCom extends React.Component {
   }
 }
 
-export default styled(OrderCom)`
+export default styled(RecommendHome)`
 .u-table .u-table-thead th {
   text-align: center;
 }
@@ -297,5 +290,8 @@ export default styled(OrderCom)`
 .pagination-wrap {
   margin-top:40px;
   text-align: center;
+}
+.time-select {
+  display: flex;
 }
 `;

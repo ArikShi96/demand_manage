@@ -1,4 +1,4 @@
-import { FormControl, Select, Pagination, Table } from "tinper-bee";
+import { FormControl, Select, Table, Pagination } from "tinper-bee";
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
@@ -12,77 +12,95 @@ import Header from "../common/Header";
 import Content from "../common/Content";
 import FormList from "../common/Form";
 import SearchPanel from "../common/SearchPanel";
-
+import makeAjaxRequest from '../../util/request';
+import { message } from 'antd';
 const Option = Select.Option;
-class SearchModel extends React.Component {
+class QuestionList extends React.Component {
   state = {
     dataSource: {
       content: [],
-      last: false,
-      totalElements: 0,
-      totalPages: 0,
-      firstPage: true,
-      lastPage: false,
-      number: 0,
-      size: 10,
-      sort: [],
-      numberOfElements: 0,
-      first: true,
+      total: 0, // 总数量
+      items: 0, // 总页数
+      activePage: 1, // 当前页面
+      pageSize: 10, // 每页多少
     },
+    question: '',
+    product_name: '',
+    isv_name: '',
+    question_type: '',
+    question_status: ''
   };
 
   columns = [
     {
       title: "编号",
       dataIndex: "order",
-      key: "agreementNum",
       width: "5%",
     },
     {
       title: "问题描述",
-      dataIndex: "productName",
-      key: "productName",
+      dataIndex: "question",
       width: "20%",
     },
     {
       title: "类型",
-      dataIndex: "isvName",
-      key: "isvName",
+      dataIndex: "questionType",
       width: "8%",
+      render: (value) => {
+        if (value === 0 || value === '0') {
+          return <span>商品问答</span>
+        } else {
+          return <span>店铺问答</span>
+        }
+      }
     },
     {
       title: "服务商",
-      dataIndex: "operatorName",
-      key: "operatorName",
+      dataIndex: "isvName",
       width: "8%",
     },
     {
       title: "商品名称",
-      dataIndex: "originalPrice",
-      key: "originalPrice",
+      dataIndex: "productName",
       width: "8%",
     },
-    { title: "提问时间", dataIndex: "discount", key: "discount", width: "15%" },
-    { title: "问题状态", dataIndex: "payMode", key: "payMode", width: "8%" },
+    { title: "提问时间", dataIndex: "askTime", width: "15%" },
+    {
+      title: "问题状态",
+      dataIndex: "questionStatus",
+      width: "8%",
+      render: (value) => {
+        if (value === 0 || value === '0') {
+          return <span>待回答</span>
+        } else {
+          return <span>已回答</span>
+        }
+      }
+    },
     {
       title: "展示状态",
-      dataIndex: "busiAmount",
-      key: "busiAmount",
+      dataIndex: "isdisplay",
       width: "8%",
+      render: (value) => {
+        if (value === 0 || value === '0') {
+          return <span>隐藏</span>
+        } else {
+          return <span>显示</span>
+        }
+      }
     },
     {
       title: "操作",
-      dataIndex: "commitTime",
-      key: "commitTime",
+      dataIndex: "operation",
       width: "20%",
-      render: (value) => {
-        return value ? (
-          <div>
-            <a>查看</a>
-            <a>隐藏</a>
-            <a>删除</a>
+      render: (value, item) => {
+        return (
+          <div className="actions">
+            <a className='action' onClick={this.handleTableAction.bind(null, item, 'view')}>查看</a>
+            <a className='action' onClick={this.handleTableAction.bind(null, item, 'toggle')}>隐藏</a>
+            <a className='action' onClick={this.handleTableAction.bind(null, item, 'delete')}>删除</a>
           </div>
-        ) : null;
+        );
       },
     },
   ];
@@ -98,69 +116,126 @@ class SearchModel extends React.Component {
     }
   };
 
-  handleSelect = (e) => {
-    this.setState({ activePage: e });
-    this.searchList(e - 1);
-  };
-
   handleChange = (type, e) => {
     this.setState({
       [type]: e,
     });
   };
 
+  // 分页
+  handleSelect = (activePage) => { // page, pageSize
+    this.setState({ dataSource: { ...this.state.dataSource, activePage } }, () => {
+      this.searchList();
+    });
+  };
+
   dataNumSelect = (index, value) => {
-    this.searchList(0, value);
+    this.setState({ dataSource: { ...this.state.dataSource, pageSize: value, activePage: 1 } }, () => {
+      this.searchList();
+    });
   };
 
   /* 重置 */
   resetSearch() {
-    this.setState({});
+    this.setState({
+      question: '', product_name: '', isv_name: '', question_type: '', question_status: ''
+    }, () => {
+      this.searchList();
+    });
   }
 
   /* 搜索 */
-  searchList = (page = 0, size = 10, billStatus = "") => {};
+  searchList = async () => {
+    try {
+      const { question, product_name, isv_name, question_type, question_status, dataSource } = this.state;
+      const { activePage } = dataSource;
+      const res = await makeAjaxRequest('/question/getallOperate', 'get', { page_num: activePage, question, product_name, isv_name, question_type, question_status });
+      res.data.forEach((item, index) => {
+        item.order = (index + 1)
+      })
+      this.setState({
+        dataSource: {
+          ...this.state.dataSource,
+          content: res.data,
+          total: res.sum || 0,
+          items: Math.floor((res.sum || 0) / this.state.dataSource.pageSize) + 1
+        }
+      });
+    } catch (err) {
+      message.error(err.message);
+    }
+  };
+
+  /* 查看/隐藏/删除 */
+  handleTableAction = async (item, action) => {
+    switch (action) {
+      case 'view': {
+        this.props.history.push(`/QuestionDetail/${item.qManageId}`);
+        break;
+      }
+      case 'toggle': {
+        try {
+          await makeAjaxRequest('/question/operateDisplay', 'get', { q_manage_id: item.qManageId });
+        } catch (err) {
+          message.error(err.message);
+        }
+        break;
+      }
+      case 'delete': {
+        try {
+          await makeAjaxRequest('/question/operateDele', 'get', { q_manage_id: item.qManageId });
+        } catch (err) {
+          message.error(err.message);
+        }
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
 
   render() {
-    const { dataSource, aaa, bbb, ccc, ddd, eee } = this.state;
-    const { first, last, prev, next, activePage } = dataSource;
+    const { dataSource, question, product_name, isv_name, question_type, question_status } = this.state;
+    const { activePage, content, total, items } = dataSource;
     return (
       <Fragment>
         <Header style={{ background: "#fff", padding: 0 }} title="问答管理" />
-        <Content style={{ width: "100%", overflowX: "auto" }}>
+        <Content className={this.props.className} style={{ width: "100%", overflowX: "auto" }}>
           <SearchPanel
             reset={this.resetSearch.bind(this)}
-            search={this.searchList.bind(this, 0, 10)}
+            search={this.searchList.bind(this)}
           >
             <FormList layoutOpt={{ md: 4, xs: 4 }}>
               <FormList.Item label="问答关键词" labelCol={100}>
                 <FormControl
                   className="search-item"
-                  value={aaa}
-                  onChange={this.handleChange.bind(null, "aaa")}
+                  value={question}
+                  onChange={this.handleChange.bind(null, "question")}
                 />
               </FormList.Item>
               <FormList.Item label="商品名称" labelCol={100}>
                 <FormControl
                   className="search-item"
-                  value={bbb}
-                  onChange={this.handleChange.bind(null, "bbb")}
+                  value={product_name}
+                  onChange={this.handleChange.bind(null, "product_name")}
                 />
               </FormList.Item>
               <FormList.Item label="服务商" labelCol={100}>
                 <FormControl
                   className="search-item"
-                  value={ccc}
-                  onChange={this.handleChange.bind(null, "ccc")}
+                  value={isv_name}
+                  onChange={this.handleChange.bind(null, "isv_name")}
                 />
               </FormList.Item>
               <FormList.Item label="问题类型" labelCol={100}>
                 <Select
+                  placeholder="选择类型"
                   className="search-item"
-                  onChange={this.handleChange.bind(null, "ddd")}
-                  value={ddd}
+                  onChange={this.handleChange.bind(null, "question_type")}
+                  value={question_type}
                 >
-                  {[{ id: "1", stat: "1" }].map((item) => (
+                  {[{ id: "0", stat: "商品问答" }, { id: "1", stat: "店铺问答" }].map((item) => (
                     <Option key={item.id} value={item.id}>
                       {item.stat}
                     </Option>
@@ -169,11 +244,12 @@ class SearchModel extends React.Component {
               </FormList.Item>
               <FormList.Item label="问题状态" labelCol={100}>
                 <Select
+                  placeholder="选择状态"
                   className="search-item"
-                  onChange={this.handleChange.bind(null, "eee")}
-                  value={eee}
+                  onChange={this.handleChange.bind(null, "question_status")}
+                  value={question_status}
                 >
-                  {[{ id: "1", stat: "1" }].map((item) => (
+                  {[{ id: "0", stat: "已回答" }, { id: "1", stat: "未回答" }].map((item) => (
                     <Option key={item.id} value={item.id}>
                       {item.stat}
                     </Option>
@@ -182,21 +258,23 @@ class SearchModel extends React.Component {
               </FormList.Item>
             </FormList>
           </SearchPanel>
-          <Table columns={this.columns} data={dataSource.content} />
+          <Table rowKey="order" columns={this.columns} data={content} />
           <Pagination
             first
             last
             prev
             next
             maxButtons={5}
+            dataNumSelect={["10"]}
+            dataNum={0}
             boundaryLinks
+            showJump={true}
+            noBorder={true}
             activePage={activePage}
             onSelect={this.handleSelect}
             onDataNumSelect={this.dataNumSelect}
-            showJump={true}
-            noBorder={true}
-            total={dataSource.totalElements}
-            items={dataSource.totalPages}
+            total={total}
+            items={items}
           />
         </Content>
       </Fragment>
@@ -204,5 +282,18 @@ class SearchModel extends React.Component {
   }
 }
 
-export default styled(SearchModel)`
+export default styled(QuestionList)`
+.u-table .u-table-thead th {
+  text-align: center;
+}
+.u-table .u-table-tbody td {
+  text-align: center;
+}
+.u-table .u-table-tbody .actions .action{
+  margin: 0 10px;
+}
+.pagination-wrap {
+  margin-top:40px;
+  text-align: center;
+}
 `;

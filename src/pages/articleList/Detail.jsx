@@ -3,7 +3,8 @@ import styled from 'styled-components';
 import { Button } from 'tinper-bee';
 import Header from "../common/Header";
 import "bee-button/build/Button.css";
-
+import makeAjaxRequest from '../../util/request';
+import { message } from 'antd';
 class ArticleDetail extends React.Component {
   state = {
     detail: {},
@@ -14,7 +15,16 @@ class ArticleDetail extends React.Component {
     this.fetchDetail();
   }
 
-  fetchDetail = () => { }
+  fetchDetail = async () => {
+    try {
+      const res = await makeAjaxRequest('/article/queryOperate', 'get', { article_id: this.props.match.params.id });
+      this.setState({
+        detail: res.data
+      });
+    } catch (err) {
+      message.error(err.message);
+    }
+  }
 
   navigateBack = () => {
     this.props.history.push(`/ArticleList`);
@@ -59,8 +69,11 @@ class ArticleDetail extends React.Component {
 
 export default styled(ArticleDetail)`
 .mix-ma-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: #ffffff;
-  margin-bottom: 20px;
+  margin-bottom: 40px;
   padding: 0;
 }
 .action-wrap {

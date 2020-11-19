@@ -25,12 +25,17 @@ import TagList from "./pages/tagList/index.jsx"; // 标签管理
 import LiveList from "./pages/liveList/index.jsx"; // 直播管理
 import LiveDetail from "./pages/liveList/Detail.jsx";
 import RecommendProduct from "./pages/recommendList/RecommendProduct.jsx"; // 推荐管理
-import RecommendKind from "./pages/recommendList/RecommendKind.jsx";
+import RecommendHeader from "./pages/recommendList/RecommendHeader.jsx";
+import RecommendFooter from "./pages/recommendList/RecommendFooter.jsx";
+import RecommendLink from "./pages/recommendList/RecommendLink.jsx";
 import RecommendDiscount from "./pages/recommendList/RecommendDiscount.jsx";
 import RecommendApp from "./pages/recommendList/RecommendApp.jsx";
 import RecommendCloud from "./pages/recommendList/RecommendCloud.jsx";
 import RecommendMerchant from "./pages/recommendList/RecommendMerchant.jsx";
-import RecommendMerchantDetail from "./pages/recommendList/RecommendMerchantDetail.jsx";
+import RecommendHome from "./pages/recommendList/RecommendHome.jsx";
+import RecommendMicro from "./pages/recommendList/RecommendMicro.jsx";
+import RecommendKeyword from "./pages/recommendList/RecommendKeyword.jsx";
+import RecommendHomeDetail from "./pages/recommendList/RecommendHomeDetail.jsx";
 import ProductCom from "./pages/commentList/ProductCom.jsx"; // 评价管理
 import ProductComDetail from "./pages/commentList/ProductComDetail.jsx";
 import OrderCom from "./pages/commentList/OrderCom.jsx";
@@ -91,7 +96,7 @@ class App extends Component {
                 <Route exact path="/LiveList" component={LiveList}></Route>
                 <Route
                   exact
-                  path="/LiveDetail:id"
+                  path="/LiveDetail/:id"
                   component={LiveDetail}
                 ></Route>
                 <Route
@@ -101,8 +106,18 @@ class App extends Component {
                 ></Route>
                 <Route
                   exact
-                  path="/RecommendKind"
-                  component={RecommendKind}
+                  path="/RecommendHeader"
+                  component={RecommendHeader}
+                ></Route>
+                <Route
+                  exact
+                  path="/RecommendFooter"
+                  component={RecommendFooter}
+                ></Route>
+                <Route
+                  exact
+                  path="/RecommendLink"
+                  component={RecommendLink}
                 ></Route>
                 <Route
                   exact
@@ -126,8 +141,23 @@ class App extends Component {
                 ></Route>
                 <Route
                   exact
-                  path="/RecommendMerchantDetai/:id"
-                  component={RecommendMerchantDetail}
+                  path="/RecommendMicro"
+                  component={RecommendMicro}
+                ></Route>
+                <Route
+                  exact
+                  path="/RecommendHome"
+                  component={RecommendHome}
+                ></Route>
+                <Route
+                  exact
+                  path="/RecommendKeyword"
+                  component={RecommendKeyword}
+                ></Route>
+                <Route
+                  exact
+                  path="/RecommendHomeDetail/:id"
+                  component={RecommendHomeDetail}
                 ></Route>
                 <Route exact path="/ProductCom" component={ProductCom}></Route>
                 <Route

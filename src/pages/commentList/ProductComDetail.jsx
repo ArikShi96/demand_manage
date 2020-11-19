@@ -3,8 +3,9 @@ import styled from 'styled-components';
 import { Button } from 'tinper-bee';
 import Header from "../common/Header";
 import "bee-button/build/Button.css";
-
-class QuestionDetail extends React.Component {
+import makeAjaxRequest from '../../util/request';
+import { message } from 'antd';
+class ProductComDetail extends React.Component {
   state = {
     detail: {}
   };
@@ -13,10 +14,18 @@ class QuestionDetail extends React.Component {
     this.fetchDetail();
   }
 
-  fetchDetail = () => { }
-
+  fetchDetail = async () => {
+    try {
+      const res = await makeAjaxRequest('/newcomment/findOne', 'get', { id: this.props.match.params.id });
+      this.setState({
+        detail: res.data
+      });
+    } catch (err) {
+      message.error(err.message);
+    }
+  }
   navigateBack = () => {
-    this.props.history.push(`/QuestionList`);
+    this.props.history.push(`/ProductCom`);
   }
 
   render() {
@@ -53,9 +62,12 @@ class QuestionDetail extends React.Component {
   }
 }
 
-export default styled(QuestionDetail)`
+export default styled(ProductComDetail)`
 .mix-ma-page-header {
-  background: "#fff";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
   margin-bottom: 40px;
   padding: 0;
 }

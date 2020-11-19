@@ -12,7 +12,7 @@ import Header from "../common/Header";
 import Content from "../common/Content";
 import makeAjaxRequest from '../../util/request';
 import { message } from 'antd';
-class RecommendDiscount extends React.Component {
+class RecommendMicro extends React.Component {
   state = {
     dataSource: {
       content: [],
@@ -130,7 +130,7 @@ class RecommendDiscount extends React.Component {
     const { activePage, content, total, items } = dataSource;
     return (
       <Fragment>
-        <Header style={{ background: "#fff", padding: 0 }} title="特惠商品列表" />
+        <Header style={{ background: "#fff", padding: 0 }} title="小微企业云产品推荐列表" />
         <Content className={this.props.className} style={{ width: "100%", overflowX: "auto" }}>
           <div className='action-wrap'>
             <Button colors="primary" onClick={this.showAdd}>新增</Button>
@@ -159,7 +159,7 @@ class RecommendDiscount extends React.Component {
   }
 }
 
-export default styled(RecommendDiscount)`
+export default styled(RecommendMicro)`
 .u-table .u-table-thead th {
   text-align: center;
 }

@@ -1,12 +1,14 @@
-const proxy = require('http-proxy-middleware');
+const proxy = require("http-proxy-middleware");
 module.exports = function (app) {
-    app.use(proxy('/api', {
-        target: 'https://market-daily.yyuap.com',
-        // secure: false,
-        changeOrigin: true,
-        pathRewrite: {
-            "^/api": ""
-        },
-        // cookieDomainRewrite: "http://localhost:3000"
-    }));
+  app.use(
+    proxy("/market", {
+      target: "http://47.104.104.45:8090",
+      // secure: false,
+      changeOrigin: true,
+      // pathRewrite: {
+      //     "^/api": ""
+      // },
+      cookieDomainRewrite: "http://localhost:3002",
+    })
+  );
 };

@@ -23,7 +23,7 @@ class AsideModel extends React.Component {
           className="u-menu-max1"
           style={{ width: "100%" }}
           mode="inline"
-          defaultSelectedKeys={["3"]}
+          // defaultSelectedKeys={["3"]}
           defaultOpenKeys={["sub1", "sub2", "sub3"]}
         >
           {/* 需求管理 */}
@@ -173,16 +173,28 @@ class AsideModel extends React.Component {
               </span>
             }
           >
-            <Menu.Item key="15">
-              <Link to="/RecommendProduct">
+            <Menu.Item key="31">
+              <Link to="/RecommendHeader">
                 <i className="iconfont icon-xuqiuliebiao"></i>
-                热销商品管理
+                首页顶部导航管理
+              </Link>
+            </Menu.Item>
+            <Menu.Item key="32">
+              <Link to="/RecommendFooter">
+                <i className="iconfont icon-xuqiuliebiao"></i>
+                底部信息管理
+              </Link>
+            </Menu.Item>
+            <Menu.Item key="15">
+              <Link to="/RecommendLink">
+                <i className="iconfont icon-xuqiuliebiao"></i>
+                友情链接管理
               </Link>
             </Menu.Item>
             <Menu.Item key="16">
-              <Link to="/RecommendKind">
+              <Link to="/RecommendProduct">
                 <i className="iconfont icon-xuqiuliebiao"></i>
-                热销分类管理
+                热销商品管理
               </Link>
             </Menu.Item>
             <Menu.Item key="17">
@@ -203,10 +215,28 @@ class AsideModel extends React.Component {
                 云平台产品推荐
               </Link>
             </Menu.Item>
+            <Menu.Item key="30">
+              <Link to="/RecommendMicro">
+                <i className="iconfont icon-xuqiuliebiao"></i>
+                小微企业云产品推荐
+              </Link>
+            </Menu.Item>
             <Menu.Item key="20">
               <Link to="/RecommendMerchant">
                 <i className="iconfont icon-xuqiuliebiao"></i>
                 优质商家推荐
+              </Link>
+            </Menu.Item>
+            <Menu.Item key="29">
+              <Link to="/RecommendHome">
+                <i className="iconfont icon-xuqiuliebiao"></i>
+                首页活动推荐
+              </Link>
+            </Menu.Item>
+            <Menu.Item key="33">
+              <Link to="/RecommendKeyword">
+                <i className="iconfont icon-xuqiuliebiao"></i>
+                关键词策略
               </Link>
             </Menu.Item>
           </SubMenu>
@@ -258,7 +288,7 @@ class AsideModel extends React.Component {
             <Menu.Item key="25">
               <Link to="/FullReduction">
                 <i className="iconfont icon-xuqiuliebiao"></i>
-                满减/满赠
+                活动管理
               </Link>
             </Menu.Item>
             <Menu.Item key="26">

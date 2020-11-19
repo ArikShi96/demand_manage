@@ -1,4 +1,4 @@
-import { Table, Pagination, Button } from "tinper-bee";
+import { Table, Pagination } from "tinper-bee";
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
@@ -12,7 +12,7 @@ import Header from "../common/Header";
 import Content from "../common/Content";
 import makeAjaxRequest from '../../util/request';
 import { message } from 'antd';
-class RecommendDiscount extends React.Component {
+class RecommendMerchant extends React.Component {
   state = {
     dataSource: {
       content: [],
@@ -27,21 +27,21 @@ class RecommendDiscount extends React.Component {
     {
       title: "序号",
       dataIndex: "order",
-      width: "20%",
+      width: "10%",
     },
     {
-      title: "商品名称",
-      dataIndex: "aaa",
-      width: "20%",
+      title: "名称",
+      dataIndex: "username",
+      width: "30%",
     },
     {
-      title: "商品类型",
-      dataIndex: "ProductName",
+      title: "跳转链接",
+      dataIndex: "navigation_url",
       width: "20%",
     },
     {
       title: "添加时间",
-      dataIndex: "comment",
+      dataIndex: "addTime",
       width: "20%",
     },
     {
@@ -51,7 +51,6 @@ class RecommendDiscount extends React.Component {
       render: (value, item) => {
         return (
           <div className="actions">
-            <a className='action' onClick={this.handleTableAction.bind(null, item, 'edit')}>编辑</a>
             <a className='action' onClick={this.handleTableAction.bind(null, item, 'delete')}>删除</a>
           </div>
         );
@@ -62,6 +61,15 @@ class RecommendDiscount extends React.Component {
   componentDidMount() {
     this.searchList();
   }
+
+  changeDate = (d, dataString) => {
+    if (dataString && dataString.length > 0) {
+      let data = dataString.split('"');
+      this.setState({ start_time: data[1], end_time: data[3] });
+    } else {
+      this.setState({ start_time: '', end_time: '' });
+    }
+  };
 
   handleChange = (type, e) => {
     this.setState({
@@ -82,6 +90,14 @@ class RecommendDiscount extends React.Component {
     });
   };
 
+  /* 重置 */
+  resetSearch() {
+    this.setState({
+    }, () => {
+      this.searchList();
+    });
+  }
+
   /* 搜索 */
   searchList = async () => {
     try {
@@ -89,7 +105,7 @@ class RecommendDiscount extends React.Component {
         dataSource
       } = this.state;
       const { activePage } = dataSource;
-      const res = await makeAjaxRequest('/newcomment/getallOperateProduct', 'get', {
+      const res = await makeAjaxRequest('/index/recommendisv/List', 'get', {
         page_num: activePage,
       });
       res.data.forEach((item, index) => {
@@ -108,14 +124,12 @@ class RecommendDiscount extends React.Component {
     }
   };
 
-  /* 编辑/删除 */
+  /* 查看/隐藏/删除 */
   handleTableAction = async (item, action) => {
     switch (action) {
-      case 'edit': {
-      }
       case 'delete': {
         try {
-          await makeAjaxRequest('/newcomment/dele', 'get', { q_manage_id: item.qManageId });
+          await makeAjaxRequest('/index/recommendisv/dele', 'get', { isv_recommend_id: item.isvId });
         } catch (err) {
           message.error(err.message);
         }
@@ -130,11 +144,8 @@ class RecommendDiscount extends React.Component {
     const { activePage, content, total, items } = dataSource;
     return (
       <Fragment>
-        <Header style={{ background: "#fff", padding: 0 }} title="特惠商品列表" />
+        <Header style={{ background: "#fff", padding: 0 }} title="首页顶部导航管理" />
         <Content className={this.props.className} style={{ width: "100%", overflowX: "auto" }}>
-          <div className='action-wrap'>
-            <Button colors="primary" onClick={this.showAdd}>新增</Button>
-          </div>
           <Table rowKey="order" columns={this.columns} data={content} />
           <Pagination
             first
@@ -159,7 +170,7 @@ class RecommendDiscount extends React.Component {
   }
 }
 
-export default styled(RecommendDiscount)`
+export default styled(RecommendMerchant)`
 .u-table .u-table-thead th {
   text-align: center;
 }
@@ -173,9 +184,7 @@ export default styled(RecommendDiscount)`
   margin-top:40px;
   text-align: center;
 }
-.action-wrap {
-  text-align: right;
-  padding: 20px;
-  padding-right: 48px;
+.time-select {
+  display: flex;
 }
 `;

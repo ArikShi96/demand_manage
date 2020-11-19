@@ -12,7 +12,7 @@ import Header from "../common/Header";
 import Content from "../common/Content";
 import makeAjaxRequest from '../../util/request';
 import { message } from 'antd';
-class RecommendDiscount extends React.Component {
+class RecommendMerchant extends React.Component {
   state = {
     dataSource: {
       content: [],
@@ -25,24 +25,19 @@ class RecommendDiscount extends React.Component {
 
   columns = [
     {
-      title: "序号",
+      title: "名称",
       dataIndex: "order",
       width: "20%",
     },
     {
-      title: "商品名称",
-      dataIndex: "aaa",
-      width: "20%",
+      title: "链接",
+      dataIndex: "isv_name",
+      width: "30%",
     },
     {
-      title: "商品类型",
-      dataIndex: "ProductName",
-      width: "20%",
-    },
-    {
-      title: "添加时间",
-      dataIndex: "comment",
-      width: "20%",
+      title: "排序",
+      dataIndex: "addTime",
+      width: "30%",
     },
     {
       title: "操作",
@@ -89,7 +84,7 @@ class RecommendDiscount extends React.Component {
         dataSource
       } = this.state;
       const { activePage } = dataSource;
-      const res = await makeAjaxRequest('/newcomment/getallOperateProduct', 'get', {
+      const res = await makeAjaxRequest('/', 'get', {
         page_num: activePage,
       });
       res.data.forEach((item, index) => {
@@ -108,14 +103,12 @@ class RecommendDiscount extends React.Component {
     }
   };
 
-  /* 编辑/删除 */
+  /* 查看/隐藏/删除 */
   handleTableAction = async (item, action) => {
     switch (action) {
-      case 'edit': {
-      }
       case 'delete': {
         try {
-          await makeAjaxRequest('/newcomment/dele', 'get', { q_manage_id: item.qManageId });
+          await makeAjaxRequest('/index/recommendisv/dele', 'get', { isv_recommend_id: item.isvId });
         } catch (err) {
           message.error(err.message);
         }
@@ -130,7 +123,7 @@ class RecommendDiscount extends React.Component {
     const { activePage, content, total, items } = dataSource;
     return (
       <Fragment>
-        <Header style={{ background: "#fff", padding: 0 }} title="特惠商品列表" />
+        <Header style={{ background: "#fff", padding: 0 }} title="友情链接管理" />
         <Content className={this.props.className} style={{ width: "100%", overflowX: "auto" }}>
           <div className='action-wrap'>
             <Button colors="primary" onClick={this.showAdd}>新增</Button>
@@ -159,7 +152,7 @@ class RecommendDiscount extends React.Component {
   }
 }
 
-export default styled(RecommendDiscount)`
+export default styled(RecommendMerchant)`
 .u-table .u-table-thead th {
   text-align: center;
 }
@@ -172,6 +165,9 @@ export default styled(RecommendDiscount)`
 .pagination-wrap {
   margin-top:40px;
   text-align: center;
+}
+.time-select {
+  display: flex;
 }
 .action-wrap {
   text-align: right;

@@ -55,7 +55,10 @@ class QuestionDetail extends React.Component {
 
 export default styled(QuestionDetail)`
 .mix-ma-page-header {
-  background: "#fff";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
   margin-bottom: 40px;
   padding: 0;
 }

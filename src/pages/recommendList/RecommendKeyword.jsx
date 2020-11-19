@@ -16,13 +16,15 @@ import { message } from 'antd';
 import { Checkbox } from 'antd';
 class IntegralManager extends React.Component {
   state = {
-    newUserPoints: '',
-    isTime: '',
-    isTimeStr: '',
-    loginPoints: '',
-    pointsProportion: '',
-    pointsCommentNum: '',
-    pointsComment: ''
+    home_title: '',
+    home_keywords: '',
+    home_description: '',
+    first_title: '',
+    first_keywords: '',
+    first_description: '',
+    second_title: '',
+    second_keywords: '',
+    second_description: ''
   };
 
   componentDidMount() {
@@ -31,7 +33,7 @@ class IntegralManager extends React.Component {
 
   fetchDetail = async () => {
     try {
-      const res = await makeAjaxRequest('/isvpoints/editQuery', 'get');
+      const res = await makeAjaxRequest('/index/kw/getall', 'POST');
       this.setState({
         ...res.data
       });
@@ -46,130 +48,117 @@ class IntegralManager extends React.Component {
     });
   };
 
-  handleCheckboxChange = (e) => {
-
-  }
-
-  submit = async () => {
-    try {
-      const {
-        newUserPoints,
-        isTime,
-        isTimeStr,
-        loginPoints,
-        pointsProportion,
-        pointsCommentNum,
-        pointsComment
-      } = this.state;
-      await makeAjaxRequest('/isvpoints/editAction', 'post', {}, {
-        newUserPoints,
-        isTime,
-        isTimeStr,
-        loginPoints,
-        pointsProportion,
-        pointsCommentNum,
-        pointsComment
-      });
-    } catch (err) {
-      message.error(err.message);
-    }
-  }
-
   render() {
     const { className } = this.props;
     const {
-      newUserPoints,
-      isTime,
-      isTimeStr,
-      loginPoints,
-      pointsProportion,
-      pointsCommentNum,
-      pointsComment
+      home_title,
+      home_keywords,
+      home_description,
+      first_title,
+      first_keywords,
+      first_description,
+      second_title,
+      second_keywords,
+      second_description
     } = this.state;
     return (
       <div className={className}>
-        <Header title="积分设置" />
+        <Header title="关键词策略" />
+        {/* 云市场首页关键词策略 */}
+        <div className='detail-title'>云市场首页关键词策略</div>
         <div className='detail-wrap'>
-          <div className='label'>新用户注册赠送积分</div>
+          <div className='label'>title</div>
           <div className='content'>
             <FormControl className="search-item"
-              value={newUserPoints}
-              onChange={this.handleChange.bind(null, "newUserPoints")}
+              value={home_title}
+              onChange={this.handleChange.bind(null, "home_title")}
             />
           </div>
         </div>
         <div className='detail-wrap'>
           <div className='label'>
-            <Checkbox onChange={this.handleCheckboxChange} />
-            <span>固定时间注册赠送积分</span>
+            <span>keywords</span>
           </div>
           <div className='content'>
             <FormControl className="search-item"
-              value={isTimeStr}
-              onChange={this.handleChange.bind(null, "isTimeStr")}
+              value={home_keywords}
+              onChange={this.handleChange.bind(null, "home_keywords")}
             />
           </div>
         </div>
         <div className='detail-wrap'>
-          <div className='label'>登录获得积分</div>
+          <div className='label'>description</div>
           <div className='content'>
             <FormControl className="search-item"
-              value={loginPoints}
-              onChange={this.handleChange.bind(null, "loginPoints")}
+              value={home_description}
+              onChange={this.handleChange.bind(null, "home_description")}
             />
-            <div className='tip'>0或空表示不赠送积分</div>
           </div>
         </div>
+        {/* 一级栏目页关键词策略 */}
+        <div className='detail-title'>一级栏目页关键词策略</div>
         <div className='detail-wrap'>
-          <div className='label'>分享获得积分</div>
+          <div className='label'>title</div>
           <div className='content'>
             <FormControl className="search-item"
-              value={loginPoints}
-              onChange={this.handleChange.bind(null, "loginPoints")}
-            />
-            <div className='tip'>0或空表示不赠送积分</div>
-          </div>
-        </div>
-        <div className='detail-wrap'>
-          <div className='label'>积分比例</div>
-          <div className='content'>
-            <FormControl className="search-item"
-              value={pointsProportion}
-              onChange={this.handleChange.bind(null, "pointsProportion")}
+              value={first_title}
+              onChange={this.handleChange.bind(null, "first_title")}
             />
           </div>
         </div>
         <div className='detail-wrap'>
-          <div className='label'>评价字数大于多少可获得积分</div>
+          <div className='label'>
+            <span>keywords</span>
+          </div>
           <div className='content'>
             <FormControl className="search-item"
-              value={pointsCommentNum}
-              onChange={this.handleChange.bind(null, "pointsCommentNum")}
+              value={first_keywords}
+              onChange={this.handleChange.bind(null, "first_keywords")}
             />
-            <div className='tip'>设置评价字数大于多少可获得积分</div>
           </div>
         </div>
         <div className='detail-wrap'>
-          <div className='label'>评价获得积分数</div>
+          <div className='label'>description</div>
           <div className='content'>
             <FormControl className="search-item"
-              value={pointsComment}
-              onChange={this.handleChange.bind(null, "pointsComment")}
+              value={first_description}
+              onChange={this.handleChange.bind(null, "first_description")}
             />
-            <div className='tip'>0或空表示不赠送积分</div>
+          </div>
+        </div>
+        {/* 二级栏目页关键词策略 */}
+        <div className='detail-title'>二级栏目页关键词策略</div>
+        <div className='detail-wrap'>
+          <div className='label'>title</div>
+          <div className='content'>
+            <FormControl className="search-item"
+              value={second_title}
+              onChange={this.handleChange.bind(null, "second_title")}
+            />
           </div>
         </div>
         <div className='detail-wrap'>
-          <div className='label'>积分清零时间</div>
+          <div className='label'>
+            <span>keywords</span>
+          </div>
           <div className='content'>
             <FormControl className="search-item"
-              value={pointsComment}
-              onChange={this.handleChange.bind(null, "pointsComment")}
+              value={second_keywords}
+              onChange={this.handleChange.bind(null, "second_keywords")}
+            />
+          </div>
+        </div>
+        <div className='detail-wrap'>
+          <div className='label'>description</div>
+          <div className='content'>
+            <FormControl className="search-item"
+              value={second_description}
+              onChange={this.handleChange.bind(null, "second_description")}
             />
           </div>
         </div>
         <div className='action-wrap'>
-          <Button colors="primary" onClick={this.submit}>提交</Button>
+          <Button colors="primary" onClick={this.submit}>保存</Button>
         </div>
       </div>
     );
@@ -184,6 +173,11 @@ export default styled(IntegralManager)`
   background: #ffffff;
   margin-bottom: 40px;
   padding: 0;
+}
+.detail-title {
+  color: #000;
+  font-weight: bold;
+  padding: 0 40px 40px;
 }
 .detail-wrap {
   display: flex;

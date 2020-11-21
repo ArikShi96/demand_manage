@@ -137,7 +137,7 @@ class IsvLevel extends React.Component {
   submit = async () => {
     try {
       await Promise.all(this.state.dataSource.content.map(item => {
-        return makeAjaxRequest('/isv/level/update', 'post', {}, { ...item });
+        return makeAjaxRequest('/isv/level/update', 'post', { ...item });
       }));
       message.success('操作成功');
       this.searchList();

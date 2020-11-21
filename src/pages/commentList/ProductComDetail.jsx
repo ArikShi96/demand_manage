@@ -4,7 +4,7 @@ import { Button } from 'tinper-bee';
 import Header from "../common/Header";
 import "bee-button/build/Button.css";
 import makeAjaxRequest from '../../util/request';
-import { message } from 'antd';
+import { message, Rate } from 'antd';
 class ProductComDetail extends React.Component {
   state = {
     detail: {}
@@ -35,6 +35,7 @@ class ProductComDetail extends React.Component {
       <div className={className}>
         <Header title="商品评价" />
         {detail.id && <div className='detail-wrap'>
+          <Rate disabled defaultValue={detail.productScore} />
           <div className='comment-info'>
             {`${detail.userName}于${new Date(detail.createTime).toLocaleString()}对${detail.productName}发表评论`}
           </div>
@@ -43,7 +44,7 @@ class ProductComDetail extends React.Component {
           <div className='comment-content'>{detail.comment}</div>
           <div className='divider'></div>
           <div className='reply-info'>{`${detail.operatorName || ''} 于 2020-04-26 17:43:11 回复`}</div>
-          <div className='comment-content'>{`回复内容: ${detail.reply || ''}`}</div>
+          <div className='comment-content'>{`回复内容: ${detail.reply || '无'}`}</div>
         </div>
         }
         <div className='action-wrap'>
@@ -73,6 +74,11 @@ export default styled(ProductComDetail)`
   .divider {
     height: 1px;
     background-color: #cccccc;
+  }
+  .ant-rate {
+    position: absolute;
+    right: 20px;
+    top: 40px;
   }
 }
 .action-wrap {

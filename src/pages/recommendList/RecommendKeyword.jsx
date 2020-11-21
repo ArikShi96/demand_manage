@@ -15,15 +15,16 @@ import { message } from 'antd';
 import { Checkbox } from 'antd';
 class IntegralManager extends React.Component {
   state = {
-    home_title: '',
-    home_keywords: '',
-    home_description: '',
-    first_title: '',
-    first_keywords: '',
-    first_description: '',
-    second_title: '',
-    second_keywords: '',
-    second_description: ''
+    homeTitle: '',
+    homeKeywords: '',
+    homeDescription: '',
+    firstTitle: '',
+    firstKeywords: '',
+    firstDescription: '',
+    secondTitle: '',
+    secondKeywords: '',
+    secondDescription: '',
+    keywordId: ""
   };
 
   componentDidMount() {
@@ -32,7 +33,7 @@ class IntegralManager extends React.Component {
 
   fetchDetail = async () => {
     try {
-      const res = await makeAjaxRequest('/index/kw/getall', 'post');
+      const res = await makeAjaxRequest('/index/kw/getAll', 'get');
       this.setState({
         ...res.data
       });
@@ -50,26 +51,28 @@ class IntegralManager extends React.Component {
   submit = async () => {
     try {
       const {
-        home_title,
-        home_keywords,
-        home_description,
-        first_title,
-        first_keywords,
-        first_description,
-        second_title,
-        second_keywords,
-        second_description
+        homeTitle,
+        homeKeywords,
+        homeDescription,
+        firstTitle,
+        firstKeywords,
+        firstDescription,
+        secondTitle,
+        secondKeywords,
+        secondDescription,
+        keywordId
       } = this.state;
       await makeAjaxRequest('/index/kw/save', 'post', {
-        home_title,
-        home_keywords,
-        home_description,
-        first_title,
-        first_keywords,
-        first_description,
-        second_title,
-        second_keywords,
-        second_description
+        home_title: homeTitle,
+        home_keywords: homeKeywords,
+        home_description: homeDescription,
+        first_title: firstTitle,
+        first_keywords: firstKeywords,
+        first_description: firstDescription,
+        second_title: secondTitle,
+        second_keywords: secondKeywords,
+        second_description: secondDescription,
+        keywordId
       });
       this.fetchDetail();
       message.success('操作成功');
@@ -81,15 +84,15 @@ class IntegralManager extends React.Component {
   render() {
     const { className } = this.props;
     const {
-      home_title,
-      home_keywords,
-      home_description,
-      first_title,
-      first_keywords,
-      first_description,
-      second_title,
-      second_keywords,
-      second_description
+      homeTitle,
+      homeKeywords,
+      homeDescription,
+      firstTitle,
+      firstKeywords,
+      firstDescription,
+      secondTitle,
+      secondKeywords,
+      secondDescription
     } = this.state;
     return (
       <div className={className}>
@@ -100,8 +103,8 @@ class IntegralManager extends React.Component {
           <div className='label'>title</div>
           <div className='content'>
             <FormControl className="search-item"
-              value={home_title}
-              onChange={this.handleChange.bind(null, "home_title")}
+              value={homeTitle}
+              onChange={this.handleChange.bind(null, "homeTitle")}
             />
           </div>
         </div>
@@ -111,8 +114,8 @@ class IntegralManager extends React.Component {
           </div>
           <div className='content'>
             <FormControl className="search-item"
-              value={home_keywords}
-              onChange={this.handleChange.bind(null, "home_keywords")}
+              value={homeKeywords}
+              onChange={this.handleChange.bind(null, "homeKeywords")}
             />
           </div>
         </div>
@@ -120,8 +123,8 @@ class IntegralManager extends React.Component {
           <div className='label'>description</div>
           <div className='content'>
             <FormControl className="search-item"
-              value={home_description}
-              onChange={this.handleChange.bind(null, "home_description")}
+              value={homeDescription}
+              onChange={this.handleChange.bind(null, "homeDescription")}
             />
           </div>
         </div>
@@ -131,8 +134,8 @@ class IntegralManager extends React.Component {
           <div className='label'>title</div>
           <div className='content'>
             <FormControl className="search-item"
-              value={first_title}
-              onChange={this.handleChange.bind(null, "first_title")}
+              value={firstTitle}
+              onChange={this.handleChange.bind(null, "firstTitle")}
             />
           </div>
         </div>
@@ -142,8 +145,8 @@ class IntegralManager extends React.Component {
           </div>
           <div className='content'>
             <FormControl className="search-item"
-              value={first_keywords}
-              onChange={this.handleChange.bind(null, "first_keywords")}
+              value={firstKeywords}
+              onChange={this.handleChange.bind(null, "firstKeywords")}
             />
           </div>
         </div>
@@ -151,8 +154,8 @@ class IntegralManager extends React.Component {
           <div className='label'>description</div>
           <div className='content'>
             <FormControl className="search-item"
-              value={first_description}
-              onChange={this.handleChange.bind(null, "first_description")}
+              value={firstDescription}
+              onChange={this.handleChange.bind(null, "firstDescription")}
             />
           </div>
         </div>
@@ -162,8 +165,8 @@ class IntegralManager extends React.Component {
           <div className='label'>title</div>
           <div className='content'>
             <FormControl className="search-item"
-              value={second_title}
-              onChange={this.handleChange.bind(null, "second_title")}
+              value={secondTitle}
+              onChange={this.handleChange.bind(null, "secondTitle")}
             />
           </div>
         </div>
@@ -173,8 +176,8 @@ class IntegralManager extends React.Component {
           </div>
           <div className='content'>
             <FormControl className="search-item"
-              value={second_keywords}
-              onChange={this.handleChange.bind(null, "second_keywords")}
+              value={secondKeywords}
+              onChange={this.handleChange.bind(null, "secondKeywords")}
             />
           </div>
         </div>
@@ -182,8 +185,8 @@ class IntegralManager extends React.Component {
           <div className='label'>description</div>
           <div className='content'>
             <FormControl className="search-item"
-              value={second_description}
-              onChange={this.handleChange.bind(null, "second_description")}
+              value={secondDescription}
+              onChange={this.handleChange.bind(null, "secondDescription")}
             />
           </div>
         </div>

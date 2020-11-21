@@ -154,7 +154,7 @@ class SettingCom extends React.Component {
         try {
           this.hideDeleteModal();
           await makeAjaxRequest('/sensitive/dele', 'get', { evaluation_sensitive_id: item.evaluationSensitiveId });
-          message.success('操作成功');
+          message.success('删除成功');
           this.searchList();
         } catch (err) {
           message.error(err.message);
@@ -259,7 +259,7 @@ class SettingCom extends React.Component {
                 </div>
               </div>
               <div className='action-wrap'>
-                <Button colors="primary" onClick={this.submit}>提交</Button>
+                <Button colors="primary" onClick={this.submit} disabled={!comment_set}>提交</Button>
               </div>
             </TabPane>
             <TabPane tab="敏感词" key="1">
@@ -321,6 +321,7 @@ class SettingCom extends React.Component {
             <Modal.Title>删除提示</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+            删除后,此敏感词将不再在前端显示.
             确认删除此敏感词?
             </Modal.Body>
           <Modal.Footer>

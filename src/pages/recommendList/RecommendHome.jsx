@@ -99,11 +99,13 @@ class RecommendHome extends React.Component {
     this.fetchListFour();
   }
 
-  changeDate = (d, dataString) => {
-    if (dataString && dataString.length > 0) {
-      let data = dataString.split('"');
-      this.setState({ start_time: data[1], end_time: data[3] });
-    } else if (d.length === 0) {
+  changeDate = (moments) => {
+    if (moments && moments.length > 0) {
+      this.setState({
+        start_time: `${moments[0].format('YYYY-MM-DD')} 00:00:00`,
+        end_time: `${moments[1].format('YYYY-MM-DD')} 00:00:00`
+      });
+    } else {
       this.setState({ start_time: '', end_time: '' });
     }
   };
@@ -181,7 +183,7 @@ class RecommendHome extends React.Component {
   handleTableAction = async (item, action) => {
     switch (action) {
       case 'view': {
-        this.props.history.push(`/RecommendHomeDetail/${item.isvId}`);
+        this.props.history.push(`/RecommendHomeDetail/${item.isvId}?status=${item.status}}`);
         break;
       }
       case 'home': {
@@ -371,7 +373,7 @@ class RecommendHome extends React.Component {
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.hideChangeModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-            <Button onClick={this.confirmChange} colors="primary">确认并替换</Button>
+            <Button onClick={this.confirmChange} colors="primary" disabled={!old_indexActivityId}>确认并替换</Button>
           </Modal.Footer>
         </Modal>
       </Fragment>

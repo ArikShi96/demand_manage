@@ -27,16 +27,18 @@ class LiveList extends React.Component {
       activePage: 1, // 当前页面
       pageSize: 10, // 每页多少
     },
-    aaa: '',
-    bbb: '',
-    ccc: '',
-    ddd: '',
+    liveName: '',
+    liveStatus: '',
+    reviewStatus: '',
+    ivsId: '',
     start_time: '',
     end_time: '',
     formData: {
       dataItem: {}
     },
     popoverVisible: false,
+    showDeleteModal: false,
+    deleteItem: '',
   };
 
   columns = [
@@ -103,9 +105,9 @@ class LiveList extends React.Component {
       width: "8%",
       render: (value, item) => {
         if (value === 0 || value === '0') {
-          return <a onClick={this.handleTableAction.bind(this, item, 'recommend')}>隐藏</a>
+          return <a onClick={this.handleTableAction.bind(this, item, 'toggleRecommend')}>推荐</a>
         } else {
-          return <a onClick={this.handleTableAction.bind(this, item, 'recommend')}>显示</a>
+          return <a onClick={this.handleTableAction.bind(this, item, 'toggleRecommend')}>取消推荐</a>
         }
       }
     },
@@ -120,8 +122,8 @@ class LiveList extends React.Component {
             <Popover
               content={
                 <div>
-                  <a className='action' onClick={this.handleTableAction.bind(null, item, 'confirm')} style={{ marginRight: '20px' }}>通过</a>
-                  <a className='action' onClick={this.handleTableAction.bind(null, item, 'reject')}>拒绝</a>
+                  <a className='action' onClick={this.handleTableAction.bind(null, item, 'reviewApprove')} style={{ marginRight: '20px' }}>通过</a>
+                  <a className='action' onClick={this.handleTableAction.bind(null, item, 'reviewReject')}>拒绝</a>
                 </div>
               }
               trigger="click"
@@ -142,11 +144,13 @@ class LiveList extends React.Component {
     this.searchList();
   }
 
-  changeDate = (d, dataString) => {
-    if (dataString && dataString.length > 0) {
-      let data = dataString.split('"');
-      this.setState({ start_time: data[1], end_time: data[3] });
-    } else if (d.length === 0) {
+  changeDate = (moments) => {
+    if (moments && moments.length > 0) {
+      this.setState({
+        start_time: `${moments[0].format('YYYY-MM-DD')} 00:00:00`,
+        end_time: `${moments[1].format('YYYY-MM-DD')} 00:00:00`
+      });
+    } else {
       this.setState({ start_time: '', end_time: '' });
     }
   };
@@ -174,10 +178,10 @@ class LiveList extends React.Component {
   resetSearch() {
     this.refs.rangePicker.clear();
     this.setState({
-      aaa: '',
-      bbb: '',
-      ccc: '',
-      ddd: '',
+      liveName: '',
+      liveStatus: '',
+      reviewStatus: '',
+      ivsId: '',
       start_time: '',
       end_time: '',
     }, () => {
@@ -216,31 +220,62 @@ class LiveList extends React.Component {
   /* 新增/编辑/删除 */
   handleTableAction = async (item, action) => {
     switch (action) {
+      // 查看
       case 'view': {
-        this.props.history.push(`/ProductComDetail/${item.id}`);
+        this.props.history.push(`/LiveDetail/${item.liveTelecastId}`);
         break;
       }
+      // 隐藏
       case 'toggleHide': {
         try {
-          await makeAjaxRequest('/newcomment/hide', 'get', { q_manage_id: item.qManageId });
+          await makeAjaxRequest('/live/hide', 'get', {
+            id: item.liveTelecastId,
+            show_status: item.show_status
+          });
+          message.success('操作成功');
+          this.searchList();
         } catch (err) {
           message.error(err.message);
         }
         break;
       }
+      // 推荐
+      case 'toggleRecommend': {
+        try {
+          await makeAjaxRequest('/live/recommend', 'get', {
+            id: item.liveTelecastId,
+            show_status: item.show_status
+          });
+          message.success('操作成功');
+          this.searchList();
+        } catch (err) {
+          message.error(err.message);
+        }
+        break;
+      }
+      // 审查
       case 'review': {
         this.setState({
           popoverVisible: true
         });
         break;
       }
-      case 'confirm': {
+      // 审查通过
+      case 'reviewApprove': {
         this.setState({
           popoverVisible: false
         });
+        try {
+          await makeAjaxRequest('/live/approve', 'get', { id: item.liveTelecastId });
+          message.success('操作成功');
+          this.searchList();
+        } catch (err) {
+          message.error(err.message);
+        }
         break;
       }
-      case 'reject': {
+      // 审查拒绝
+      case 'reviewReject': {
         this.setState({
           popoverVisible: false,
           ...this.state.formData,
@@ -250,12 +285,72 @@ class LiveList extends React.Component {
         });
         break;
       }
-      case 'delete': {
+      // 确认审查拒绝
+      case 'confirmReject': {
+        this.setState({
+          formData: {
+            showRejectModal: true
+          }
+        });
         try {
-          await makeAjaxRequest('/live/list', 'get', { q_manage_id: item.qManageId });
+          await makeAjaxRequest('/live/reject', 'get', { id: item.liveTelecastId });
+          message.success('操作成功');
+          this.searchList();
         } catch (err) {
           message.error(err.message);
         }
+        break;
+      }
+      // 批量审查通过
+      case 'mulReviewApprove': {
+        this.setState({
+          popoverVisible: false
+        });
+        try {
+          await makeAjaxRequest('/live/approve', 'get', { id: item.liveTelecastId });
+          message.success('操作成功');
+        } catch (err) {
+          message.error(err.message);
+        }
+        break;
+      }
+      // 批量审查拒绝
+      case 'mulReviewReject': {
+        this.setState({
+          popoverVisible: false,
+          ...this.state.formData,
+          formData: {
+            showRejectModal: true
+          }
+        });
+        break;
+      }
+      // 删除
+      case 'delete': {
+        this.setState({
+          showDeleteModal: true,
+          deleteItem: item
+        })
+        break;
+      }
+      // 确认删除
+      case 'confirmDelete': {
+        try {
+          this.hideDeleteModal();
+          await makeAjaxRequest('/live/del', 'get', { id: item.liveTelecastId });
+          message.success('删除成功');
+          this.searchList();
+        } catch (err) {
+          message.error(err.message);
+        }
+        break;
+      }
+      // 跳转到直播间
+      case 'redirect': {
+        window.open(item.liveUrl);
+        break;
+      }
+      default: {
         break;
       }
     }
@@ -293,17 +388,28 @@ class LiveList extends React.Component {
   }
 
   submitReject = async () => {
+    this.handleTableAction(null, 'confirmReject')
+  }
 
+  hideDeleteModal = () => {
+    this.setState({
+      showDeleteModal: false
+    })
+  }
+
+  confirmDelete = () => {
+    this.handleTableAction(this.state.deleteItem, 'confirmDelete')
   }
 
   render() {
     const {
-      aaa,
-      bbb,
-      ccc,
-      ddd,
+      liveName,
+      liveStatus,
+      reviewStatus,
+      ivsId,
       dataSource,
-      formData
+      formData,
+      showDeleteModal,
     } = this.state;
     const { showRejectModal, reason } = formData;
     const { activePage, content, total, items } = dataSource;
@@ -320,16 +426,16 @@ class LiveList extends React.Component {
               <FormList.Item label="直播名称" labelCol={100}>
                 <FormControl
                   className="search-item"
-                  value={aaa}
-                  onChange={this.handleChange.bind(null, "aaa")}
+                  value={liveName}
+                  onChange={this.handleChange.bind(null, "liveName")}
                 />
               </FormList.Item>
               <FormList.Item label="直播状态" labelCol={100}>
                 <Select
                   placeholder="直播状态"
                   className="search-item"
-                  onChange={this.handleChange.bind(null, "bbb")}
-                  value={bbb}
+                  onChange={this.handleChange.bind(null, "liveStatus")}
+                  value={liveStatus}
                 >
                   {[
                     { id: "1", stat: "直播中" },
@@ -345,8 +451,8 @@ class LiveList extends React.Component {
                 <Select
                   placeholder="审核状态"
                   className="search-item"
-                  onChange={this.handleChange.bind(null, "ccc")}
-                  value={ccc}
+                  onChange={this.handleChange.bind(null, "reviewStatus")}
+                  value={reviewStatus}
                 >
                   {[
                     { id: "1", stat: "已通过" },
@@ -362,8 +468,8 @@ class LiveList extends React.Component {
                 <Select
                   placeholder="服务商"
                   className="search-item"
-                  onChange={this.handleChange.bind(null, "ddd")}
-                  value={ddd}
+                  onChange={this.handleChange.bind(null, "ivsId")}
+                  value={ivsId}
                 >
                   {[
                     { id: "1", stat: "直播中" },
@@ -388,8 +494,8 @@ class LiveList extends React.Component {
             </FormList>
           </SearchPanel>
           <div className='action-wrap'>
-            <Button colors="primary" onClick={this.batchConfirm}>批量通过</Button>
-            <Button colors="primary" onClick={this.batchRefuse}>批量拒绝</Button>
+            <Button colors="primary" onClick={this.handleTableAction.bind(this, null, 'mulReviewApprove')}>批量通过</Button>
+            <Button colors="primary" onClick={this.handleTableAction.bind(this, null, 'mulReviewReject')}>批量拒绝</Button>
           </div>
           <Table rowKey="order" columns={this.columns} data={content} />
           <Pagination
@@ -424,6 +530,23 @@ class LiveList extends React.Component {
           <Modal.Footer>
             <Button onClick={this.hideRejectModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
             <Button onClick={this.submitReject} colors="primary">确认</Button>
+          </Modal.Footer>
+        </Modal>
+        {/* 提示框 - 删除 */}
+        <Modal
+          show={showDeleteModal}
+          style={{ marginTop: '20vh' }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>删除提示</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            删除后,此直播信息将不再在前端显示.
+            确认删除此直播信息?
+            </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.hideDeleteModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
+            <Button onClick={this.confirmDelete} colors="primary">确认</Button>
           </Modal.Footer>
         </Modal>
       </Fragment>

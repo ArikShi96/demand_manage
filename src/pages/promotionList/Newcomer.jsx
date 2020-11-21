@@ -28,10 +28,12 @@ class Newcomer extends React.Component {
       total: 0, // 总数量
       items: 0, // 总页数
       activePage: 1, // 当前页面
-      size: 10, // 每页多少
+      pageSize: 10, // 每页多少
     },
     startTime: '',
     endTime: '',
+    name: '',
+    status: '',
     formData: {
       dataItem: {}
     },
@@ -40,43 +42,41 @@ class Newcomer extends React.Component {
   };
 
   columns = [
+    // {
+    //   title: "编号",
+    //   dataIndex: "order",
+    //   key: "agreementNum",
+    //   width: "5%",
+    // },
     {
-      title: "编号",
-      dataIndex: "order",
-      key: "agreementNum",
-      width: "5%",
-    },
-    {
-      title: "问题描述",
-      dataIndex: "productName",
-      key: "productName",
+      title: "优惠券名称",
+      dataIndex: "name",
+      key: "name",
       width: "20%",
     },
     {
-      title: "类型",
-      dataIndex: "isvName",
-      key: "isvName",
-      width: "8%",
+      title: "已使用/已发放",
+      dataIndex: "statusCount",
+      key: "statusCount",
+      width: "10%",
     },
     {
-      title: "服务商",
-      dataIndex: "operatorName",
-      key: "operatorName",
-      width: "8%",
+      title: "开始时间",
+      dataIndex: "startTime",
+      key: "startTime",
+      width: "20%",
     },
     {
-      title: "商品名称",
-      dataIndex: "originalPrice",
-      key: "originalPrice",
-      width: "8%",
+      title: "结束时间",
+      dataIndex: "endTime",
+      key: "endTime",
+      width: "20%",
     },
-    { title: "提问时间", dataIndex: "discount", key: "discount", width: "15%" },
-    { title: "问题状态", dataIndex: "payMode", key: "payMode", width: "8%" },
     {
-      title: "展示状态",
-      dataIndex: "busiAmount",
-      key: "busiAmount",
-      width: "8%",
+      title: "发放状态",
+      dataIndex: "status",
+      key: "status",
+      width: "10%",
     },
     {
       title: "操作",
@@ -87,8 +87,8 @@ class Newcomer extends React.Component {
         return value ? (
           <div>
             <a>查看</a>
-            <a>隐藏</a>
-            <a>删除</a>
+            <a>编辑</a>
+            <a>停止发放</a>
           </div>
         ) : null;
       },
@@ -99,11 +99,13 @@ class Newcomer extends React.Component {
     this.searchList();
   }
 
-  changeDate = (d, dataString) => {
-    if (dataString && dataString.length > 0) {
-      let data = dataString.split('"');
-      this.setState({ start_time: data[1], end_time: data[3] });
-    } else if (d.length === 0) {
+  changeDate = (moments) => {
+    if (moments && moments.length > 0) {
+      this.setState({
+        start_time: `${moments[0].format('YYYY-MM-DD')} 00:00:00`,
+        end_time: `${moments[1].format('YYYY-MM-DD')} 00:00:00`
+      });
+    } else {
       this.setState({ start_time: '', end_time: '' });
     }
   };
@@ -173,19 +175,25 @@ class Newcomer extends React.Component {
         this.showAdd(true, item);
         break;
       }
-      case 'view': {
-        this.showAdd(false);
+      case 'delete': {
+        this.setState({
+          showDeleteModal: true,
+          deleteItem: item
+        })
         break;
       }
       case 'confirmDelete': {
         try {
           this.hideDeleteModal();
-          await makeAjaxRequest('/index/recommendisv/dele', 'get', { isv_recommend_id: item.isvId });
-          message.success('操作成功');
+          await makeAjaxRequest('/xxx', 'get', { isv_recommend_id: item.isvId });
+          message.success('删除成功');
           this.searchList();
         } catch (err) {
           message.error(err.message);
         }
+        break;
+      }
+      default: {
         break;
       }
     }
@@ -196,7 +204,7 @@ class Newcomer extends React.Component {
       formData: {
         ...this.state.formData,
         showAddModal: true,
-        title: isEdit ? '编辑顶部导航' : '新增顶部导航',
+        title: isEdit ? '编辑新人专享' : '新增新人专享',
         dataItem: item || {}
       }
     })
@@ -212,29 +220,32 @@ class Newcomer extends React.Component {
   }
 
   handleFormDataChange = (type, e) => {
-    this.setState({
-      formData: {
-        ...this.state.formData,
-        dataItem: {
-          ...this.state.formData.dataItem,
-          [type]: e.target ? e.target.value : e,
+    if (type === 'ccc') {
+      this.state.formData.dataItem.start_time = e[0] ? e[0].format('YYYY-MM-DD') : '';
+      this.state.formData.dataItem.end_time = e[1] ? e[1].format('YYYY-MM-DD') : '';
+    } else {
+      this.setState({
+        formData: {
+          ...this.state.formData,
+          dataItem: {
+            ...this.state.formData.dataItem,
+            [type]: e.target ? e.target.value : e,
+          }
         }
-      }
-    })
+      })
+    }
   }
 
   submit = async () => {
     const { dataItem } = this.state.formData;
-    const { in_id, username, navigation_url } = dataItem;
+    const { id } = dataItem;
     try {
       this.hideAddModal();
-      if (in_id) {
-        await makeAjaxRequest('/index/navigation/editQuerSave', 'post', {
-          in_id, username, navigation_url
+      if (id) {
+        await makeAjaxRequest('/xxx', 'post', {
         });
       } else {
-        await makeAjaxRequest('/index/navigation/save', 'post', {
-          username, navigation_url
+        await makeAjaxRequest('/xxx', 'post', {
         });
       }
       message.success('操作成功');
@@ -358,7 +369,7 @@ class Newcomer extends React.Component {
                 <Radio value='1'>有效日期</Radio>
               </Radio.RadioGroup>
             </FormList.Item>
-            <FormList.Item label="活动起止时间" labelCol={100}>
+            {dataItem.bbb === '1' && <FormList.Item label="活动起止时间" labelCol={100}>
               <RangePicker
                 ref="rangePicker"
                 className="search-item"
@@ -366,7 +377,7 @@ class Newcomer extends React.Component {
                 format={format}
                 onChange={this.handleFormDataChange.bind(null, "ccc")}
               />
-            </FormList.Item>
+            </FormList.Item>}
             <FormList.Item label="活动说明" labelCol={100}>
               <FormControl
                 className="search-item"

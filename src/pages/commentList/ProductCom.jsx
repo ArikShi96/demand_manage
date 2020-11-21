@@ -99,11 +99,13 @@ class ProductCom extends React.Component {
     this.searchList();
   }
 
-  changeDate = (d, dataString) => {
-    if (dataString && dataString.length > 0) {
-      let data = dataString.split('"');
-      this.setState({ start_time: data[1], end_time: data[3] });
-    } else if (d.length === 0) {
+  changeDate = (moments) => {
+    if (moments && moments.length > 0) {
+      this.setState({
+        start_time: `${moments[0].format('YYYY-MM-DD')} 00:00:00`,
+        end_time: `${moments[1].format('YYYY-MM-DD')} 00:00:00`
+      });
+    } else {
       this.setState({ start_time: '', end_time: '' });
     }
   };
@@ -189,13 +191,16 @@ class ProductCom extends React.Component {
       }
       case 'toggle': {
         try {
-          await makeAjaxRequest('/newcomment/hide', 'get', { id: item.id });
+          await makeAjaxRequest('/newcomment/hide', 'get', {
+            id: item.id,
+            show_status: item.show_status === 0 ? 1 : 0
+          });
           message.success('操作成功');
           this.searchList();
-          break;
         } catch (err) {
           message.error(err.message);
         }
+        break;
       }
       case 'delete': {
         this.setState({
@@ -208,12 +213,12 @@ class ProductCom extends React.Component {
         try {
           this.hideDeleteModal();
           await makeAjaxRequest('/newcomment/dele', 'get', { id: item.id });
-          message.success('操作成功');
+          message.success('删除成功');
           this.searchList();
-          break;
         } catch (err) {
           message.error(err.message);
         }
+        break;
       }
       default: {
         break;
@@ -341,6 +346,7 @@ class ProductCom extends React.Component {
             <Modal.Title>删除提示</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+            删除后,此评论将不再在前端显示.
             确认删除此评论?
             </Modal.Body>
           <Modal.Footer>

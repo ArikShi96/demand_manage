@@ -19,7 +19,7 @@ class RecommendMerchant extends React.Component {
       total: 0, // 总数量
       items: 0, // 总页数
       activePage: 1, // 当前页面
-      size: 10, // 每页多少
+      pageSize: 10, // 每页多少
     },
     formData: {
       dataItem: {}
@@ -31,17 +31,17 @@ class RecommendMerchant extends React.Component {
   columns = [
     {
       title: "名称",
-      dataIndex: "order",
+      dataIndex: "linksName",
       width: "20%",
     },
     {
       title: "链接",
-      dataIndex: "isv_name",
+      dataIndex: "linksUrl",
       width: "30%",
     },
     {
       title: "排序",
-      dataIndex: "addTime",
+      dataIndex: "sort",
       width: "30%",
     },
     {
@@ -77,7 +77,7 @@ class RecommendMerchant extends React.Component {
   };
 
   dataNumSelect = (index, value) => {
-    this.setState({ dataSource: { ...this.state.dataSource, size: value, activePage: 1 } }, () => {
+    this.setState({ dataSource: { ...this.state.dataSource, pageSize: value, activePage: 1 } }, () => {
       this.searchList();
     });
   };
@@ -86,21 +86,22 @@ class RecommendMerchant extends React.Component {
   searchList = async () => {
     try {
       const {
-        dataSource
+        dataSource,
       } = this.state;
-      const { activePage } = dataSource;
-      const res = await makeAjaxRequest('/', 'get', {
-        page_num: activePage,
+      const { activePage, pageSize } = dataSource;
+      const res = await makeAjaxRequest('/link/getLinkList', 'get', {
+        start: activePage - 1,
+        pageSize
       });
-      (res.data || []).forEach((item, index) => {
+      (res.data.content || []).forEach((item, index) => {
         item.order = (index + 1)
       })
       this.setState({
         dataSource: {
           ...this.state.dataSource,
-          content: res.data || [],
-          total: res.sum || 0,
-          items: Math.floor((res.sum || 0) / this.state.dataSource.size) + 1
+          content: res.data.content || [],
+          total: res.data.totalElements || 0,
+          items: Math.floor((res.data.totalElements || 0) / this.state.dataSource.pageSize) + 1
         }
       });
     } catch (err) {
@@ -122,16 +123,19 @@ class RecommendMerchant extends React.Component {
         })
         break;
       }
-
       case 'confirmDelete': {
         try {
           this.hideDeleteModal();
-          await makeAjaxRequest('/xxx', 'get', { id: item.id });
-          message.success('操作成功');
+          await makeAjaxRequest(`/link/delLink/${item.linksId}`, 'get');
+          message.success('删除成功');
           this.searchList();
         } catch (err) {
           message.error(err.message);
         }
+        break;
+      }
+      default: {
+        break;
       }
     }
   }
@@ -169,11 +173,23 @@ class RecommendMerchant extends React.Component {
   }
 
   submit = async () => {
+    const { linksId, linksName, linksUrl, sort } = this.state.formData.dataItem;
     try {
       this.hideAddModal();
-      await makeAjaxRequest('/xx', 'post', {}, {
-        isv_id: this.state.formData.dataItem.isv_id
-      });
+      if (linksId) {
+        await makeAjaxRequest('/link/updateLink', 'post', {}, {
+          linksId,
+          linksName,
+          linksUrl,
+          sort
+        });
+      } else {
+        await makeAjaxRequest('/link/addLink', 'post', {}, {
+          linksName,
+          linksUrl,
+          sort
+        });
+      }
       message.success('操作成功');
       this.searchList();
     } catch (err) {
@@ -237,16 +253,16 @@ class RecommendMerchant extends React.Component {
             <FormList.Item label="名称" labelCol={100}>
               <FormControl
                 className="search-item"
-                value={dataItem.name}
-                onChange={this.handleFormDataChange.bind(null, "name")}
+                value={dataItem.linksName}
+                onChange={this.handleFormDataChange.bind(null, "linksName")}
                 style={{ width: 250 }}
               />
             </FormList.Item>
             <FormList.Item label="链接" labelCol={100}>
               <FormControl
                 className="search-item"
-                value={dataItem.link}
-                onChange={this.handleFormDataChange.bind(null, "link")}
+                value={dataItem.linksUrl}
+                onChange={this.handleFormDataChange.bind(null, "linksUrl")}
                 style={{ width: 250 }}
               />
             </FormList.Item>
@@ -261,17 +277,25 @@ class RecommendMerchant extends React.Component {
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.hideAddModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-            <Button onClick={this.submit} colors="primary">确认</Button>
+            <Button
+              onClick={this.submit}
+              colors="primary"
+              disabled={!dataItem.linksName || !dataItem.linksUrl || (!dataItem.sort && dataItem.sort !== 0)}
+            >
+              确认
+            </Button>
           </Modal.Footer>
         </Modal>
         {/* 提示框 - 删除 */}
         <Modal
           show={showDeleteModal}
+          style={{ marginTop: '20vh' }}
         >
           <Modal.Header closeButton>
             <Modal.Title>删除提示</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+            删除后,此链接将不再在前端显示.
             确认删除此链接?
             </Modal.Body>
           <Modal.Footer>

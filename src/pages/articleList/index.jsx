@@ -70,7 +70,7 @@ class ArticleList extends React.Component {
         }
       }
     },
-    { title: "时间", dataIndex: "createTime", width: "20%" },
+    { title: "时间", dataIndex: "addTime", width: "20%" },
     {
       title: "操作",
       dataIndex: "operation",
@@ -186,7 +186,7 @@ class ArticleList extends React.Component {
         try {
           this.hideDeleteModal();
           await makeAjaxRequest('/article/deleOperate', 'get', { article_id: item.articleId });
-          message.success('操作成功');
+          message.success('删除成功');
           this.searchList();
         } catch (err) {
           message.error(err.message);
@@ -285,6 +285,7 @@ class ArticleList extends React.Component {
             <Modal.Title>删除提示</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+            删除后,此文章将不再在前端显示.
             确认删除此文章?
             </Modal.Body>
           <Modal.Footer>

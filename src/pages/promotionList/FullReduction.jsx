@@ -14,7 +14,7 @@ import Header from "../common/Header";
 import Content from "../common/Content";
 import FormList from "../common/Form";
 import SearchPanel from "../common/SearchPanel";
-import { message } from 'antd';
+import { message, Tag, Radio, Checkbox } from 'antd';
 import makeAjaxRequest from '../../util/request';
 const TabPane = Tabs.TabPane;
 const { RangePicker } = DatePicker;
@@ -105,11 +105,13 @@ class FullReduction extends React.Component {
     this.searchList();
   }
 
-  changeDate = (d, dataString) => {
-    if (dataString && dataString.length > 0) {
-      let data = dataString.split('"');
-      this.setState({ start_time: data[1], end_time: data[3] });
-    } else if (d.length === 0) {
+  changeDate = (moments) => {
+    if (moments && moments.length > 0) {
+      this.setState({
+        start_time: `${moments[0].format('YYYY-MM-DD')} 00:00:00`,
+        end_time: `${moments[1].format('YYYY-MM-DD')} 00:00:00`
+      });
+    } else {
       this.setState({ start_time: '', end_time: '' });
     }
   };
@@ -231,11 +233,14 @@ class FullReduction extends React.Component {
         try {
           this.hideConfirmModal();
           await makeAjaxRequest('/index/recommendisv/dele', 'get', { isv_recommend_id: item.isvId });
-          message.success('操作成功');
+          message.success('删除成功');
           this.searchList();
         } catch (err) {
           message.error(err.message);
         }
+        break;
+      }
+      default: {
         break;
       }
     }
@@ -262,15 +267,37 @@ class FullReduction extends React.Component {
   }
 
   handleFormDataChange = (type, e) => {
-    this.setState({
-      formData: {
-        ...this.state.formData,
-        dataItem: {
-          ...this.state.formData.dataItem,
-          [type]: e.target ? e.target.value : e,
+    if (type === 'ccc') {
+      this.state.formData.dataItem.start_time = e[0] ? e[0].format('YYYY-MM-DD') : '';
+      this.state.formData.dataItem.end_time = e[1] ? e[1].format('YYYY-MM-DD') : '';
+    } else {
+      this.setState({
+        formData: {
+          ...this.state.formData,
+          dataItem: {
+            ...this.state.formData.dataItem,
+            [type]: e.target ? e.target.value : e,
+          }
         }
-      }
-    })
+      })
+    }
+  }
+
+  handleListDataChange = (type, index, e) => {
+    this.state.formData.dataItem.conditions[index][type] = e.target ? e.target.value : e;
+    this.forceUpdate();
+  }
+
+  addListData = () => {
+    if (!this.state.formData.dataItem.conditions) {
+      this.state.formData.dataItem.conditions = []
+    }
+    this.state.formData.dataItem.conditions.push({});
+    this.forceUpdate();
+  }
+
+  onFormCheckBoxChange = (e) => {
+    this.state.formData.dataItem.checks = e;
   }
 
   submit = async () => {
@@ -416,7 +443,10 @@ class FullReduction extends React.Component {
               <Modal.Title>{formData.title}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <div className='section-title'>活动信息</div>
+              <div className='section-title'>
+                {/* <Tag color="default">活动信息</Tag> */}
+                活动信息
+              </div>
               <FormList.Item label="活动名称" labelCol={100}>
                 <FormControl
                   className="search-item"
@@ -451,7 +481,72 @@ class FullReduction extends React.Component {
                   style={{ width: 250 }}
                 />
               </FormList.Item>
-              <div className='section-title'>活动信息</div>
+              <FormList.Item label="活动范围" labelCol={100}>
+                <Radio.Group
+                  value={dataItem.eee}
+                  onChange={this.handleFormDataChange.bind(null, "eee")}
+                >
+                  <Radio value='0'>全品类</Radio>
+                  <Radio value='1'>部分品类</Radio>
+                </Radio.Group>
+              </FormList.Item>
+              <FormList.Item label="请选择品类" labelCol={100}>
+                <Checkbox.Group onChange={this.onFormCheckBoxChange}>
+                  <Checkbox value="0">1</Checkbox>
+                  <Checkbox value="1">2</Checkbox>
+                </Checkbox.Group>
+              </FormList.Item>
+              <div className='section-title'>
+                {/* <Tag color="default">活动规则</Tag> */}
+                活动规则
+              </div>
+              <FormList.Item label="活动类型" labelCol={100}>
+                <Radio.Group
+                  value="0"
+                >
+                  <Radio value='0'>满减</Radio>
+                </Radio.Group>
+              </FormList.Item>
+              <FormList.Item label="满减条件" labelCol={100}>
+                <Radio.Group
+                  value={dataItem.fff}
+                  onChange={this.handleFormDataChange.bind(null, "fff")}
+                >
+                  {(dataItem.conditions || [{}, {}]).map((item, index) => (
+                    <Radio value={index} style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span>满</span>
+                        <FormControl
+                          className="search-item"
+                          value={item.ggg1}
+                          onChange={this.handleListDataChange.bind(null, "ggg1", index)}
+                          style={{ width: 40, margin: "0 20px" }}
+                        />
+                        <span>元, </span>
+                        <span>减</span>
+                        <FormControl
+                          className="search-item"
+                          value={item.ggg2}
+                          onChange={this.handleListDataChange.bind(null, "ggg2", index)}
+                          style={{ width: 40, margin: "0 20px" }}
+                        />
+                        <span>元, </span>
+                        <span>平台分摊</span>
+                        <FormControl
+                          className="search-item"
+                          value={item.ggg3}
+                          onChange={this.handleListDataChange.bind(null, "ggg3", index)}
+                          style={{ width: 40, margin: "0 20px" }}
+                        />
+                        <span>%</span>
+                      </div>
+                    </Radio>
+                  ))}
+                </Radio.Group>
+              </FormList.Item>
+              <div className="add-item" style={{ marginTop: 20, paddingLeft: 50 }}>
+                <a onClick={this.addListData}>添加</a>
+              </div>
             </Modal.Body>
             <Modal.Footer>
               <Button onClick={this.hideAddModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
@@ -499,5 +594,11 @@ export default styled(FullReduction)`
   text-align: right;
   padding: 20px;
   padding-right: 48px;
+}
+.section-title {
+  margin-bottom: 10px;
+  .ant-tag.ant-tag-has-color {
+    color: #666666;
+  }
 }
 `;

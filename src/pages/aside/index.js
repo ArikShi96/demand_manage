@@ -24,7 +24,7 @@ class AsideModel extends React.Component {
           style={{ width: "100%" }}
           mode="inline"
           // defaultSelectedKeys={["3"]}
-          defaultOpenKeys={["sub1", "sub2", "sub3"]}
+          // defaultOpenKeys={["sub1", "sub2", "sub3"]}
         >
           {/* 需求管理 */}
           <SubMenu

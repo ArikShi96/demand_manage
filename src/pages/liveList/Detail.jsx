@@ -1,4 +1,4 @@
-import { Button, Modal } from "tinper-bee";
+import { Button, Modal, Select } from "tinper-bee";
 import styled from 'styled-components';
 import React from "react";
 import "bee-form-control/build/FormControl.css";
@@ -12,12 +12,21 @@ import { Input } from 'antd';
 class LiveDetail extends React.Component {
   state = {
     detail: {},
-    formData: {}
+    formData: {
+      dataItem: {}
+    },
+    status: "0",
   };
 
   componentDidMount() {
     this.fetchDetail();
   }
+
+  handleChange = (type, e) => {
+    this.setState({
+      [type]: e,
+    });
+  };
 
   fetchDetail = () => { }
 
@@ -25,25 +34,28 @@ class LiveDetail extends React.Component {
     this.props.history.push(`/LiveList`);
   }
 
+  submit = () => {
+    const { status } = this.state;
+    switch (status) {
+      case '0': {
+        this.showReject();
+        break;
+      }
+      case '1': {
+        break;
+      }
+      case '2': {
+        break;
+      }
+    }
+  }
+
   /* 提交/拒绝 */
-  showReject = (item) => {
+  showReject = () => {
     this.setState({
       formData: {
         ...this.state.formData,
         showRejectModal: true,
-        data: item || {}
-      }
-    })
-  }
-
-  handleFormDataChange = (type, e) => {
-    this.setState({
-      formData: {
-        ...this.state.formData,
-        dataItem: {
-          ...this.state.formData.dataItem,
-          [type]: e,
-        }
       }
     })
   }
@@ -57,29 +69,19 @@ class LiveDetail extends React.Component {
     })
   }
 
-  showReject = (item) => {
-    this.setState({
-      formData: {
-        ...this.state.formData,
-        showRejectModal: true,
-        data: item || {}
-      }
-    })
-  }
-
   handleFormDataChange = (type, e) => {
     this.setState({
       formData: {
         ...this.state.formData,
         dataItem: {
           ...this.state.formData.dataItem,
-          [type]: e,
+          [type]: e.target ? e.target.value : e,
         }
       }
     })
   }
 
-  hideRejectModal = () => {
+  confirmRejectModal = () => {
     this.setState({
       formData: {
         ...this.state.formData,
@@ -90,11 +92,11 @@ class LiveDetail extends React.Component {
 
   render() {
     const { className } = this.props;
-    const { formData } = this.state;
-    const { showRejectModal, reason } = formData;
+    const { formData, status } = this.state;
+    const { showRejectModal, dataItem } = formData;
     return (
       <div className={className}>
-        <Header title="问答详情" />
+        <Header title="直播详情" />
         <div className='detail-wrap'>
           <div className='label'>问答类型</div>
           <div className='content'>123</div>
@@ -115,8 +117,29 @@ class LiveDetail extends React.Component {
           <div className='label'>回答</div>
           <div className='content'>123</div>
         </div>
+        {/* 审核状态 */}
+        <div className='select-wrap'>
+          <Select
+            placeholder="审核状态"
+            className="search-item"
+            onChange={this.handleChange.bind(null, "status")}
+            value={status}
+            style={{ width: 200 }}
+          >
+            {[
+              { id: "0", stat: "待审核" },
+              { id: "1", stat: "审核通过" },
+              { id: "2", stat: "审核拒绝" }].map((item) => (
+                <Select.Option key={item.id} value={item.id}>
+                  {item.stat}
+                </Select.Option>
+              ))}
+          </Select>
+        </div>
+        {/* button */}
         <div className='action-wrap'>
           <Button colors="primary" onClick={this.navigateBack}>返回</Button>
+          <Button colors="primary" onClick={this.submit}>提交</Button>
         </div>
         {/* 提示框 - 拒绝 */}
         <Modal
@@ -127,11 +150,11 @@ class LiveDetail extends React.Component {
             <Modal.Title>拒绝原因</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Input.TextArea value={reason} rows={4} onChange={this.handleFormDataChange.bind(this, reason)} />
+            <Input.TextArea value={dataItem.reason} rows={4} onChange={this.handleFormDataChange.bind(this, 'reason')} />
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.hideRejectModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-            <Button onClick={this.submitReject} colors="primary">确认</Button>
+            <Button onClick={this.confirmRejectModal} colors="primary">确认</Button>
           </Modal.Footer>
         </Modal>
       </div>
@@ -167,5 +190,12 @@ export default styled(LiveDetail)`
 .action-wrap {
   text-align: center;
   margin: 40px auto;
+  .u-button {
+    margin: 0 20px;
+  }
+}
+.select-wrap {
+  padding-left: 60px;
+
 }
 `;

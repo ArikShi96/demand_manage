@@ -20,7 +20,7 @@ class QuestionDetail extends React.Component {
       const res = await makeAjaxRequest('/question/findOperateOne', 'get', { q_manage_id: this.props.match.params.id });
       this.setState({
         detail: res.data,
-        reply: res.data2 || ""
+        reply: res.data2
       });
     } catch (err) {
       message.error(err.message);
@@ -55,7 +55,7 @@ class QuestionDetail extends React.Component {
         </div>
         <div className='detail-wrap'>
           <div className='label'>回答</div>
-          <div className='content'>{reply}</div>
+          <div className='content'>{reply && reply.answer ? reply.answer : reply || ""}</div>
         </div>
         <div className='action-wrap'>
           <Button colors="primary" onClick={this.navigateBack}>返回</Button>

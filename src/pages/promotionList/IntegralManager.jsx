@@ -14,13 +14,16 @@ import makeAjaxRequest from '../../util/request';
 import { message, Radio, Checkbox } from 'antd';
 class IntegralManager extends React.Component {
   state = {
+    gradeRuleId: "",
     newUserPoints: '',
     isTime: '',
     isTimeStr: '',
     loginPoints: '',
     pointsProportion: '',
     pointsCommentNum: '',
-    pointsComment: ''
+    pointsComment: '',
+    clearRules: '',
+    sharePoints: ''
   };
 
   componentDidMount() {
@@ -31,7 +34,8 @@ class IntegralManager extends React.Component {
     try {
       const res = await makeAjaxRequest('/isvpoints/editQuery', 'get');
       this.setState({
-        ...res.data
+        ...res.data,
+        isTime: res.data.isTime !== 0 && res.data.isTime !== '0'
       });
     } catch (err) {
       message.error(err.message);
@@ -44,7 +48,7 @@ class IntegralManager extends React.Component {
     });
   };
 
-  handleCheckboxChange = (e) => {
+  handleCheckboxChange = () => {
     this.setState({
       isTime: !this.state.isTime
     })
@@ -52,30 +56,38 @@ class IntegralManager extends React.Component {
 
   handleRadioChange = (e) => {
     this.setState({
-      radioValue: e.target.value
+      clearRules: e.target.value
     })
   }
 
   submit = async () => {
     try {
       const {
+        gradeRuleId,
         newUserPoints,
         isTime,
         isTimeStr,
         loginPoints,
         pointsProportion,
         pointsCommentNum,
-        pointsComment
+        pointsComment,
+        clearRules,
+        sharePoints,
       } = this.state;
-      await makeAjaxRequest('/isvpoints/editAction', 'post', {}, {
+      await makeAjaxRequest('/isvpoints/editAction', 'post', {
+        gradeRuleId,
         newUserPoints,
-        isTime,
+        isTime: isTime ? '1' : '0',
         isTimeStr,
         loginPoints,
         pointsProportion,
         pointsCommentNum,
-        pointsComment
+        pointsComment,
+        clearRules,
+        share_points: sharePoints,
       });
+      this.fetchDetail();
+      message.success('操作成功');
     } catch (err) {
       message.error(err.message);
     }
@@ -91,7 +103,8 @@ class IntegralManager extends React.Component {
       pointsProportion,
       pointsCommentNum,
       pointsComment,
-      radioValue,
+      clearRules,
+      sharePoints,
     } = this.state;
     return (
       <div className={className}>
@@ -131,8 +144,8 @@ class IntegralManager extends React.Component {
           <div className='label'>分享获得积分</div>
           <div className='content'>
             <FormControl className="search-item"
-              value={loginPoints}
-              onChange={this.handleChange.bind(null, "loginPoints")}
+              value={sharePoints}
+              onChange={this.handleChange.bind(null, "sharePoints")}
             />
             <div className='tip'>0或空表示不赠送积分</div>
           </div>
@@ -169,10 +182,10 @@ class IntegralManager extends React.Component {
         <div className='detail-wrap'>
           <div className='label'>积分清零时间</div>
           <div className='content'>
-            <Radio.Group onChange={this.handleRadioChange} value={radioValue}>
-              <Radio value={1}>不限</Radio>
-              <Radio value={2}>每年</Radio>
-              <Radio value={3}>每两年</Radio>
+            <Radio.Group onChange={this.handleRadioChange} value={clearRules}>
+              <Radio value={0}>不限</Radio>
+              <Radio value={1}>每年</Radio>
+              <Radio value={2}>每两年</Radio>
             </Radio.Group>
           </div>
         </div>

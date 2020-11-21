@@ -112,15 +112,6 @@ class QuestionList extends React.Component {
     this.searchList();
   }
 
-  changeDate = (d, dataString) => {
-    if (dataString && dataString.length > 0) {
-      let data = dataString.split('"');
-      this.setState({ startTime: data[1], endTime: data[3] });
-    } else if (d.length === 0) {
-      this.setState({ start_time: '', end_time: '' });
-    }
-  };
-
   handleChange = (type, e) => {
     this.setState({
       [type]: e,
@@ -202,7 +193,7 @@ class QuestionList extends React.Component {
         try {
           this.hideDeleteModal();
           await makeAjaxRequest('/question/operateDele', 'get', { q_manage_id: item.qManageId });
-          message.success('操作成功');
+          message.success('删除成功');
           this.searchList();
         } catch (err) {
           message.error(err.message);
@@ -317,6 +308,7 @@ class QuestionList extends React.Component {
             <Modal.Title>删除提示</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+            删除后,此问答将不再在前端显示.
             确认删除此问答?
             </Modal.Body>
           <Modal.Footer>

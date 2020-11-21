@@ -8,9 +8,12 @@ import makeAjaxRequest from '../../util/request';
 
 class QuestionDetail extends React.Component {
   state = {
+    status: '',
+    index_activity_id: ""
   };
 
   componentDidMount() {
+    debugger
     this.fetchDetail();
   }
 
@@ -18,7 +21,9 @@ class QuestionDetail extends React.Component {
     try {
       const res = await makeAjaxRequest('/index/activity/getOperateStore', 'get', { isv_id: this.props.match.params.id });
       this.setState({
-        ...res
+        ...res,
+        status: (new URLSearchParams(this.props.location.search)).get('status') || '',
+        index_activity_id: (new URLSearchParams(this.props.location.search)).get('index_activity_id') || ''
       });
     } catch (err) {
       message.error(err.message);
@@ -31,7 +36,7 @@ class QuestionDetail extends React.Component {
 
   submit = async () => {
     try {
-      await makeAjaxRequest('/index/activity/operatePass', 'get', { index_activity_id: this.props.match.params.id });
+      await makeAjaxRequest('/index/activity/operatePass', 'get', { index_activity_id: this.state.index_activity_id, status: 2 });
       message.success('操作成功');
       this.fetchDetail();
     } catch (err) {
@@ -41,7 +46,7 @@ class QuestionDetail extends React.Component {
 
   reject = async () => {
     try {
-      await makeAjaxRequest('/index/activity/operateReject', 'get', { index_activity_id: this.props.match.params.id });
+      await makeAjaxRequest('/index/activity/operatePass', 'get', { index_activity_id: this.state.index_activity_id, status: 3 });
       message.success('操作成功');
     } catch (err) {
       message.error(err.message);
@@ -49,7 +54,7 @@ class QuestionDetail extends React.Component {
   }
 
   render() {
-    const { data, data_other } = this.state;
+    const { data, data_other, status } = this.state;
     const { className } = this.props;
     return (
       <div className={className}>
@@ -73,14 +78,17 @@ class QuestionDetail extends React.Component {
             <div className='info-row'>
               <div className="label">服务商等级:</div>
               <div className="content">
+                <img src={data.grade_icon} className='grade-icon' alt="" />
                 <span>{data.grade_name}</span>
-                <Progress percent={50} />
+                <Progress percent={(parseInt(data.points_start) / parseInt(data.points_end).toFixed(2) * 100)} />
               </div>
             </div>
             <div className='info-row'>
               <div className="label">店铺标签:</div>
               <div className="content">
-                <Tag color="blue">标签</Tag>
+                {(data.label || "").split(",").map(la => (
+                  <Tag color="blue">{la}</Tag>
+                ))}
               </div>
             </div>
             <div className='info-row'>
@@ -101,7 +109,7 @@ class QuestionDetail extends React.Component {
             </div>
             <div className='info-row'>
               <div className="label">联系电话</div>
-              <div className="content">{data.createnyr}</div>
+              <div className="content">{data.hotline}</div>
             </div>
           </Card>
           <Card style={{ width: '48%' }}>
@@ -130,6 +138,8 @@ class QuestionDetail extends React.Component {
           <Button colors="primary" onClick={this.navigateBack}>返回</Button>
           <Button colors="primary" onClick={this.submit}>审核通过</Button>
           <Button colors="primary" onClick={this.reject}>审核拒绝</Button>
+          {/* {status === '1' && <Button colors="primary" onClick={this.submit}>审核通过</Button>}
+          {status === '1' && <Button colors="primary" onClick={this.reject}>审核拒绝</Button>} */}
         </div>
       </div>
     );
@@ -158,6 +168,11 @@ export default styled(QuestionDetail)`
       margin-right: 10px;
     }
     .content {
+      .grade-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+      }
       .ant-progress {
         display: inline-block;
         width: 200px;

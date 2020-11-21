@@ -1,4 +1,4 @@
-import { FormControl, Select, Button } from "tinper-bee";
+import { FormControl, Button } from "tinper-bee";
 import React, { Fragment } from "react";
 import styled from 'styled-components';
 import "bee-form-control/build/FormControl.css";
@@ -9,66 +9,11 @@ import "bee-pagination/build/Pagination.css";
 import "bee-tabs/build/Tabs.css";
 import Header from "../common/Header";
 import Content from "../common/Content";
-
+import makeAjaxRequest from '../../util/request';
+import { message } from 'antd';
 class RecommendFooter extends React.Component {
   state = {
   };
-
-  columns = [
-    {
-      title: "编号",
-      dataIndex: "order",
-      key: "agreementNum",
-      width: "5%",
-    },
-    {
-      title: "问题描述",
-      dataIndex: "productName",
-      key: "productName",
-      width: "20%",
-    },
-    {
-      title: "类型",
-      dataIndex: "isvName",
-      key: "isvName",
-      width: "8%",
-    },
-    {
-      title: "服务商",
-      dataIndex: "operatorName",
-      key: "operatorName",
-      width: "8%",
-    },
-    {
-      title: "商品名称",
-      dataIndex: "originalPrice",
-      key: "originalPrice",
-      width: "8%",
-    },
-    { title: "提问时间", dataIndex: "discount", key: "discount", width: "15%" },
-    { title: "问题状态", dataIndex: "payMode", key: "payMode", width: "8%" },
-    {
-      title: "展示状态",
-      dataIndex: "busiAmount",
-      key: "busiAmount",
-      width: "8%",
-    },
-    {
-      title: "操作",
-      dataIndex: "commitTime",
-      key: "commitTime",
-      width: "20%",
-      render: (value) => {
-        return value ? (
-          <div>
-            <a>查看</a>
-            <a>隐藏</a>
-            <a>删除</a>
-          </div>
-        ) : null;
-      },
-    },
-  ];
 
   componentDidMount() {
     this.fetchDetail();
@@ -82,6 +27,18 @@ class RecommendFooter extends React.Component {
 
   /* 搜索 */
   fetchDetail = () => { };
+
+  submit = async () => {
+    const { } = this.state;
+    try {
+      await makeAjaxRequest('/xxx', 'post', {
+      });
+      message.success('操作成功');
+      this.fetchDetail();
+    } catch (err) {
+      message.error(err.message);
+    }
+  }
 
   render() {
     const { aaa, bbb, ccc, ddd } = this.state;
@@ -114,7 +71,7 @@ class RecommendFooter extends React.Component {
             />
           </div>
           <div className='action-wrap'>
-            <Button colors="primary" onClick={this.showAdd}>保存</Button>
+            <Button colors="primary" onClick={this.submit}>保存</Button>
           </div>
         </Content>
       </Fragment>

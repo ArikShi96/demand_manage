@@ -19,7 +19,7 @@ class RecommendMerchant extends React.Component {
       total: 0, // 总数量
       items: 0, // 总页数
       activePage: 1, // 当前页面
-      size: 10, // 每页多少
+      pageSize: 10, // 每页多少
     },
     formData: {
       dataItem: {}
@@ -36,12 +36,12 @@ class RecommendMerchant extends React.Component {
     },
     {
       title: "名称",
-      dataIndex: "username",
+      dataIndex: "name",
       width: "30%",
     },
     {
       title: "跳转链接",
-      dataIndex: "navigation_url",
+      dataIndex: "navigationUrl",
       width: "20%",
     },
     {
@@ -51,7 +51,7 @@ class RecommendMerchant extends React.Component {
     },
     {
       title: "操作",
-      dataIndex: "in_id",
+      dataIndex: "indexNavigationId",
       width: "20%",
       render: (value, item) => {
         return (
@@ -69,15 +69,6 @@ class RecommendMerchant extends React.Component {
     this.searchList();
   }
 
-  changeDate = (d, dataString) => {
-    if (dataString && dataString.length > 0) {
-      let data = dataString.split('"');
-      this.setState({ start_time: data[1], end_time: data[3] });
-    } else if (d.length === 0) {
-      this.setState({ start_time: '', end_time: '' });
-    }
-  };
-
   handleChange = (type, e) => {
     this.setState({
       [type]: e,
@@ -92,7 +83,7 @@ class RecommendMerchant extends React.Component {
   };
 
   dataNumSelect = (index, value) => {
-    this.setState({ dataSource: { ...this.state.dataSource, size: value, activePage: 1 } }, () => {
+    this.setState({ dataSource: { ...this.state.dataSource, pageSize: value, activePage: 1 } }, () => {
       this.searchList();
     });
   };
@@ -112,7 +103,7 @@ class RecommendMerchant extends React.Component {
         dataSource
       } = this.state;
       const { activePage } = dataSource;
-      const res = await makeAjaxRequest('/index/navigation/list', 'get', {
+      const res = await makeAjaxRequest('/index/navigation/getAll', 'get', {
         page_num: activePage,
       });
       const data = res.data || [];
@@ -127,7 +118,7 @@ class RecommendMerchant extends React.Component {
           ...this.state.dataSource,
           content: data,
           total: res.sum || 0,
-          items: Math.floor((res.sum || 0) / this.state.dataSource.size) + 1
+          items: Math.floor((res.sum || 0) / this.state.dataSource.pageSize) + 1
         }
       });
     } catch (err) {
@@ -148,19 +139,23 @@ class RecommendMerchant extends React.Component {
       }
       case 'delete': {
         this.setState({
-          showDeleteModal: true
+          showDeleteModal: true,
+          deleteItem: item
         })
         break;
       }
       case 'confirmDelete': {
         try {
           this.hideDeleteModal();
-          await makeAjaxRequest('/index/recommendisv/dele', 'get', { isv_recommend_id: item.isvId });
-          message.success('操作成功');
+          await makeAjaxRequest('/index/recommendisv/dele', 'get', { in_id: item.indexNavigationId });
+          message.success('删除成功');
           this.searchList();
         } catch (err) {
           message.error(err.message);
         }
+        break;
+      }
+      default: {
         break;
       }
     }
@@ -200,16 +195,19 @@ class RecommendMerchant extends React.Component {
 
   submit = async () => {
     const { dataItem } = this.state.formData;
-    const { in_id, username, navigation_url } = dataItem;
+    const { indexNavigationId, name, navigationUrl } = dataItem;
     try {
       this.hideAddModal();
-      if (in_id) {
+      if (indexNavigationId) {
         await makeAjaxRequest('/index/navigation/editQuerSave', 'post', {
-          in_id, username, navigation_url
+          in_id: indexNavigationId,
+          name,
+          navigation_url: navigationUrl
         });
       } else {
         await makeAjaxRequest('/index/navigation/save', 'post', {
-          username, navigation_url
+          name,
+          navigation_url: navigationUrl
         });
       }
       message.success('操作成功');
@@ -272,33 +270,35 @@ class RecommendMerchant extends React.Component {
             <FormList.Item label="名称" labelCol={100}>
               <FormControl
                 className="search-item"
-                value={dataItem.username}
-                onChange={this.handleFormDataChange.bind(null, "username")}
+                value={dataItem.name}
+                onChange={this.handleFormDataChange.bind(null, "name")}
                 style={{ width: 250 }}
               />
             </FormList.Item>
             <FormList.Item label="跳转链接" labelCol={100}>
               <FormControl
                 className="search-item"
-                value={dataItem.navigation_url}
-                onChange={this.handleFormDataChange.bind(null, "navigation_url")}
+                value={dataItem.navigationUrl}
+                onChange={this.handleFormDataChange.bind(null, "navigationUrl")}
                 style={{ width: 250 }}
               />
             </FormList.Item>
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.hideAddModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-            <Button onClick={this.submit} colors="primary">确认</Button>
+            <Button onClick={this.submit} colors="primary" disabled={!dataItem.name || !dataItem.navigationUrl}>确认</Button>
           </Modal.Footer>
         </Modal>
         {/* 提示框 - 删除 */}
         <Modal
           show={showDeleteModal}
+          style={{ marginTop: '20vh' }}
         >
           <Modal.Header closeButton>
             <Modal.Title>删除提示</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+            删除后,此顶部导航将不再在前端显示.
             确认删除此顶部导航?
             </Modal.Body>
           <Modal.Footer>

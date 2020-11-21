@@ -72,15 +72,6 @@ class TagList extends React.Component {
     this.searchList();
   }
 
-  changeDate = (d, dataString) => {
-    if (dataString && dataString.length > 0) {
-      let data = dataString.split('"');
-      this.setState({ start_time: data[1], end_time: data[3] });
-    } else if (d.length === 0) {
-      this.setState({ start_time: '', end_time: '' });
-    }
-  };
-
   handleChange = (type, e) => {
     this.setState({
       [type]: e,
@@ -163,7 +154,7 @@ class TagList extends React.Component {
         try {
           this.hideDeleteModal();
           await makeAjaxRequest(`/label/delLabel/${item.labelId}`, 'post', {});
-          message.success('操作成功');
+          message.success('删除成功');
           this.searchList();
         } catch (err) {
           message.error(err.message);
@@ -347,7 +338,13 @@ class TagList extends React.Component {
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.hideAddModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-            <Button onClick={this.submit} colors="primary" disabled={!dataItem.labelName || !dataItem.labelType}>确认</Button>
+            <Button
+              onClick={this.submit}
+              colors="primary"
+              disabled={!dataItem.labelName || (!dataItem.labelType && dataItem.labelType !== 0)}
+            >
+              确认
+            </Button>
           </Modal.Footer>
         </Modal>
         {/* 提示框 - 删除 */}

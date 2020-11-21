@@ -32,7 +32,7 @@ class OrderCom extends React.Component {
     start_time: '',
     end_time: '',
     average: '',
-    comment_type: '',
+    show_status: '',
     showDeleteModal: false,
     deleteItem: '',
   };
@@ -48,7 +48,7 @@ class OrderCom extends React.Component {
       dataIndex: "average",
       width: "25%",
       render: (value, item) => {
-        return <span>{`${value}(${item.product_score})`}</span>
+        return <span>{`${value} ( ${item.speed_score} 、 ${item.quality_score} 、 ${item.attitude_score} )`}</span>
       }
     },
     {
@@ -87,11 +87,13 @@ class OrderCom extends React.Component {
     this.searchList();
   }
 
-  changeDate = (d, dataString) => {
-    if (dataString && dataString.length > 0) {
-      let data = dataString.split('"');
-      this.setState({ start_time: data[1], end_time: data[3] });
-    } else if (d.length === 0) {
+  changeDate = (moments) => {
+    if (moments && moments.length > 0) {
+      this.setState({
+        start_time: `${moments[0].format('YYYY-MM-DD')} 00:00:00`,
+        end_time: `${moments[1].format('YYYY-MM-DD')} 00:00:00`
+      });
+    } else {
       this.setState({ start_time: '', end_time: '' });
     }
   };
@@ -124,7 +126,7 @@ class OrderCom extends React.Component {
       start_time: '',
       end_time: '',
       average: '',
-      comment_type: '',
+      show_status: '',
     }, () => {
       this.searchList();
     });
@@ -139,7 +141,7 @@ class OrderCom extends React.Component {
         start_time,
         end_time,
         average,
-        comment_type,
+        show_status,
         dataSource
       } = this.state;
       const { activePage } = dataSource;
@@ -150,7 +152,7 @@ class OrderCom extends React.Component {
         start_time,
         end_time,
         average,
-        comment_type
+        show_status
       });
       (res.data || []).forEach((item, index) => {
         item.order = (index + 1)
@@ -173,13 +175,16 @@ class OrderCom extends React.Component {
     switch (action) {
       case 'toggle': {
         try {
-          await makeAjaxRequest('/newcomment/hide', 'get', { id: item.id });
+          await makeAjaxRequest('/newcomment/hide', 'get', {
+            id: item.id,
+            show_status: item.show_status === 0 ? 1 : 0
+          });
           message.success('操作成功');
           this.searchList();
-          break;
         } catch (err) {
           message.error(err.message);
         }
+        break;
       }
       case 'delete': {
         this.setState({
@@ -192,12 +197,12 @@ class OrderCom extends React.Component {
         try {
           this.hideDeleteModal();
           await makeAjaxRequest('/newcomment/dele', 'get', { id: item.id });
-          message.success('操作成功');
+          message.success('删除成功');
           this.searchList();
-          break;
         } catch (err) {
           message.error(err.message);
         }
+        break;
       }
       default: {
         break;
@@ -221,7 +226,7 @@ class OrderCom extends React.Component {
       order_id,
       comment,
       average,
-      comment_type,
+      show_status,
       showDeleteModal,
     } = this.state;
     const { activePage, content, total, items } = dataSource;
@@ -271,8 +276,8 @@ class OrderCom extends React.Component {
                 <Select
                   placeholder="全部状态"
                   className="search-item"
-                  onChange={this.handleChange.bind(null, "comment_type")}
-                  value={comment_type}
+                  onChange={this.handleChange.bind(null, "show_status")}
+                  value={show_status}
                 >
                   {[
                     { id: "0", stat: "显示" },
@@ -323,6 +328,7 @@ class OrderCom extends React.Component {
             <Modal.Title>删除提示</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+            删除后,此评论将不再在前端显示.
             确认删除此评论?
             </Modal.Body>
           <Modal.Footer>

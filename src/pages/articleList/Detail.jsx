@@ -147,5 +147,6 @@ export default styled(ArticleDetail)`
 }
 .button-action {
   text-align: center;
+  margin: 40px 0;
 }
 `;

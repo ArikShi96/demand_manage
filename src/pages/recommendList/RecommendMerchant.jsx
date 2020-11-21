@@ -20,7 +20,7 @@ class RecommendMerchant extends React.Component {
       total: 0, // 总数量
       items: 0, // 总页数
       activePage: 1, // 当前页面
-      size: 10, // 每页多少
+      pageSize: 10, // 每页多少
     },
     formData: {
       dataItem: {}
@@ -65,15 +65,6 @@ class RecommendMerchant extends React.Component {
     this.fetchAllList();
   }
 
-  changeDate = (d, dataString) => {
-    if (dataString && dataString.length > 0) {
-      let data = dataString.split('"');
-      this.setState({ start_time: data[1], end_time: data[3] });
-    } else if (d.length === 0) {
-      this.setState({ start_time: '', end_time: '' });
-    }
-  };
-
   handleChange = (type, e) => {
     this.setState({
       [type]: e,
@@ -88,7 +79,7 @@ class RecommendMerchant extends React.Component {
   };
 
   dataNumSelect = (index, value) => {
-    this.setState({ dataSource: { ...this.state.dataSource, size: value, activePage: 1 } }, () => {
+    this.setState({ dataSource: { ...this.state.dataSource, pageSize: value, activePage: 1 } }, () => {
       this.searchList();
     });
   };
@@ -119,7 +110,7 @@ class RecommendMerchant extends React.Component {
           ...this.state.dataSource,
           content: res.data || [],
           total: res.sum || 0,
-          items: Math.floor((res.sum || 0) / this.state.dataSource.size) + 1
+          items: Math.floor((res.sum || 0) / this.state.dataSource.pageSize) + 1
         }
       });
     } catch (err) {
@@ -149,16 +140,19 @@ class RecommendMerchant extends React.Component {
         })
         break;
       }
-
       case 'confirmDelete': {
         try {
           this.hideDeleteModal();
           await makeAjaxRequest('/index/recommendisv/dele', 'get', { isv_recommend_id: item.isvRecommendId });
-          message.success('操作成功');
+          message.success('删除成功');
           this.searchList();
         } catch (err) {
           message.error(err.message);
         }
+        break;
+      }
+      default: {
+        break;
       }
     }
   }
@@ -280,7 +274,7 @@ class RecommendMerchant extends React.Component {
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.hideAddModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-            <Button onClick={this.submit} colors="primary">确认</Button>
+            <Button onClick={this.submit} colors="primary" disabled={!dataItem.isv_id}>确认</Button>
           </Modal.Footer>
         </Modal>
         {/* 提示框 - 删除 */}

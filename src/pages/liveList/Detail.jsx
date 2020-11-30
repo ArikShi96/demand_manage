@@ -8,7 +8,8 @@ import "bee-table/build/Table.css";
 import "bee-pagination/build/Pagination.css";
 import "bee-tabs/build/Tabs.css";
 import Header from "../common/Header";
-import { Input } from 'antd';
+import { Input, message } from 'antd';
+import makeAjaxRequest from '../../util/request';
 class LiveDetail extends React.Component {
   state = {
     detail: {},
@@ -28,24 +29,37 @@ class LiveDetail extends React.Component {
     });
   };
 
-  fetchDetail = () => { }
+  fetchDetail = async () => {
+    try {
+      const res = await makeAjaxRequest(`/live/info`, 'get', { liveTelecastId: this.props.match.params.id })
+      this.setState({
+        detail: res.data,
+        status: res.data.auditStatus
+      })
+    } catch (err) {
+      message.error(err.message)
+    }
+  }
 
   navigateBack = () => {
     this.props.history.push(`/LiveList`);
   }
 
-  submit = () => {
+  submit = async () => {
     const { status } = this.state;
-    switch (status) {
-      case '0': {
-        this.showReject();
-        break;
-      }
-      case '1': {
-        break;
-      }
-      case '2': {
-        break;
+    if (status === '2') {
+      this.showReject();
+    } else {
+      try {
+        await makeAjaxRequest(`/live/audit`, 'post', {
+          liveTelecastId: this.props.match.params.id,
+          type: status,
+          reason: status === '0' ? "待审核" : '通过'
+        });
+        message.success('操作成功');
+        this.fetchDetail();
+      } catch (err) {
+        message.error(err.message);
       }
     }
   }
@@ -81,41 +95,60 @@ class LiveDetail extends React.Component {
     })
   }
 
-  confirmRejectModal = () => {
+  confirmRejectModal = async () => {
     this.setState({
       formData: {
         ...this.state.formData,
         showRejectModal: false,
       }
-    })
+    });
+    try {
+      await makeAjaxRequest(`/live/audit`, 'post', {
+        liveTelecastId: this.props.match.params.id,
+        type: '2',
+        reason: this.state.formData.dataItem.reason
+      });
+      message.success('操作成功');
+      this.fetchDetail();
+    } catch (err) {
+      message.error(err.message);
+    }
   }
 
   render() {
     const { className } = this.props;
-    const { formData, status } = this.state;
+    const { formData, status, detail } = this.state;
     const { showRejectModal, dataItem } = formData;
     return (
       <div className={className}>
         <Header title="直播详情" />
         <div className='detail-wrap'>
-          <div className='label'>问答类型</div>
-          <div className='content'>123</div>
+          <div className='label'>直播名称</div>
+          <div className='content'>{detail.liveName}</div>
         </div>
         <div className='detail-wrap'>
-          <div className='label'>相关商品</div>
-          <div className='content'>123</div>
+          <div className='label'>直播时间</div>
+          <div className='content'>
+            {detail.liveTelecastId && `${new Date(detail.liveStarttime).toLocaleString()} 至 ${new Date(detail.liveEndtime).toLocaleString()}`}
+          </div>
         </div>
         <div className='detail-wrap'>
-          <div className='label'>提问时间</div>
-          <div className='content'>123</div>
+          <div className='label'>直播封面</div>
+          <div className='content'>
+            <img src={detail.coverUrl} alt="" />
+          </div>
         </div>
         <div className='detail-wrap'>
-          <div className='label'>问题详情</div>
-          <div className='content'>123</div>
+          <div className='label'>直播预告</div>
+          <div className='content'>
+            <video controls>
+              <source src={detail.noticeUrl} />
+            </video>
+          </div>
         </div>
         <div className='detail-wrap'>
-          <div className='label'>回答</div>
-          <div className='content'>123</div>
+          <div className='label'>直播描述</div>
+          <div className='content'>{detail.liveInfo}</div>
         </div>
         {/* 审核状态 */}
         <div className='select-wrap'>
@@ -154,7 +187,7 @@ class LiveDetail extends React.Component {
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.hideRejectModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-            <Button onClick={this.confirmRejectModal} colors="primary">确认</Button>
+            <Button onClick={this.confirmRejectModal} colors="primary" disabled={!dataItem.reason}>确认</Button>
           </Modal.Footer>
         </Modal>
       </div>
@@ -185,6 +218,10 @@ export default styled(LiveDetail)`
   }
   .content {
     flex: auto;
+    img, video {
+      width: 300px;
+      height: auto;
+    }
   }
 }
 .action-wrap {

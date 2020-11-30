@@ -14,29 +14,32 @@ import Content from "../common/Content";
 import FormList from "../common/Form";
 import SearchPanel from "../common/SearchPanel";
 import makeAjaxRequest from '../../util/request';
-import { message, Popover, Input } from 'antd';
+import { message, Popover, Input, Checkbox } from 'antd';
+import multiSelect from "bee-table/build/lib/multiSelect.js"
 const { RangePicker } = DatePicker;
 const format = "YYYY-MM-DD";
 const Option = Select.Option;
 class LiveList extends React.Component {
   state = {
+    selectedRows: [],
     dataSource: {
-      content: [{}],
+      content: [],
       total: 0, // 总数量
       items: 0, // 总页数
       activePage: 1, // 当前页面
       pageSize: 10, // 每页多少
     },
+    isvList: [],
+    isvMap: {},
     liveName: '',
     liveStatus: '',
-    reviewStatus: '',
-    ivsId: '',
-    start_time: '',
-    end_time: '',
+    auditStatus: '',
+    isvId: '',
+    liveStarttime: '',
+    liveEndtime: '',
     formData: {
       dataItem: {}
     },
-    popoverVisible: false,
     showDeleteModal: false,
     deleteItem: '',
   };
@@ -54,60 +57,73 @@ class LiveList extends React.Component {
     },
     {
       title: "服务商",
-      dataIndex: "isvName",
+      dataIndex: "isvId",
       width: "10%",
+      render: (value) => {
+        return this.state.isvMap[value]
+      }
     },
     {
       title: "开始时间",
       dataIndex: "liveStarttime",
       width: "15%",
+      render: (value) => {
+        return new Date(value).toLocaleString()
+      }
     },
     {
       title: "结束时间",
       dataIndex: "liveEndtime",
       width: "15%",
+      render: (value) => {
+        return new Date(value).toLocaleString()
+      }
     },
     {
       title: "直播状态", dataIndex: "ip_address", width: "10%",
-      render: (value, item) => {
-        if (value === 0 || value === '0') {
-          return <span></span>
+      render: (value) => {
+        if (value === 2 || value === '2') {
+          return <span>直播中</span>
+        } else if (value === 1 || value === '1') {
+          return <span>未开始</span>
         } else {
-          return <span></span>
+          return <span>已结束</span>
         }
       }
     },
     {
-      title: "审核状态", dataIndex: "create_time", width: "10%",
-      render: (value, item) => {
+      title: "审核状态", dataIndex: "auditStatus", width: "10%",
+      render: (value) => {
         if (value === 0 || value === '0') {
-          return <span></span>
+          return <span>待审核</span>
+        } else if (value === 1 || value === '1') {
+          return <span>已通过</span>
         } else {
-          return <span></span>
+          return <span>已拒绝</span>
         }
       }
     },
     {
       title: "显示状态",
-      dataIndex: "show_status",
+      dataIndex: "displayFlag",
       width: "10%",
       render: (value, item) => {
         if (value === 0 || value === '0') {
-          return <a onClick={this.handleTableAction.bind(this, item, 'toggleHide')}>隐藏</a>
-        } else {
           return <a onClick={this.handleTableAction.bind(this, item, 'toggleHide')}>显示</a>
+        } else {
+          return <a onClick={this.handleTableAction.bind(this, item, 'toggleHide')}>隐藏</a>
         }
       }
     },
     {
       title: "推荐",
-      dataIndex: "show_status1",
+      dataIndex: "topop",
       width: "8%",
       render: (value, item) => {
         if (value === 0 || value === '0') {
-          return <a onClick={this.handleTableAction.bind(this, item, 'toggleRecommend')}>推荐</a>
-        } else {
           return <a onClick={this.handleTableAction.bind(this, item, 'toggleRecommend')}>取消推荐</a>
+        } else {
+          return <a onClick={this.handleTableAction.bind(this, item, 'toggleRecommend')}>推荐</a>
         }
       }
     },
@@ -127,7 +143,7 @@ class LiveList extends React.Component {
                 </div>
               }
               trigger="click"
-              visible={this.state.popoverVisible}
+              visible={item.popoverVisible}
               onVisibleChange={this.handleVisibleChange}
             >
               <a className='action' onClick={this.handleTableAction.bind(null, item, 'review')}>审核</a>
@@ -140,18 +156,19 @@ class LiveList extends React.Component {
     },
   ];
 
-  componentDidMount() {
+  async componentDidMount() {
+    await this.searchIsvList();
     this.searchList();
   }
 
   changeDate = (moments) => {
     if (moments && moments.length > 0) {
       this.setState({
-        start_time: `${moments[0].format('YYYY-MM-DD')} 00:00:00`,
-        end_time: `${moments[1].format('YYYY-MM-DD')} 00:00:00`
+        liveStarttime: `${moments[0].format('YYYY-MM-DD')} 00:00:00`,
+        liveEndtime: `${moments[1].format('YYYY-MM-DD')} 00:00:00`
       });
     } else {
-      this.setState({ start_time: '', end_time: '' });
+      this.setState({ liveStarttime: '', liveEndtime: '' });
     }
   };
 
@@ -160,6 +177,18 @@ class LiveList extends React.Component {
       [type]: e,
     });
   };
+
+  getSelectedDataFunc = (rows) => {
+    const rowIds = rows.map(row => {
+      return row.liveTelecastId
+    })
+    this.state.dataSource.content.forEach(item => {
+      item._checked = rowIds.includes(item.liveTelecastId);
+    })
+    this.setState({
+      selectedRows: rows
+    })
+  }
 
   // 分页
   handleSelect = (activePage) => { // page, pageSize
@@ -180,10 +209,10 @@ class LiveList extends React.Component {
     this.setState({
       liveName: '',
       liveStatus: '',
-      reviewStatus: '',
-      ivsId: '',
-      start_time: '',
-      end_time: '',
+      auditStatus: '',
+      isvId: '',
+      liveStarttime: '',
+      liveEndtime: '',
     }, () => {
       this.searchList();
     });
@@ -193,24 +222,49 @@ class LiveList extends React.Component {
   searchList = async () => {
     try {
       const {
-        dataSource
+        dataSource,
+        liveName, liveStatus, auditStatus, isvId, liveStarttime, liveEndtime,
       } = this.state;
       const { activePage, pageSize } = dataSource;
       const res = await makeAjaxRequest('/live/list', 'get', {
         pageIndex: activePage - 1,
         pageSize,
-        queryType: 2
+        queryType: 2,
+        liveName,
+        liveStatus,
+        auditStatus,
+        isvId,
+        liveStarttime,
+        liveEndtime,
       });
       (res.data.content || []).forEach((item, index) => {
         item.order = (index + 1)
       })
       this.setState({
+        selectedRows: [],
         dataSource: {
           ...this.state.dataSource,
           content: res.data.content || [],
-          total: res.sum || 0,
-          items: Math.floor((res.sum || 0) / this.state.dataSource.pageSize) + 1
+          total: res.data.totalCount || 0,
+          items: Math.floor((res.data.totalCount || 0) / this.state.dataSource.pageSize) + 1
         }
+      });
+    } catch (err) {
+      message.error(err.message);
+    }
+  };
+
+  /* 服务商下拉 */
+  searchIsvList = async () => {
+    try {
+      const res = await makeAjaxRequest('/live/isv/select', 'get', {});
+      const isvMap = {};
+      (res.data || []).forEach(isv => {
+        isvMap[isv.value] = isv.label
+      });
+      this.setState({
+        isvList: res.data || [],
+        isvMap
       });
     } catch (err) {
       message.error(err.message);
@@ -228,9 +282,9 @@ class LiveList extends React.Component {
       // 隐藏
       case 'toggleHide': {
         try {
-          await makeAjaxRequest('/live/hide', 'get', {
-            id: item.liveTelecastId,
-            show_status: item.show_status
+          await makeAjaxRequest(`/live/display`, 'post', {
+            liveTelecastId: item.liveTelecastId,
+            type: item.displayFlag === '0' ? '1' : '0'
           });
           message.success('操作成功');
           this.searchList();
@@ -242,9 +296,9 @@ class LiveList extends React.Component {
       // 推荐
       case 'toggleRecommend': {
         try {
-          await makeAjaxRequest('/live/recommend', 'get', {
-            id: item.liveTelecastId,
-            show_status: item.show_status
+          await makeAjaxRequest(`/live/topop`, 'post', {
+            liveTelecastId: item.liveTelecastId,
+            type: item.topop === '0' ? '1' : "0"
           });
           message.success('操作成功');
           this.searchList();
@@ -255,18 +309,24 @@ class LiveList extends React.Component {
       }
       // 审查
       case 'review': {
+        item.popoverVisible = true
         this.setState({
           popoverVisible: true
-        });
+        })
         break;
       }
       // 审查通过
       case 'reviewApprove': {
+        item.popoverVisible = false
         this.setState({
-          popoverVisible: false
-        });
+          popoverVisible: true
+        })
         try {
-          await makeAjaxRequest('/live/approve', 'get', { id: item.liveTelecastId });
+          await makeAjaxRequest(`/live/audit`, 'post', {
+            liveTelecastId: item.liveTelecastId,
+            type: '1',
+            reason: "通过"
+          });
           message.success('操作成功');
           this.searchList();
         } catch (err) {
@@ -276,24 +336,19 @@ class LiveList extends React.Component {
       }
       // 审查拒绝
       case 'reviewReject': {
-        this.setState({
-          popoverVisible: false,
-          ...this.state.formData,
-          formData: {
-            showRejectModal: true
-          }
-        });
+        item.popoverVisible = false;
+        this.showReject(item);
         break;
       }
       // 确认审查拒绝
       case 'confirmReject': {
-        this.setState({
-          formData: {
-            showRejectModal: true
-          }
-        });
+        this.hideRejectModal();
         try {
-          await makeAjaxRequest('/live/reject', 'get', { id: item.liveTelecastId });
+          await makeAjaxRequest(`/live/audit`, 'post', {
+            liveTelecastId: item.liveTelecastId,
+            type: '2',
+            reason: this.state.formData.dataItem.reason
+          });
           message.success('操作成功');
           this.searchList();
         } catch (err) {
@@ -303,12 +358,16 @@ class LiveList extends React.Component {
       }
       // 批量审查通过
       case 'mulReviewApprove': {
-        this.setState({
-          popoverVisible: false
-        });
         try {
-          await makeAjaxRequest('/live/approve', 'get', { id: item.liveTelecastId });
+          await Promise.all(this.state.selectedRows.map(row => {
+            return makeAjaxRequest(`/live/audit`, 'post', {
+              liveTelecastId: row.liveTelecastId,
+              type: '1',
+              reason: '通过'
+            });
+          }));
           message.success('操作成功');
+          this.searchList();
         } catch (err) {
           message.error(err.message);
         }
@@ -316,13 +375,18 @@ class LiveList extends React.Component {
       }
       // 批量审查拒绝
       case 'mulReviewReject': {
-        this.setState({
-          popoverVisible: false,
-          ...this.state.formData,
-          formData: {
-            showRejectModal: true
-          }
-        });
+        try {
+          await Promise.all(this.state.selectedRows.map(row => {
+            return makeAjaxRequest(`/live/audit`, 'post', {
+              liveTelecastId: row.liveTelecastId,
+              type: '2',
+              reason: '不符合直播标准'
+            });
+          }));
+          this.searchList();
+        } catch (err) {
+          message.error(err.message);
+        }
         break;
       }
       // 删除
@@ -337,7 +401,7 @@ class LiveList extends React.Component {
       case 'confirmDelete': {
         try {
           this.hideDeleteModal();
-          await makeAjaxRequest('/live/del', 'get', { id: item.liveTelecastId });
+          await makeAjaxRequest(`/live/remove`, 'post', { liveTelecastId: item.liveTelecastId });
           message.success('删除成功');
           this.searchList();
         } catch (err) {
@@ -361,7 +425,7 @@ class LiveList extends React.Component {
       formData: {
         ...this.state.formData,
         showRejectModal: true,
-        data: item || {}
+        dataItem: item || {}
       }
     })
   }
@@ -372,7 +436,7 @@ class LiveList extends React.Component {
         ...this.state.formData,
         dataItem: {
           ...this.state.formData.dataItem,
-          [type]: e,
+          [type]: e.target ? e.target.value : "",
         }
       }
     })
@@ -388,7 +452,7 @@ class LiveList extends React.Component {
   }
 
   submitReject = async () => {
-    this.handleTableAction(null, 'confirmReject')
+    this.handleTableAction(this.state.formData.dataItem, 'confirmReject')
   }
 
   hideDeleteModal = () => {
@@ -405,13 +469,15 @@ class LiveList extends React.Component {
     const {
       liveName,
       liveStatus,
-      reviewStatus,
-      ivsId,
+      auditStatus,
+      isvId,
       dataSource,
       formData,
       showDeleteModal,
+      isvList,
     } = this.state;
-    const { showRejectModal, reason } = formData;
+    const MultiSelectTable = multiSelect(Table, Checkbox)
+    const { showRejectModal, dataItem } = formData;
     const { activePage, content, total, items } = dataSource;
     return (
       <Fragment>
@@ -438,8 +504,8 @@ class LiveList extends React.Component {
                   value={liveStatus}
                 >
                   {[
-                    { id: "1", stat: "直播中" },
-                    { id: "2", stat: "未开始" },
+                    { id: "1", stat: "未开始" },
+                    { id: "2", stat: "直播中" },
                     { id: "3", stat: "已结束" }].map((item) => (
                       <Option key={item.id} value={item.id}>
                         {item.stat}
@@ -451,13 +517,13 @@ class LiveList extends React.Component {
                 <Select
                   placeholder="审核状态"
                   className="search-item"
-                  onChange={this.handleChange.bind(null, "reviewStatus")}
-                  value={reviewStatus}
+                  onChange={this.handleChange.bind(null, "auditStatus")}
+                  value={auditStatus}
                 >
                   {[
+                    { id: "0", stat: "待审核" },
                     { id: "1", stat: "已通过" },
-                    { id: "2", stat: "待审核" },
-                    { id: "3", stat: "已拒绝" }].map((item) => (
+                    { id: "2", stat: "已拒绝" }].map((item) => (
                       <Option key={item.id} value={item.id}>
                         {item.stat}
                       </Option>
@@ -468,17 +534,14 @@ class LiveList extends React.Component {
                 <Select
                   placeholder="服务商"
                   className="search-item"
-                  onChange={this.handleChange.bind(null, "ivsId")}
-                  value={ivsId}
+                  onChange={this.handleChange.bind(null, "isvId")}
+                  value={isvId}
                 >
-                  {[
-                    { id: "1", stat: "直播中" },
-                    { id: "2", stat: "未开始" },
-                    { id: "3", stat: "已结束" }].map((item) => (
-                      <Option key={item.id} value={item.id}>
-                        {item.stat}
-                      </Option>
-                    ))}
+                  {isvList.map((item) => (
+                    <Option key={item.value} value={item.value}>
+                      {item.label}
+                    </Option>
+                  ))}
                 </Select>
               </FormList.Item>
               <FormList.Item label="直播时间" labelCol={100}>
@@ -497,7 +560,11 @@ class LiveList extends React.Component {
             <Button colors="primary" onClick={this.handleTableAction.bind(this, null, 'mulReviewApprove')}>批量通过</Button>
             <Button colors="primary" onClick={this.handleTableAction.bind(this, null, 'mulReviewReject')}>批量拒绝</Button>
           </div>
-          <Table rowKey="order" columns={this.columns} data={content} />
+          <MultiSelectTable
+            getSelectedDataFunc={this.getSelectedDataFunc}
+            rowKey="order"
+            columns={this.columns}
+            data={content} />
           <Pagination
             first
             last
@@ -525,11 +592,11 @@ class LiveList extends React.Component {
             <Modal.Title>拒绝原因</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Input.TextArea value={reason} rows={4} onChange={this.handleFormDataChange.bind(this, reason)} />
+            <Input.TextArea value={dataItem.reason} rows={4} onChange={this.handleFormDataChange.bind(this, 'reason')} />
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.hideRejectModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-            <Button onClick={this.submitReject} colors="primary">确认</Button>
+            <Button onClick={this.submitReject} colors="primary" disabled={!dataItem.reason}>确认</Button>
           </Modal.Footer>
         </Modal>
         {/* 提示框 - 删除 */}
@@ -560,6 +627,9 @@ export default styled(LiveList)`
 }
 .u-table .u-table-tbody td {
   text-align: center;
+  .ant-checkbox-input {
+    pointer-events: none;
+  }
 }
 .u-table .u-table-tbody .actions .action{
   margin: 0 10px;

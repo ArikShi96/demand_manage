@@ -188,7 +188,7 @@ class RecommendApp extends React.Component {
     try {
       this.hideAddModal();
       if (linksId) {
-        await makeAjaxRequest('/recommend/addRecommend', 'post', {}, {
+        await makeAjaxRequest('/recommend/updateRecommend', 'post', {}, {
         });
       } else {
         await makeAjaxRequest('/recommend/addRecommend', 'post', {}, {

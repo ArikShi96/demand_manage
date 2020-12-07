@@ -23,9 +23,12 @@ class RecommendProduct extends React.Component {
       activePage: 1, // 当前页面
       pageSize: 10, // 每页多少
     },
-    productName: '',
-    classId: '',
-    classId2: '',
+    product_name: '',
+    class_id: '',
+    class_sun_id: '',
+    class_ids: [],
+    class_sun_ids: [],
+    class_pros: [],
     formData: {
       dataItem: {}
     },
@@ -41,7 +44,7 @@ class RecommendProduct extends React.Component {
     },
     {
       title: "商品名称",
-      dataIndex: "productName",
+      dataIndex: "product_name",
       width: "20%",
     },
     {
@@ -53,6 +56,16 @@ class RecommendProduct extends React.Component {
       title: "排序",
       dataIndex: "sort",
       width: "10%",
+      render: (value, item) => {
+        return (
+          <FormControl
+            data-id={item.hot_sale_product_id}
+            className="search-item"
+            value={value}
+            onChange={this.handleSortChange.bind(null, item)}
+          />
+        );
+      }
     },
     {
       title: "添加时间",
@@ -81,12 +94,33 @@ class RecommendProduct extends React.Component {
 
   componentDidMount() {
     this.searchList();
+    this.fetchClassIds();
+    // 绑定回车事件
+    if (!this.tableRef || !this.tableRef.bodyTable) {
+      return;
+    }
+    this.tableRef.bodyTable.addEventListener('keypress', (event) => {
+      if (event.target.className.includes('u-form-control') && event.keyCode === 13) {
+        const sort = event.target.value;
+        this.setSort(event.target.dataset.id, sort);
+        event.target.blur();
+      }
+    });
   }
 
   handleChange = (type, e) => {
     this.setState({
       [type]: e,
+    }, () => {
+      if (type === 'class_id') {
+        this.fetchClassIds2()
+      }
     });
+  };
+
+  handleSortChange = (item, e) => {
+    item.sort = e;
+    this.forceUpdate();
   };
 
   // 分页
@@ -105,9 +139,10 @@ class RecommendProduct extends React.Component {
   /* 重置 */
   resetSearch() {
     this.setState({
-      productName: '',
-      classId: '',
-      classId2: '',
+      product_name: '',
+      class_id: '',
+      class_sun_id: '',
+      class_sun_ids: []
     }, () => {
       this.searchList();
     });
@@ -117,31 +152,81 @@ class RecommendProduct extends React.Component {
   searchList = async () => {
     try {
       const {
-        productName,
-        classId,
-        classId2,
+        product_name,
+        class_id,
+        class_sun_id,
         dataSource
       } = this.state;
       const { activePage } = dataSource;
-      const res = await makeAjaxRequest('/newcomment/getallOperateProduct', 'get', {
-        start: activePage - 1,
-        limit: '',
-        productName,
-        classId,
-        classId2
+      const res = await makeAjaxRequest('/hot/sale/getHotSaleList', 'get', {
+        page_num: activePage,
+        product_name,
+        class_id,
+        class_sun_id
       });
-      // const res = { "data": [{ "qManageId": "74e9f34a-3423-415e-b1fc-9fda6d3b866e", "question": "问题2", "questionType": 0, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "深圳市宏数科技有限公司", "productId": "sdfdsfdsfdsfsdf", "productName": "任意的商品名", "askTime": null, "questionStatus": 0, "isdisplay": 1, "userId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "delFlag": 0, "addTime": "2020-11-12 14:48:26", "updateTime": null }, { "qManageId": "1f77de75-f11b-486c-b42c-dcb622163e69", "question": "问题1", "questionType": 0, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "深圳市宏数科技有限公司", "productId": "空", "productName": "空", "askTime": null, "questionStatus": 0, "isdisplay": 1, "userId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "delFlag": 0, "addTime": "2020-11-12 14:48:02", "updateTime": null }, { "qManageId": "sdfdsf", "question": "4", "questionType": 0, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "", "productId": "bc663882-bc56-4910-a4ae-69f9a7863e18", "productName": "", "askTime": "2020-11-10 18:03:54.0", "questionStatus": 1, "isdisplay": 1, "userId": "ab635124-1ac4-491c-90fb-8d7dc8485f16", "delFlag": 0, "addTime": "2020-11-10 18:03:47", "updateTime": null }, { "qManageId": "65456456", "question": "2", "questionType": 0, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "", "productId": "91462e8b-dba5-4256-bf13-3e1d2b884844", "productName": "", "askTime": "2020-11-10 18:03:26.0", "questionStatus": 0, "isdisplay": 1, "userId": "ab635124-1ac4-491c-90fb-8d7dc8485f15", "delFlag": 0, "addTime": "2020-11-10 18:03:39", "updateTime": null }, { "qManageId": "45tretert", "question": "1", "questionType": 1, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "", "productId": "", "productName": "", "askTime": "2020-11-10 16:28:01.0", "questionStatus": 0, "isdisplay": 1, "userId": "ab635124-1ac4-491c-10fb-8d7dc8485f17", "delFlag": 0, "addTime": "2020-11-10 16:28:16", "updateTime": null }, { "qManageId": "dsfdsfdsfadsf", "question": "3", "questionType": 0, "isvId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "isvName": "", "productId": "bc663882-bc56-4910-a4ae-69f9a7863e18", "productName": "", "askTime": "2020-11-10 16:15:35.0", "questionStatus": 0, "isdisplay": 1, "userId": "bb635124-1ac4-491c-90fb-8d7dc8485f17", "delFlag": 0, "addTime": "2020-11-10 16:16:52", "updateTime": null }], "new_page_num": 1, "sum": 6, "status": 1, "msg": "查询成功" };
-      (res.data.content || []).forEach((item, index) => {
+      (res.data || []).forEach((item, index) => {
         item.order = (index + 1)
       })
       this.setState({
         dataSource: {
           ...this.state.dataSource,
-          content: res.data.content || [],
-          total: res.data.totalElements || 0,
-          items: Math.floor((res.data.totalElements || 0) / this.state.dataSource.pageSize) + 1
+          content: res.data || [],
+          total: res.sum || 0,
+          items: Math.floor((res.sum || 0) / this.state.dataSource.pageSize) + 1
         }
       });
+    } catch (err) {
+      message.error(err.message);
+    }
+  };
+
+  /* 排序 */
+  setSort = async (id, sort) => {
+    try {
+      const res = await makeAjaxRequest('/hot/sale/editSort', 'post', {}, {
+        hotSaleProductId: id,
+        sort
+      });
+      message.success('操作成功');
+      this.searchList();
+    } catch (err) {
+      message.error(err.message);
+    }
+  };
+
+  /* 分类 */
+  fetchClassIds = async () => {
+    try {
+      const res = await makeAjaxRequest('/hot/sale/getProductCategory1', 'get', {});
+      this.setState({
+        class_ids: res.data || []
+      })
+    } catch (err) {
+      message.error(err.message);
+    }
+  };
+  fetchClassIds2 = async (class_id) => {
+    try {
+      const res = await makeAjaxRequest('/hot/sale/getProductCategory2', 'get', {
+        category_id: class_id || this.state.class_id
+      });
+      this.setState({
+        class_sun_ids: res.data || [],
+        class_pros: []
+      })
+    } catch (err) {
+      message.error(err.message);
+    }
+  };
+  fetchClassProducts = async (class_id, class_sun_id) => {
+    try {
+      const res = await makeAjaxRequest('/hot/sale/selectProduct', 'get', {
+        product_name: "",
+        product_category2: class_sun_id || this.state.class_sun_id
+      });
+      this.setState({
+        class_pros: res.data || []
+      })
     } catch (err) {
       message.error(err.message);
     }
@@ -164,7 +249,7 @@ class RecommendProduct extends React.Component {
       case 'confirmDelete': {
         try {
           this.hideDeleteModal();
-          await makeAjaxRequest(`/hot/sale/delHotSale/${item.hotSaleProductId}`, 'get');
+          await makeAjaxRequest(`/hot/sale/delHotSale/${item.hot_sale_product_id}`, 'get');
           message.success('删除成功');
           this.searchList();
         } catch (err) {
@@ -180,17 +265,26 @@ class RecommendProduct extends React.Component {
 
   showAdd = (isEdit, item) => {
     this.setState({
+      class_sun_ids: [],
+      class_pros: [],
       formData: {
         ...this.state.formData,
         showAddModal: true,
         title: isEdit ? '编辑商品' : '新增商品',
         dataItem: item || {}
       }
-    })
+    }, async () => {
+      if (isEdit && item) {
+        await this.fetchClassIds2(item.class_id);
+        await this.fetchClassProducts(item.class_id, item.class_sun_id);
+      }
+    });
   }
 
   hideAddModal = () => {
     this.setState({
+      class_sun_ids: [],
+      class_pros: [],
       formData: {
         ...this.state.formData,
         showAddModal: false,
@@ -207,18 +301,37 @@ class RecommendProduct extends React.Component {
           [type]: e,
         }
       }
-    })
+    });
+    if (type === 'class_id') {
+      this.fetchClassIds2(e);
+    }
+    if (type === 'class_sun_id') {
+      this.fetchClassProducts(this.state.formData.dataItem.class_id, e);
+    }
   }
 
   submit = async () => {
-    const { hotSaleProductId } = this.state.formData.dataItem;
+    const { hot_sale_product_id } = this.state.formData.dataItem;
+    const { class_id, class_sun_id, product_id } = this.state.formData.dataItem;
+    const product = this.state.class_pros.find(pro => {
+      return pro.product_id === product_id
+    })
     try {
       this.hideAddModal();
-      if (hotSaleProductId) {
+      if (hot_sale_product_id) {
         await makeAjaxRequest('/hot/sale/updateHotSale', 'post', {}, {
+          productId: product_id,
+          productName: product.product_name,
+          hotSaleProductId: hot_sale_product_id,
+          classId: class_id,
+          classSunId: class_sun_id,
         });
       } else {
         await makeAjaxRequest('/hot/sale/addHotSale', 'post', {}, {
+          productId: product_id,
+          productName: product.product_name,
+          classId: class_id,
+          classSunId: class_sun_id,
         });
       }
       message.success('操作成功');
@@ -241,9 +354,12 @@ class RecommendProduct extends React.Component {
   render() {
     const {
       dataSource,
-      productName,
-      classId,
-      classId2,
+      product_name,
+      class_id,
+      class_sun_id,
+      class_ids,
+      class_sun_ids,
+      class_pros,
       formData,
       showDeleteModal,
     } = this.state;
@@ -261,20 +377,20 @@ class RecommendProduct extends React.Component {
               <FormList.Item label="商品名称" labelCol={100}>
                 <FormControl
                   className="search-item"
-                  value={productName}
-                  onChange={this.handleChange.bind(null, "productName")}
+                  value={product_name}
+                  onChange={this.handleChange.bind(null, "product_name")}
                 />
               </FormList.Item>
               <FormList.Item label="一级分类" labelCol={100}>
                 <Select
                   placeholder="选择一级分类"
                   className="search-item"
-                  onChange={this.handleChange.bind(null, "classId")}
-                  value={classId}
+                  onChange={this.handleChange.bind(null, "class_id")}
+                  value={class_id}
                 >
-                  {[].map((item) => (
-                    <Option key={item.id} value={item.id}>
-                      {item.stat}
+                  {class_ids.map((item) => (
+                    <Option key={item.category_id1} value={item.category_id1}>
+                      {item.category_name}
                     </Option>
                   ))}
                 </Select>
@@ -283,12 +399,12 @@ class RecommendProduct extends React.Component {
                 <Select
                   placeholder="选择二级分类"
                   className="search-item"
-                  onChange={this.handleChange.bind(null, "classId2")}
-                  value={classId2}
+                  onChange={this.handleChange.bind(null, "class_sun_id")}
+                  value={class_sun_id}
                 >
-                  {[].map((item) => (
-                    <Option key={item.id} value={item.id}>
-                      {item.stat}
+                  {class_sun_ids.map((item) => (
+                    <Option key={item.category_id2} value={item.category_id2}>
+                      {item.category_name}
                     </Option>
                   ))}
                 </Select>
@@ -298,7 +414,7 @@ class RecommendProduct extends React.Component {
           <div className='action-wrap'>
             <Button colors="primary" onClick={this.showAdd.bind(this, false)}>新增</Button>
           </div>
-          <Table rowKey="order" columns={this.columns} data={content} />
+          <Table ref={(ref) => this.tableRef = ref} rowKey="order" columns={this.columns} data={content} />
           <Pagination
             first
             last
@@ -330,12 +446,12 @@ class RecommendProduct extends React.Component {
               <Select
                 placeholder="选择一级分类"
                 className="search-item"
-                onChange={this.handleFormDataChange.bind(null, "first")}
-                value={dataItem.first}
+                onChange={this.handleFormDataChange.bind(null, "class_id")}
+                value={dataItem.class_id}
               >
-                {[].map((item) => (
-                  <Option key={item.id} value={item.id}>
-                    {item.stat}
+                {class_ids.map((item) => (
+                  <Option key={item.category_id1} value={item.category_id1}>
+                    {item.category_name}
                   </Option>
                 ))}
               </Select>
@@ -344,12 +460,12 @@ class RecommendProduct extends React.Component {
               <Select
                 placeholder="选择二级分类"
                 className="search-item"
-                onChange={this.handleFormDataChange.bind(null, "second")}
-                value={dataItem.second}
+                onChange={this.handleFormDataChange.bind(null, "class_sun_id")}
+                value={dataItem.class_sun_id}
               >
-                {[].map((item) => (
-                  <Option key={item.id} value={item.id}>
-                    {item.stat}
+                {class_sun_ids.map((item) => (
+                  <Option key={item.category_id2} value={item.category_id2}>
+                    {item.category_name}
                   </Option>
                 ))}
               </Select>
@@ -358,12 +474,12 @@ class RecommendProduct extends React.Component {
               <Select
                 placeholder="选择商品"
                 className="search-item"
-                onChange={this.handleFormDataChange.bind(null, "pro")}
-                value={dataItem.pro}
+                onChange={this.handleFormDataChange.bind(null, "product_id")}
+                value={dataItem.product_id}
               >
-                {[].map((item) => (
-                  <Option key={item.id} value={item.id}>
-                    {item.stat}
+                {class_pros.map((item) => (
+                  <Option key={item.product_id} value={item.product_id}>
+                    {item.product_name}
                   </Option>
                 ))}
               </Select>
@@ -371,7 +487,7 @@ class RecommendProduct extends React.Component {
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.hideAddModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-            <Button onClick={this.submit} colors="primary">确认</Button>
+            <Button onClick={this.submit} colors="primary" disabled={!dataItem.class_id || !dataItem.class_sun_id || !dataItem.product_id}>确认</Button>
           </Modal.Footer>
         </Modal>
         {/* 提示框 - 删除 */}

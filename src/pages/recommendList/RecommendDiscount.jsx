@@ -22,6 +22,11 @@ class RecommendDiscount extends React.Component {
       activePage: 1, // 当前页面
       pageSize: 10, // 每页多少
     },
+    class_id: '',
+    class_sun_id: '',
+    class_ids: [],
+    class_sun_ids: [],
+    class_pros: [],
     formData: {
       dataItem: {}
     },
@@ -37,12 +42,12 @@ class RecommendDiscount extends React.Component {
     },
     {
       title: "商品名称",
-      dataIndex: "productName",
+      dataIndex: "product_name",
       width: "20%",
     },
     {
       title: "商品类型",
-      dataIndex: "type",
+      dataIndex: "product_type",
       width: "20%",
     },
     {
@@ -72,6 +77,7 @@ class RecommendDiscount extends React.Component {
 
   componentDidMount() {
     this.searchList();
+    this.fetchClassIds();
   }
 
   handleChange = (type, e) => {

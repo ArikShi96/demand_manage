@@ -15,7 +15,7 @@
   height: 100%;
   text-align: center;
   line-height: 50px;
-  background: #E53935;
+  background: #e53935;
   overflow: hidden;
 }
 .mix-portal-header .portal-logo {
@@ -37,7 +37,7 @@
   left: -7px;
   width: 1px;
   height: 28px;
-  background: #FFF;
+  background: #fff;
 }
 .mix-portal-header .portal-header-content {
   overflow-x: hidden;

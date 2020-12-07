@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react'
-import classnames from 'classnames'
-import './index.css'
+import React, { useEffect, useRef } from "react";
+import classnames from "classnames";
+import "./index.css";
 
 const bodyClientHeight = document.body.clientHeight;
 /**
@@ -16,13 +16,18 @@ const bodyClientHeight = document.body.clientHeight;
 const Content = (props) => {
   let contentNode = useRef(null);
   let {
-    className="", contentCls="", hasFooter=false, contentTop,
-    minHeight=true, setHeight=false, viewType='card'
+    className = "",
+    contentCls = "",
+    hasFooter = false,
+    contentTop,
+    minHeight = true,
+    setHeight = false,
+    viewType = "card",
   } = props;
-  let cls = classnames('mix-ma-content-wrap', className, {
-    'footer-bottom': hasFooter,
-    'view-card': viewType === 'card',
-    'has-content-top': !!contentTop
+  let cls = classnames("mix-ma-content-wrap", className, {
+    "footer-bottom": hasFooter,
+    "view-card": viewType === "card",
+    "has-content-top": !!contentTop,
   });
   let _contentCls = classnames("content-con-wrap", contentCls);
 
@@ -31,26 +36,25 @@ const Content = (props) => {
       let contentDom = contentNode.current;
       let clientRect = contentDom.getBoundingClientRect();
       let { top } = clientRect;
-      let styleKey = 'height';
+      let styleKey = "height";
       if (setHeight) {
-        styleKey = 'height'
-      }else {
+        styleKey = "height";
+      } else {
         if (minHeight) {
-          styleKey = 'minHeight'
+          styleKey = "minHeight";
         }
       }
-      contentDom.style[styleKey] = ( bodyClientHeight - top - 20 - (props.minus || 0) ) + 'px'
+      contentDom.style[styleKey] =
+        bodyClientHeight - top - 20 - (props.minus || 0) + "px";
     }
   }, [minHeight, setHeight, viewType]);
   let { children } = props;
   return (
     <div ref={contentNode} className={cls}>
-      {typeof contentTop === 'function' ? contentTop() : contentTop}
-      <div className={_contentCls}>
-        {children}
-      </div>
+      {typeof contentTop === "function" ? contentTop() : contentTop}
+      <div className={_contentCls}>{children}</div>
     </div>
-  )
-}
+  );
+};
 
-export default Content
+export default Content;

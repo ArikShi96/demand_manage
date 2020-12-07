@@ -1,145 +1,145 @@
 .isv-detail-header {
-    text-align: center;
-    color: #212121;
-    font-weight: 600;
-    line-height: 32px;
+  text-align: center;
+  color: #212121;
+  font-weight: 600;
+  line-height: 32px;
 }
 
 .isv-detail-zone {
-    padding: 0 50px 30px;
+  padding: 0 50px 30px;
 }
 
 .isv-detail-zone-row {
-    margin-top: 16px;
-    margin-bottom: 5px;
-    height: 40px;
-    border-bottom: 1px dotted #e8e8e8;
-    position: relative;
+  margin-top: 16px;
+  margin-bottom: 5px;
+  height: 40px;
+  border-bottom: 1px dotted #e8e8e8;
+  position: relative;
 }
 
 .isv-detail-zone-icon {
-    display: inline-block;
-    margin-left: 7px;
-    width: 20px;
-    height: 20px;
+  display: inline-block;
+  margin-left: 7px;
+  width: 20px;
+  height: 20px;
 }
 
 .isv-detail-zone-svg {
-    display: inline-block;
-    margin-left: 7px;
-    width: 26px;
-    height: 27px;
+  display: inline-block;
+  margin-left: 7px;
+  width: 26px;
+  height: 27px;
 }
 
 .isv-detail-zone-btn {
-    float: right;
-    margin: 4px 15px 0 0;
+  float: right;
+  margin: 4px 15px 0 0;
 }
 
 .isv-detail-zone-header {
-    display: inline-block;
-    position: relative;
-    margin-top: 13px;
-    margin-left: 11px;
-    font-size: 14px;
-    color: #6a7c94;
-    line-height: 19px;
+  display: inline-block;
+  position: relative;
+  margin-top: 13px;
+  margin-left: 11px;
+  font-size: 14px;
+  color: #6a7c94;
+  line-height: 19px;
 }
 
 .isv-detail-zone-icon {
-    display: inline-block;
-    margin-left: 7px;
-    width: 20px;
-    height: 20px;
+  display: inline-block;
+  margin-left: 7px;
+  width: 20px;
+  height: 20px;
 }
 
-.isv-detail-zone-item:nth-child(2n+1) {
-    padding-left: 0;
+.isv-detail-zone-item:nth-child(2n + 1) {
+  padding-left: 0;
 }
 
 .isv-detail-zone-item,
 .isv-detail-zone-date {
-    margin-bottom: 5px;
-    display: inline-block;
-    width: 50%;
-    padding-left: 6%;
-    vertical-align: top;
+  margin-bottom: 5px;
+  display: inline-block;
+  width: 50%;
+  padding-left: 6%;
+  vertical-align: top;
 }
 
 .isv-detail-zone-date.block {
-    display: block;
-    width: 100%;
-    padding-left: 10%;
+  display: block;
+  width: 100%;
+  padding-left: 10%;
 }
 
 .isv-detail-zone-item-title {
-    position: relative;
-    display: inline-block;
-    vertical-align: top;
-    width: 25%;
-    text-align: right;
-    font-size: 12px;
-    color: #40465C;
-    line-height: 40px;
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  width: 25%;
+  text-align: right;
+  font-size: 12px;
+  color: #40465c;
+  line-height: 40px;
 }
 
 .isv-detail-zone-item-value {
-    display: inline-block;
-    margin-left: 20px;
-    color: rgba(47, 55, 61, 1);
-    line-height: 40px;
-    font-size: 12px;
+  display: inline-block;
+  margin-left: 20px;
+  color: rgba(47, 55, 61, 1);
+  line-height: 40px;
+  font-size: 12px;
 }
 
 img.isv-detail-zone-item-value {
-    width: 200px;
+  width: 200px;
 }
 
 .isv-detail-zone-item-select {
-    position: absolute;
-    margin-left: 20px;
-    margin-top: 5px;
-    width: 150px;
+  position: absolute;
+  margin-left: 20px;
+  margin-top: 5px;
+  width: 150px;
 }
 
 .isv-detail-zone-item-btn,
 .isv-detail-zone-item-edit {
-    margin: 5px 0 0 16px;
-    vertical-align: baseline;
+  margin: 5px 0 0 16px;
+  vertical-align: baseline;
 }
 
 .isv-detail-zone-item-edit:nth-child(3) {
-    margin-left: 190px;
+  margin-left: 190px;
 }
 
 .isv-detail-zone-item-btn:last-of-type {
-    margin-right: 0;
+  margin-right: 0;
 }
 
 .isv-detail-zone-item-input {
-    position: absolute;
-    margin-left: 20px;
-    margin-top: 5px;
-    width: 150px;
+  position: absolute;
+  margin-left: 20px;
+  margin-top: 5px;
+  width: 150px;
 }
 
 .u-button-dark {
-    background-color: #505766;
-    border: 1px solid #505766;
+  background-color: #505766;
+  border: 1px solid #505766;
 }
 
 .u-button-dark:hover {
-    background-color: #3c424d;
-    border: 1px solid #3c424d;
+  background-color: #3c424d;
+  border: 1px solid #3c424d;
 }
 
 .u-button-secondary {
-    color: #212121;
-    background-color: #eceff1;
-    border: 1px solid #eceff1;
+  color: #212121;
+  background-color: #eceff1;
+  border: 1px solid #eceff1;
 }
 
 .u-button-secondary:hover {
-    background-color: #dfe1e6;
-    border-color: #dfe1e6;
+  background-color: #dfe1e6;
+  border-color: #dfe1e6;
 }

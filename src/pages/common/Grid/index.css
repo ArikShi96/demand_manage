@@ -23,18 +23,18 @@
   transition: none;
 }
 .ucg-ma-grid-wrapper .u-table tr:nth-child(2n) {
-  background: #FAFAFA;
+  background: #fafafa;
 }
 .ucg-ma-grid-wrapper .u-table tr:nth-child(2n + 1) {
   background: #ffffff;
 }
 .ucg-ma-grid-wrapper .u-table tr:hover,
 .ucg-ma-grid-wrapper .u-table tr.u-table-row-hover {
-  background: #EBECF0;
+  background: #ebecf0;
 }
 .ucg-ma-grid-wrapper .u-table tr.u-table-row.selected,
 .ucg-ma-grid-wrapper .u-table tr.u-table-row.ref-multiple-table-row-selected {
-  background: #EBECF0;
+  background: #ebecf0;
 }
 .ucg-ma-grid-wrapper .u-table th,
 .ucg-ma-grid-wrapper .u-table td {
@@ -54,7 +54,7 @@
   height: 39px;
 }
 .ucg-ma-grid-wrapper .ucg-grid-empty {
-  color: #BEBEBE;
+  color: #bebebe;
   font-size: 12px;
   line-height: 20px;
 }
@@ -106,27 +106,27 @@
 }
 .u-table .u-table-thead th {
   padding: 9px 8px 8px 20px;
-  background-color: #F7F9FD;
+  background-color: #f7f9fd;
   font-size: 12px;
   line-height: 17px;
   color: #333333;
   font-weight: bold;
-  font-family: Microsoft YaHei,Arial;
+  font-family: Microsoft YaHei, Arial;
 }
 .u-table .u-table-tbody tr {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
 }
 .u-table .u-table-tbody tr:hover {
-  background-color: #EDF1F7;
+  background-color: #edf1f7;
 }
 .u-table .u-table-tbody .u-table-row.u-table-row-hover {
-  background-color: #EDF1F7 !important;
+  background-color: #edf1f7 !important;
 }
 .u-table tr:nth-child(2n) {
   background-color: #fff;
 }
 .u-table .u-table-tbody tr.has-checked {
-  background-color: #EDF1F7 !important;
+  background-color: #edf1f7 !important;
 }
 .u-table .u-table-tbody td {
   padding: 7px 8px 7px 20px;
@@ -148,7 +148,7 @@
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
   border-radius: 2px;
-  border-color: #CCCCCC;
+  border-color: #cccccc;
 }
 .u-table .u-table-content .u-checkbox.is-checked .u-checkbox-label:before {
   width: 14px;
@@ -157,7 +157,7 @@
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
   border-radius: 2px;
-  border-color: #CCCCCC;
+  border-color: #cccccc;
 }
 .u-table .u-table-content .u-checkbox .u-checkbox-label:after {
   width: 14px;
@@ -170,7 +170,7 @@
 .u-table .u-table-content .u-checkbox.is-checked .u-checkbox-label:after {
   font-size: 12px;
   line-height: 14px;
-  color: #EE2223;
+  color: #ee2223;
   text-align: start;
 }
 /*按钮*/
@@ -197,11 +197,11 @@
 }
 .u-table .u-table-tbody .action-btns-container:before {
   display: table;
-  content: '';
+  content: "";
 }
 .u-table .u-table-tbody .action-btns-container:after {
   display: table;
-  content: '';
+  content: "";
   clear: both;
 }
 .u-table .u-table-tbody .action-btns-container .action-btn {

@@ -70,7 +70,11 @@
 .ucg-ma-form.u-form .u-form-item .u-select .u-select-selection {
   height: 32px;
 }
-.ucg-ma-form.u-form .u-form-item .u-select .u-select-selection .u-select-selection-rendered {
+.ucg-ma-form.u-form
+  .u-form-item
+  .u-select
+  .u-select-selection
+  .u-select-selection-rendered {
   line-height: 32px;
 }
 .ucg-ma-form.u-form .u-form-item .u-select.u-select-disabled {
@@ -84,7 +88,7 @@
   width: 100%;
 }
 .ucg-ma-form.u-form .u-form-item .error {
-  color: #CE2F23;
+  color: #ce2f23;
   display: block;
   font-size: 12px;
   margin-top: 2px;
@@ -109,7 +113,11 @@
   width: 100%;
   min-width: auto;
 }
-.ucg-ma-form.u-form .u-form-item .u-input-number.u-input-group.simple .u-input-group-btn .icon-group {
+.ucg-ma-form.u-form
+  .u-form-item
+  .u-input-number.u-input-group.simple
+  .u-input-group-btn
+  .icon-group {
   height: 32px;
 }
 .ucg-ma-form.u-form .ref-input-wrap {
@@ -135,13 +143,13 @@
 .ucg-ma-form.u-form.sm .u-form-item .u-form-control {
   height: 26px;
   font-size: 12px;
-  color: #4A4A4A;
+  color: #4a4a4a;
 }
 .ucg-ma-form.u-form.sm .u-form-item .u-label {
   height: 26px;
   line-height: 26px;
   font-size: 12px;
-  color: #4A4A4A;
+  color: #4a4a4a;
 }
 .ucg-ma-form.u-form.sm .u-form-item .form-input-wrap {
   height: 26px;
@@ -153,13 +161,24 @@
 .ucg-ma-form.u-form.sm .u-form-item .u-select .u-select-selection {
   height: 26px;
 }
-.ucg-ma-form.u-form.sm .u-form-item .u-select .u-select-selection .u-select-selection-rendered {
+.ucg-ma-form.u-form.sm
+  .u-form-item
+  .u-select
+  .u-select-selection
+  .u-select-selection-rendered {
   line-height: 26px;
 }
-.ucg-ma-form.u-form.sm .u-form-item .u-input-number.u-input-group.simple .u-input-group-btn .icon-group {
+.ucg-ma-form.u-form.sm
+  .u-form-item
+  .u-input-number.u-input-group.simple
+  .u-input-group-btn
+  .icon-group {
   height: 26px;
 }
-.ucg-ma-form.u-form.sm .u-form-item .u-input-number.u-input-group .u-input-group-addon {
+.ucg-ma-form.u-form.sm
+  .u-form-item
+  .u-input-number.u-input-group
+  .u-input-group-addon {
   font-size: 12px;
 }
 .ucg-ma-form.u-form p.form-item-hint {

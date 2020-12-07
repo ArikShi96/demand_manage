@@ -1,32 +1,26 @@
-import React, { Component, Fragment } from 'react';
-import { PortalHeader } from '../common/Portal'
-import iuap from './iuap-logo.svg';
-import './index.css';
+import React, { Component, Fragment } from "react";
+import { PortalHeader } from "../common/Portal";
+import iuap from "./iuap-logo.svg";
+import "./index.css";
 export default class HeaderBar extends Component {
   constructor(props) {
-    super(props)
+    super(props);
   }
 
-  componentDidMount = () => {
-  }
+  componentDidMount = () => {};
 
   portalHeaderProps = {
     portalLogo: iuap,
-    logoType: 'image',
+    logoType: "image",
     logoClick: undefined,
-    portalName: '云市场',
+    portalName: "云市场",
     navUser: true,
     onUserMenuSelect: undefined,
     homeHref: undefined,
-    userMenus: []
-  }
+    userMenus: [],
+  };
 
   render() {
-    return (
-      <PortalHeader
-        {...this.portalHeaderProps}
-      >
-      </PortalHeader>
-    )
+    return <PortalHeader {...this.portalHeaderProps}></PortalHeader>;
   }
 }

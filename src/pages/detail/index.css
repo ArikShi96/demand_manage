@@ -1,47 +1,47 @@
 .order-detail-header {
-    text-align: center;
-    color: #212121;
-    font-weight: 600;
-    line-height: 32px;
+  text-align: center;
+  color: #212121;
+  font-weight: 600;
+  line-height: 32px;
 }
 
 .order-detail-zone {
-    padding: 0 50px 30px;
+  padding: 0 50px 30px;
 }
 
 .order-detail-zone-header {
-    margin-bottom: 18px;
-    height: 29px;
-    border-bottom: 1px dotted #e8e8e8;
-    position: relative;
-    font-size: 14px;
-    color: #6a7c94;
-    line-height: 19px;
-    vertical-align: top;
+  margin-bottom: 18px;
+  height: 29px;
+  border-bottom: 1px dotted #e8e8e8;
+  position: relative;
+  font-size: 14px;
+  color: #6a7c94;
+  line-height: 19px;
+  vertical-align: top;
 }
 
 .order-detail-zone-item {
-    display: inline-grid;
-    width: 49.99%;
-    margin-bottom: 5px;
+  display: inline-grid;
+  width: 49.99%;
+  margin-bottom: 5px;
 }
 
 .order-detail-zone-item-title {
-    vertical-align: top;
-    color: #40465c;
-    font-size: 14px;
-    line-height: 32px;
-    position: relative;
-    padding-left: 50px;
+  vertical-align: top;
+  color: #40465c;
+  font-size: 14px;
+  line-height: 32px;
+  position: relative;
+  padding-left: 50px;
 }
 
 .order-detail-zone-item-value {
-    vertical-align: middle;
-    line-height: 32px;
-    color: #2f373d;
-    padding-left: 50px;
+  vertical-align: middle;
+  line-height: 32px;
+  color: #2f373d;
+  padding-left: 50px;
 }
 
 .confirm-btn {
-    margin-left: 30px;
+  margin-left: 30px;
 }

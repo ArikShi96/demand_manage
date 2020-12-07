@@ -1,191 +1,191 @@
 .rc-calendar-picker {
-    z-index: 1800;
+  z-index: 1800;
 }
 
 .u-form-item .u-form-control,
 .u-form-item .u-select,
 .u-form-item .datepicker-container,
 .u-form-item .datepicker-container .u-form-control {
-    width: 250px;
+  width: 250px;
 }
 
 .u-form-item .u-form-control {
-    padding: 0px 7px;
+  padding: 0px 7px;
 }
 
 .tabList {
-    margin: 0 45px 4px;
+  margin: 0 45px 4px;
 }
 
 .tabList div {
-    width: 120px;
-    height: 32px;
-    display: inline-block;
-    line-height: 32px;
-    text-align: center;
-    font-size: 14px;
-    color: #40465B;
-    border-radius: 0 100px 100px 0;
-    border: 1px solid #505766;
-    cursor: pointer;
+  width: 120px;
+  height: 32px;
+  display: inline-block;
+  line-height: 32px;
+  text-align: center;
+  font-size: 14px;
+  color: #40465b;
+  border-radius: 0 100px 100px 0;
+  border: 1px solid #505766;
+  cursor: pointer;
 }
 
 .tabList div:first-child {
-    border-radius: 100px 0 0px 100px;
+  border-radius: 100px 0 0px 100px;
 }
 
 .tabList .active {
-    background: #40465B;
-    color: #fff;
-    border: 1px solid #40465B;
+  background: #40465b;
+  color: #fff;
+  border: 1px solid #40465b;
 }
 
 .button-zone {
-    width: 100%;
-    height: 100%;
-    text-align: right;
-    padding: 16px 20px;
+  width: 100%;
+  height: 100%;
+  text-align: right;
+  padding: 16px 20px;
 }
 
 /*通用表格样式*/
 
 .u-table-tbody tr:nth-child(2n) {
-    background: #fafafa;
+  background: #fafafa;
 }
 
 .u-table-tbody tr:hover {
-    background-color: #edf1f7;
+  background-color: #edf1f7;
 }
 
 .u-table thead tr:last-child {
-    border-bottom: 1px solid #c1c7d0;
+  border-bottom: 1px solid #c1c7d0;
 }
 
 .u-table .u-table-thead th {
-    padding: 9px 8px 8px 20px;
-    background-color: #f7f9fd;
-    font-size: 12px;
-    line-height: 17px;
-    color: #333;
-    font-weight: 700;
-    height: 40px;
+  padding: 9px 8px 8px 20px;
+  background-color: #f7f9fd;
+  font-size: 12px;
+  line-height: 17px;
+  color: #333;
+  font-weight: 700;
+  height: 40px;
 }
 
 .u-table td .u-switch-span {
-    display: inline-block;
-    vertical-align: middle;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .u-table .u-table-tbody td {
-    padding: 7px 8px 7px 20px;
-    font-size: 12px;
-    line-height: 26px;
-    color: #333333;
+  padding: 7px 8px 7px 20px;
+  font-size: 12px;
+  line-height: 26px;
+  color: #333333;
 }
 
 .u-table .u-table-content {
-    border: none;
-    border-top: 1px solid #505766;
+  border: none;
+  border-top: 1px solid #505766;
 }
 
 .u-timeline {
-    margin: 20px 0 0 20px;
+  margin: 20px 0 0 20px;
 }
 
 .u-timeline-item-content p {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 /*通用表格样式*/
 
 /*通用Modal样式*/
 .u-modal .u-modal-header {
-    border-bottom: 1px solid #E4E4E4;
+  border-bottom: 1px solid #e4e4e4;
 }
 
 .u-modal-body .u-form {
-    margin-top: 10px;
-    background: #FFFFFF;
+  margin-top: 10px;
+  background: #ffffff;
 }
 
 .u-modal-body .u-form-item {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .u-modal-body .u-input-number-out {
-    display: inline-block;
-    width: 250px;
+  display: inline-block;
+  width: 250px;
 }
 
 .u-modal-body .form-inline {
-    display: inline-block;
-    margin-bottom: 0;
+  display: inline-block;
+  margin-bottom: 0;
 }
 
 /*通用Modal样式*/
 
 .u-form-item .u-label {
-    min-width: 30%;
+  min-width: 30%;
 }
 
 .button-transparent {
-    background: rgba(255, 255, 255, 1) !important;
-    border-radius: 4px;
-    border: 1px solid rgba(217, 217, 217, 1) !important;
+  background: rgba(255, 255, 255, 1) !important;
+  border-radius: 4px;
+  border: 1px solid rgba(217, 217, 217, 1) !important;
 }
 
 .button-transparent:hover {
-    border: 1px solid rgba(80, 87, 102, 1) !important;
+  border: 1px solid rgba(80, 87, 102, 1) !important;
 }
 
 /**bee-button复写*/
 .u-button[disabled] {
-    background-color: rgba(236, 239, 241, 0.4);
-    border: 1px solid rgba(236, 239, 241, 0.4);
-    color: rgba(177, 177, 177, 0.4);
+  background-color: rgba(236, 239, 241, 0.4);
+  border: 1px solid rgba(236, 239, 241, 0.4);
+  color: rgba(177, 177, 177, 0.4);
 }
 
 .u-button.u-button-dark {
-    background-color: #505766;
-    border: 1px solid #505766;
+  background-color: #505766;
+  border: 1px solid #505766;
 }
 
 .u-button.u-button-dark:hover {
-    background-color: #3C424D;
-    border: 1px solid #3C424D;
+  background-color: #3c424d;
+  border: 1px solid #3c424d;
 }
 
 .u-button.u-button-dark.u-button-border {
-    color: #505766;
-    background-color: #fff;
-    border: 1px solid #505766;
+  color: #505766;
+  background-color: #fff;
+  border: 1px solid #505766;
 }
 
 .u-button.u-button-dark.u-button-border:hover {
-    color: #FFF;
-    background-color: #3C424D;
-    border: 1px solid #3C424D;
+  color: #fff;
+  background-color: #3c424d;
+  border: 1px solid #3c424d;
 }
 
 /**bee-button复写*/
 /**bee-form-control复写*/
 .u-form-control:focus {
-    background: rgba(255, 255, 255, 1);
-    border-radius: 4px;
-    border: 1px solid rgba(80, 87, 102, 1);
+  background: rgba(255, 255, 255, 1);
+  border-radius: 4px;
+  border: 1px solid rgba(80, 87, 102, 1);
 }
 
 .u-form-control:hover {
-    background: rgba(255, 255, 255, 1);
-    border-radius: 4px;
-    border: 1px solid rgba(80, 87, 102, 1);
+  background: rgba(255, 255, 255, 1);
+  border-radius: 4px;
+  border: 1px solid rgba(80, 87, 102, 1);
 }
 
 /**bee-form-control复写*/
 .u-switch.is-checked {
-    background-color: #505766;
-    border: 1px solid #616161;
+  background-color: #505766;
+  border: 1px solid #616161;
 }
 
 .u-select-selection:hover,
@@ -193,10 +193,10 @@
 .u-select-focused .u-select-selection,
 .u-select-selection:focus,
 .u-select-selection:active {
-    border: 1px solid #505766;
+  border: 1px solid #505766;
 }
 
 .order-tabs-pane {
-    margin-top: -20px;
-    max-width: 100%;
+  margin-top: -20px;
+  max-width: 100%;
 }

@@ -49,7 +49,7 @@ class RecommendProduct extends React.Component {
     },
     {
       title: "商品类型",
-      dataIndex: "type",
+      dataIndex: "class_name",
       width: "20%",
     },
     {
@@ -69,7 +69,7 @@ class RecommendProduct extends React.Component {
     },
     {
       title: "添加时间",
-      dataIndex: "addTime",
+      dataIndex: "add_time",
       width: "20%",
       render: (value) => {
         return (
@@ -437,6 +437,7 @@ class RecommendProduct extends React.Component {
         <Modal
           show={showAddModal}
           style={{ marginTop: '20vh' }}
+          onHide={this.hideAddModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>{formData.title}</Modal.Title>
@@ -494,6 +495,7 @@ class RecommendProduct extends React.Component {
         <Modal
           show={showDeleteModal}
           style={{ marginTop: '20vh' }}
+          onHide={this.hideDeleteModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>删除提示</Modal.Title>

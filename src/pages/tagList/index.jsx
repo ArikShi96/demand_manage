@@ -47,6 +47,11 @@ class TagList extends React.Component {
       title: "标签类型",
       dataIndex: "labelType",
       width: "20%",
+      render: (value) => {
+        return (
+          <span>{{ "1": "产品标签", "2": "服务标签", "3": "行业标签" }[value]}</span>
+        )
+      }
     },
     {
       title: "创建时间",
@@ -114,21 +119,22 @@ class TagList extends React.Component {
         dataSource
       } = this.state;
       const { activePage, pageSize } = dataSource;
-      const res = await makeAjaxRequest('/label/getLabelList', 'post', {}, {
-        start: activePage,
+      const res = await makeAjaxRequest('/label/getLabelList', 'get', {
+        start: activePage - 1,
         limit: pageSize,
         labelName,
         labelType,
       });
-      (res.data || []).forEach((item, index) => {
+      const data = res.data.content || []
+      data.forEach((item, index) => {
         item.order = (index + 1)
       })
       this.setState({
         dataSource: {
           ...this.state.dataSource,
-          content: res.data || [],
-          total: res.sum || 0,
-          items: Math.floor((res.sum || 0) / this.state.dataSource.pageSize) + 1
+          content: data,
+          total: res.data.totalElements || 0,
+          items: Math.floor((res.data.totalElements || 0) / this.state.dataSource.pageSize) + 1
         }
       });
     } catch (err) {
@@ -216,6 +222,8 @@ class TagList extends React.Component {
           labelType
         });
       }
+      message.success('操作成功');
+      this.searchList();
     } catch (err) {
       message.error(err.message);
     }
@@ -302,6 +310,7 @@ class TagList extends React.Component {
         <Modal
           show={showAddModal}
           style={{ marginTop: '20vh' }}
+          onHide={this.hideAddModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>{title}</Modal.Title>
@@ -351,6 +360,7 @@ class TagList extends React.Component {
         <Modal
           show={showDeleteModal}
           style={{ marginTop: '20vh' }}
+          onHide={this.hideDeleteModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>删除提示</Modal.Title>

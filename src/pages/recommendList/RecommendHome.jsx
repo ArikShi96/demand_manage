@@ -356,6 +356,7 @@ class RecommendHome extends React.Component {
         <Modal
           show={showChangeModal}
           style={{ marginTop: '20vh' }}
+          onHide={this.hideChangeModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>推荐到首页</Modal.Title>

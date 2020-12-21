@@ -13,6 +13,11 @@ import makeAjaxRequest from '../../util/request';
 import { message } from 'antd';
 class RecommendFooter extends React.Component {
   state = {
+    footId: '',
+    copyright: '',
+    company: '',
+    beianhao: '',
+    anbei: ''
   };
 
   componentDidMount() {
@@ -26,12 +31,23 @@ class RecommendFooter extends React.Component {
   };
 
   /* 搜索 */
-  fetchDetail = () => { };
+  fetchDetail = async () => {
+    try {
+      const res = await makeAjaxRequest('/foot/getOne', 'get', {
+      });
+      this.setState({
+        ...res.data
+      })
+    } catch (err) {
+      message.error(err.message);
+    }
+  };
 
   submit = async () => {
-    const { } = this.state;
+    const { footId, copyright, company, beianhao, anbei } = this.state;
     try {
-      await makeAjaxRequest('/xxx', 'post', {
+      await makeAjaxRequest('/foot/save', 'post', {
+        footId, copyright, company, beianhao, anbei
       });
       message.success('操作成功');
       this.fetchDetail();
@@ -41,7 +57,7 @@ class RecommendFooter extends React.Component {
   }
 
   render() {
-    const { aaa, bbb, ccc, ddd } = this.state;
+    const { copyright, company, beianhao, anbei } = this.state;
     return (
       <Fragment>
         <Header style={{ background: "#fff", padding: 0 }} title="底部信息管理" />
@@ -50,24 +66,24 @@ class RecommendFooter extends React.Component {
             <div className='label'>底部信息</div>
             <FormControl
               className="input-item"
-              value={aaa}
-              onChange={this.handleChange.bind(null, "aaa")}
+              value={copyright}
+              onChange={this.handleChange.bind(null, "copyright")}
             />
             <FormControl
               className="input-item"
-              value={bbb}
-              onChange={this.handleChange.bind(null, "bbb")}
+              value={company}
+              onChange={this.handleChange.bind(null, "company")}
             />
             <FormControl
               className="input-item"
-              value={ccc}
-              onChange={this.handleChange.bind(null, "ccc")}
+              value={beianhao}
+              onChange={this.handleChange.bind(null, "beianhao")}
             />
             <img className='image' src="/market/market/dist/images/footer/beianhao.png" alt="" />
             <FormControl
               className="input-item"
-              value={ddd}
-              onChange={this.handleChange.bind(null, "ddd")}
+              value={anbei}
+              onChange={this.handleChange.bind(null, "anbei")}
             />
           </div>
           <div className='action-wrap'>

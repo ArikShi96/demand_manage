@@ -280,6 +280,7 @@ class ArticleList extends React.Component {
         <Modal
           show={showDeleteModal}
           style={{ marginTop: '20vh' }}
+          onHide={this.hideDeleteModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>删除提示</Modal.Title>

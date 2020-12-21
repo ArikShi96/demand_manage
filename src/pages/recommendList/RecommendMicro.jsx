@@ -250,6 +250,7 @@ class RecommendMicro extends React.Component {
         <Modal
           show={showAddModal}
           style={{ marginTop: '20vh' }}
+          onHide={this.hideAddModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>{formData.title}</Modal.Title>
@@ -307,6 +308,7 @@ class RecommendMicro extends React.Component {
         <Modal
           show={showDeleteModal}
           style={{ marginTop: '20vh' }}
+          onHide={this.hideDeleteModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>删除提示</Modal.Title>

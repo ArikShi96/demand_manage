@@ -147,7 +147,7 @@ class RecommendMerchant extends React.Component {
       case 'confirmDelete': {
         try {
           this.hideDeleteModal();
-          await makeAjaxRequest('/index/recommendisv/dele', 'get', { in_id: item.indexNavigationId });
+          await makeAjaxRequest('/index/navigation/dele', 'get', { in_id: item.indexNavigationId });
           message.success('删除成功');
           this.searchList();
         } catch (err) {
@@ -262,6 +262,7 @@ class RecommendMerchant extends React.Component {
         <Modal
           show={showAddModal}
           style={{ marginTop: '20vh' }}
+          onHide={this.hideAddModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>{formData.title}</Modal.Title>
@@ -293,6 +294,7 @@ class RecommendMerchant extends React.Component {
         <Modal
           show={showDeleteModal}
           style={{ marginTop: '20vh' }}
+          onHide={this.hideDeleteModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>删除提示</Modal.Title>

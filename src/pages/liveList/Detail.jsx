@@ -178,6 +178,7 @@ class LiveDetail extends React.Component {
         <Modal
           show={showRejectModal}
           style={{ marginTop: '20vh' }}
+          onHide={this.hideRejectModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>拒绝原因</Modal.Title>

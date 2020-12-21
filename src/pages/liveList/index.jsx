@@ -587,6 +587,7 @@ class LiveList extends React.Component {
         <Modal
           show={showRejectModal}
           style={{ marginTop: '20vh' }}
+          onHide={this.hideRejectModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>拒绝原因</Modal.Title>
@@ -603,6 +604,7 @@ class LiveList extends React.Component {
         <Modal
           show={showDeleteModal}
           style={{ marginTop: '20vh' }}
+          onHide={this.hideDeleteModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>删除提示</Modal.Title>

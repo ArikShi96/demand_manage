@@ -102,11 +102,11 @@ class Newcomer extends React.Component {
   changeDate = (moments) => {
     if (moments && moments.length > 0) {
       this.setState({
-        start_time: `${moments[0].format('YYYY-MM-DD')} 00:00:00`,
-        end_time: `${moments[1].format('YYYY-MM-DD')} 00:00:00`
+        startTime: `${moments[0].format('YYYY-MM-DD')} 00:00:00`,
+        endTime: `${moments[1].format('YYYY-MM-DD')} 00:00:00`
       });
     } else {
-      this.setState({ start_time: '', end_time: '' });
+      this.setState({ startTime: '', endTime: '' });
     }
   };
 
@@ -131,7 +131,12 @@ class Newcomer extends React.Component {
 
   /* 重置 */
   resetSearch() {
+    this.refs.rangePicker.clear();
     this.setState({
+      couponActivityName: '',
+      startTime: '',
+      endTime: '',
+      status: '',
     }, () => {
       this.searchList();
     });
@@ -141,13 +146,23 @@ class Newcomer extends React.Component {
   searchList = async () => {
     try {
       const {
-        dataSource
+        dataSource,
+        startTime,
+        endTime,
+        status,
+        couponActivityName
       } = this.state;
-      const { activePage } = dataSource;
-      const res = await makeAjaxRequest('/index/navigation/list', 'get', {
-        page_num: activePage,
+      const { activePage, pageSize } = dataSource;
+      const res = await makeAjaxRequest('/activity/operateList', 'get', {
+        // scope: "1",
+        pageIndex: activePage - 1,
+        pageSize,
+        activityName: couponActivityName,
+        status,
+        startTime,
+        endTime
       });
-      const data = res.data || [];
+      const data = res.data.content || [];
       data.forEach((item, index) => {
         item.order = (index + 1)
       })
@@ -155,8 +170,8 @@ class Newcomer extends React.Component {
         dataSource: {
           ...this.state.dataSource,
           content: data,
-          total: res.sum || 0,
-          items: Math.floor((res.sum || 0) / this.state.dataSource.pageSize) + 1
+          total: res.data.totalCount || 0,
+          items: Math.floor((res.data.totalCount || 0) / this.state.dataSource.pageSize) + 1
         }
       });
     } catch (err) {
@@ -220,9 +235,17 @@ class Newcomer extends React.Component {
   }
 
   handleFormDataChange = (type, e) => {
-    if (type === 'ccc') {
-      this.state.formData.dataItem.start_time = e[0] ? e[0].format('YYYY-MM-DD') : '';
-      this.state.formData.dataItem.end_time = e[1] ? e[1].format('YYYY-MM-DD') : '';
+    if (type === "dateType" && e.target ? e.target.value : e === "1") {
+
+    }
+    if (type === 'dates' || type === 'activityDates') {
+      if (type === 'dates') {
+        this.state.formData.dataItem.dateStart = e[0] ? e[0].format('YYYY-MM-DD') : '';
+        this.state.formData.dataItem.dateEnd = e[1] ? e[1].format('YYYY-MM-DD') : '';
+      } else {
+        this.state.formData.dataItem.activityDateStart = e[0] ? e[0].format('YYYY-MM-DD') : '';
+        this.state.formData.dataItem.activityDateEnd = e[1] ? e[1].format('YYYY-MM-DD') : '';
+      }
     } else {
       this.setState({
         formData: {
@@ -238,14 +261,46 @@ class Newcomer extends React.Component {
 
   submit = async () => {
     const { dataItem } = this.state.formData;
-    const { id } = dataItem;
+    const {
+      couponActivityId,
+      couponActivityName,
+      dateType,
+      dateStart,
+      dateEnd,
+      activityDateStart,
+      activityDateEnd,
+      remarks,
+      couponMoney,
+      limitMoney,
+    } = dataItem;
     try {
       this.hideAddModal();
-      if (id) {
-        await makeAjaxRequest('/xxx', 'post', {
+      if (couponActivityId) {
+        await makeAjaxRequest('/coupon/editNewuser', 'post', {
+          couponActivityId,
+          busType: "1",
+          couponActivityName,
+          dateType,
+          dateStart,
+          dateEnd,
+          activityDateStart,
+          activityDateEnd,
+          remarks,
+          couponMoney,
+          limitMoney,
         });
       } else {
-        await makeAjaxRequest('/xxx', 'post', {
+        await makeAjaxRequest('/coupon/addnewuser', 'post', {
+          busType: "1",
+          couponActivityName,
+          dateType,
+          dateStart,
+          dateEnd,
+          activityDateStart,
+          activityDateEnd,
+          remarks,
+          couponMoney,
+          limitMoney,
         });
       }
       message.success('操作成功');
@@ -268,8 +323,8 @@ class Newcomer extends React.Component {
   render() {
     const {
       dataSource,
-      aaa,
-      bbb,
+      couponActivityName,
+      status,
       formData,
       showDeleteModal,
     } = this.state;
@@ -277,7 +332,7 @@ class Newcomer extends React.Component {
     const { showAddModal, dataItem } = formData;
     return (
       <Fragment>
-        <Header style={{ background: "#fff", padding: 0 }} title="新人专享" />
+        <Header style={{ background: "#limitMoney", padding: 0 }} title="新人专享" />
         <Content className={this.props.className} style={{ width: "100%", overflowX: "auto" }}>
           <SearchPanel
             reset={this.resetSearch.bind(this)}
@@ -287,15 +342,15 @@ class Newcomer extends React.Component {
               <FormList.Item label="活动名称" labelCol={100}>
                 <FormControl
                   className="search-item"
-                  value={aaa}
-                  onChange={this.handleChange.bind(null, "aaa")}
+                  value={couponActivityName}
+                  onChange={this.handleChange.bind(null, "couponActivityName")}
                 />
               </FormList.Item>
               <FormList.Item label="状态" labelCol={100}>
                 <Select
                   className="search-item"
-                  onChange={this.handleChange.bind(null, "bbb")}
-                  value={bbb}
+                  onChange={this.handleChange.bind(null, "status")}
+                  value={status}
                 >
                   {[
                     { id: "0", stat: "全部状态" },
@@ -347,6 +402,7 @@ class Newcomer extends React.Component {
         <Modal
           show={showAddModal}
           style={{ marginTop: '15vh' }}
+          onHide={this.hideAddModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>{formData.title}</Modal.Title>
@@ -355,42 +411,53 @@ class Newcomer extends React.Component {
             <FormList.Item label="优惠券名称" labelCol={100}>
               <FormControl
                 className="search-item"
-                value={dataItem.aaa}
-                onChange={this.handleFormDataChange.bind(null, "aaa")}
+                value={dataItem.couponActivityName}
+                onChange={this.handleFormDataChange.bind(null, "couponActivityName")}
                 style={{ width: 250 }}
               />
             </FormList.Item>
             <FormList.Item label="有效期" labelCol={100}>
               <Radio.RadioGroup
-                value={dataItem.bbb}
-                onChange={this.handleFormDataChange.bind(null, "bbb")}
+                value={dataItem.dateType}
+                onChange={this.handleFormDataChange.bind(null, "dateType")}
               >
-                <Radio value='0'>一直有效</Radio>
-                <Radio value='1'>有效日期</Radio>
+                <Radio value='1'>一直有效</Radio>
+                <Radio value='2'>有效日期</Radio>
               </Radio.RadioGroup>
             </FormList.Item>
-            {dataItem.bbb === '1' && <FormList.Item label="活动起止时间" labelCol={100}>
+            {dataItem.dateType === '2' && <FormList.Item label="" labelCol={100}>
               <RangePicker
                 ref="rangePicker"
-                className="search-item"
+                className="search-item w-100"
                 placeholder={'开始时间 ~ 结束时间'}
                 format={format}
-                onChange={this.handleFormDataChange.bind(null, "ccc")}
+                onChange={this.handleFormDataChange.bind(null, "dates")}
+                style={{ width: 250 }}
               />
             </FormList.Item>}
+            <FormList.Item label="活动起止时间" labelCol={100}>
+              <RangePicker
+                ref="rangePicker"
+                className="search-item w-100"
+                placeholder={'开始时间 ~ 结束时间'}
+                format={format}
+                onChange={this.handleFormDataChange.bind(null, "activityDates")}
+                style={{ width: 250 }}
+              />
+            </FormList.Item>
             <FormList.Item label="活动说明" labelCol={100}>
               <FormControl
                 className="search-item"
-                value={dataItem.ddd}
-                onChange={this.handleFormDataChange.bind(null, "ddd")}
+                value={dataItem.remarks}
+                onChange={this.handleFormDataChange.bind(null, "remarks")}
                 style={{ width: 250 }}
               />
             </FormList.Item>
             <FormList.Item label="优惠金额" labelCol={100}>
               <FormControl
                 className="search-item"
-                value={dataItem.eee}
-                onChange={this.handleFormDataChange.bind(null, "eee")}
+                value={dataItem.couponMoney}
+                onChange={this.handleFormDataChange.bind(null, "couponMoney")}
                 style={{ width: 250 }}
               />
               <div>此类型的优惠可以抵销的金额</div>
@@ -398,8 +465,8 @@ class Newcomer extends React.Component {
             <FormList.Item label="最小订单金额" labelCol={100}>
               <FormControl
                 className="search-item"
-                value={dataItem.fff}
-                onChange={this.handleFormDataChange.bind(null, "fff")}
+                value={dataItem.limitMoney}
+                onChange={this.handleFormDataChange.bind(null, "limitMoney")}
                 style={{ width: 250 }}
               />
               <div>只有商品总金额达到这个数的订单才能使用这种优惠</div>
@@ -414,6 +481,7 @@ class Newcomer extends React.Component {
         <Modal
           show={showDeleteModal}
           style={{ marginTop: '20vh' }}
+          onHide={this.hideDeleteModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>提示</Modal.Title>
@@ -432,6 +500,15 @@ class Newcomer extends React.Component {
 }
 
 export default styled(Newcomer)`
+.u-table .u-table-thead th {
+  text-align: center;
+}
+.u-table .u-table-tbody td {
+  text-align: center;
+}
+.u-table .u-table-tbody .actions .action{
+  margin: 0 10px;
+}
 .action-wrap {
   text-align: right;
   padding: 20px;

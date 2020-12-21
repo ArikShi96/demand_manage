@@ -1,9 +1,6 @@
 * http://47.104.104.45:8090/market/index/navigation/editQuerSave?in_id=1d95c42a-f4f0-491f-a5e0-7c6c19e7f205&name=1212&navigation_url=121212
 缺少请求参数
 
-* http://47.104.104.45:8090/market/index/recommendisv/dele?in_id=1d95c42a-f4f0-491f-a5e0-7c6c19e7f205
-缺少请求参数
-
 * index/activity/getListFour
 只返回一条记录。（原型图有四条记录, 这个问题这是确认一下）
 

@@ -250,6 +250,7 @@ class RecommendMerchant extends React.Component {
         <Modal
           show={showAddModal}
           style={{ marginTop: '20vh' }}
+          onHide={this.hideAddModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>新增优质商家</Modal.Title>
@@ -281,6 +282,7 @@ class RecommendMerchant extends React.Component {
         <Modal
           show={showDeleteModal}
           style={{ marginTop: '20vh' }}
+          onHide={this.hideDeleteModal}
         >
           <Modal.Header closeButton>
             <Modal.Title>删除提示</Modal.Title>

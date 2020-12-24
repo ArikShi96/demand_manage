@@ -1,4 +1,13 @@
-import { FormControl, Select, Pagination, Table, Message } from "tinper-bee";
+import makeAjaxRequest from "../../util/request";
+import {
+  FormControl,
+  Select,
+  Pagination,
+  Table,
+  Message,
+  Button,
+  Modal,
+} from "tinper-bee";
 import DatePicker from "bee-datepicker";
 import "bee-form-control/build/FormControl.css";
 import "bee-select/build/Select.css";
@@ -14,6 +23,7 @@ import Header from "../common/Header";
 import Content from "../common/Content";
 import FormList from "../common/Form";
 import SearchPanel from "../common/SearchPanel";
+import { message } from "antd";
 const Option = Select.Option;
 const { RangePicker } = DatePicker;
 const format = "YYYY-MM-DD";
@@ -98,13 +108,19 @@ class IsvModel extends React.Component {
       verifyStart: "",
       verifyEnd: "",
       approveStatus: "",
+      pub_isv_grade_id: "",
       activePage: 1,
+      levelList: [],
+      formData: {
+        dataItem: {},
+      },
     };
   }
 
   componentDidMount() {
     this.getSiteList();
     this.getSearch();
+    this.getLevelList();
   }
 
   columns = [
@@ -163,6 +179,24 @@ class IsvModel extends React.Component {
       },
     },
     {
+      title: "等级",
+      dataIndex: "isvGradeName",
+      key: "isvGradeName",
+      width: "10%",
+      render: (value, item) => {
+        return (
+          <div className="actions">
+            <a
+              className="action"
+              onClick={this.showSetLevelModal.bind(null, item)}
+            >
+              {value || "点击设置"}
+            </a>
+          </div>
+        );
+      },
+    },
+    {
       title: "审核状态",
       dataIndex: "approveStatus",
       key: "approveStatus",
@@ -202,6 +236,7 @@ class IsvModel extends React.Component {
       verifyEnd,
       verifyStart,
       approveStatus,
+      pub_isv_grade_id,
     } = this.state;
     let newData = {
       isvName,
@@ -213,6 +248,7 @@ class IsvModel extends React.Component {
       verifyEnd,
       verifyStart,
       approveStatus,
+      pubIsvGradeId: pub_isv_grade_id,
       pageSize: pageSize,
       pageIndex: pageIndex,
     };
@@ -303,6 +339,76 @@ class IsvModel extends React.Component {
     this.props.history.push(`/isv-detail/${id}`);
   };
 
+  getLevelList = async () => {
+    try {
+      const res = await makeAjaxRequest("/isv/level/select", "get");
+      this.setState({
+        levelList: res.data,
+      });
+    } catch (err) {
+      message.error(err.message);
+    }
+  };
+
+  showSetLevelModal = (item) => {
+    item.pub_isv_grade_id = item.pubIsvGradeId;
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        showModal: true,
+        isConfirmMode: false,
+        dataItem: item || {},
+      },
+    });
+  };
+
+  hideSetLevelModal = () => {
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        showModal: false,
+      },
+    });
+  };
+
+  handleFormDataChange = (type, e) => {
+    const level = this.state.levelList.find((le) => {
+      return le.value === e;
+    });
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        dataItem: {
+          ...this.state.formData.dataItem,
+          [type]: e,
+          grade_name: level.label,
+        },
+      },
+    });
+  };
+
+  confirmSet = async () => {
+    const { formData } = this.state;
+    const { isConfirmMode, dataItem } = formData;
+    if (!isConfirmMode) {
+      this.state.formData.isConfirmMode = true;
+      this.forceUpdate();
+    } else {
+      try {
+        await makeAjaxRequest("/isv/level/setLevel", "post", {
+          isv_id: dataItem.isvId,
+          pub_isv_grade_id: dataItem.pub_isv_grade_id,
+          grade_name: dataItem.grade_name,
+        });
+        this.hideSetLevelModal();
+        message.success("设置成功");
+        this.getSearch();
+      } catch (err) {
+        message.error(err.message);
+      }
+    }
+  };
+
   render() {
     let {
       dataSource,
@@ -315,6 +421,7 @@ class IsvModel extends React.Component {
       statusSelect,
       activePage,
       approveStatusSelect,
+      formData,
     } = this.state;
     return (
       <Fragment>
@@ -403,6 +510,22 @@ class IsvModel extends React.Component {
                   ))}
                 </Select>
               </FormList.Item>
+
+              <FormList.Item label="选择等级" labelCol={120}>
+                <Select
+                  className="search-item"
+                  onChange={this.handleChange.bind(null, "pub_isv_grade_id")}
+                >
+                  {[
+                    { label: "全部", value: "" },
+                    ...(this.state.levelList || []),
+                  ].map((item) => (
+                    <Option key={item.value} value={item.value}>
+                      {item.label}
+                    </Option>
+                  ))}
+                </Select>
+              </FormList.Item>
             </FormList>
           </SearchPanel>
           <Table columns={this.columns} data={dataSource.content} />
@@ -422,6 +545,67 @@ class IsvModel extends React.Component {
             items={dataSource.totalPages}
           />
         </Content>
+        <Modal
+          show={formData.showModal}
+          style={{ marginTop: "20vh" }}
+          onHide={this.hideSetLevelModal}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {formData.isConfirmMode ? "确认提示" : "设置等级"}
+            </Modal.Title>
+          </Modal.Header>
+          {formData.isConfirmMode ? (
+            <Modal.Body>
+              <FormList.Item label="服务商名称: " labelCol={120}>
+                <div>{formData.dataItem.isvName}</div>
+              </FormList.Item>
+              <FormList.Item label="服务商等级: " labelCol={120}>
+                <div>{formData.dataItem.grade_name}</div>
+              </FormList.Item>
+              <FormList.Item label="" labelCol={0}>
+                <div style={{ color: "#d4483e", paddingLeft: "44px" }}>
+                  确认完成,前端将显示此服务商等级
+                </div>
+              </FormList.Item>
+            </Modal.Body>
+          ) : (
+            <Modal.Body>
+              <FormList.Item label="选择等级" labelCol={120}>
+                <Select
+                  className="search-item"
+                  onChange={this.handleFormDataChange.bind(
+                    null,
+                    "pub_isv_grade_id"
+                  )}
+                  value={formData.dataItem.pub_isv_grade_id}
+                >
+                  {(this.state.levelList || []).map((item) => (
+                    <Option key={item.value} value={item.value}>
+                      {item.label}
+                    </Option>
+                  ))}
+                </Select>
+              </FormList.Item>
+            </Modal.Body>
+          )}
+          <Modal.Footer>
+            <Button
+              onClick={this.hideSetLevelModal}
+              colors="secondary"
+              style={{ marginRight: 8 }}
+            >
+              取消
+            </Button>
+            <Button
+              onClick={this.confirmSet}
+              colors="primary"
+              disabled={!this.state.formData.dataItem.pub_isv_grade_id}
+            >
+              确认
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </Fragment>
     );
   }

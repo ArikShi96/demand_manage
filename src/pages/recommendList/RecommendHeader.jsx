@@ -1,4 +1,4 @@
-import { Table, Pagination, Button, Modal, FormControl } from "tinper-bee";
+import { Table, Button, Modal, FormControl } from "tinper-bee";
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
@@ -233,14 +233,14 @@ class RecommendMerchant extends React.Component {
       formData,
       showDeleteModal,
     } = this.state;
-    const { activePage, content, total, items } = dataSource;
+    const { content } = dataSource;
     const { showAddModal, dataItem } = formData;
     return (
       <Fragment>
         <Header style={{ background: "#fff", padding: 0 }} title="首页顶部导航管理" />
         <Content className={this.props.className} style={{ width: "100%", overflowX: "auto" }}>
           <Table rowKey="order" columns={this.columns} data={content} />
-          <Pagination
+          {/* <Pagination
             first
             last
             prev
@@ -256,7 +256,7 @@ class RecommendMerchant extends React.Component {
             onDataNumSelect={this.dataNumSelect}
             total={total}
             items={items}
-          />
+          /> */}
         </Content>
         {/* 提示框 - 新增 */}
         <Modal

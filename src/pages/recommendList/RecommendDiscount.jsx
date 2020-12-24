@@ -1,4 +1,4 @@
-import { Table, Pagination, Button, Modal, FormControl, Select } from "tinper-bee";
+import { Table, Button, Modal, Select } from "tinper-bee";
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
@@ -22,10 +22,6 @@ class RecommendDiscount extends React.Component {
       activePage: 1, // 当前页面
       pageSize: 10, // 每页多少
     },
-    class_id: '',
-    class_sun_id: '',
-    class_ids: [],
-    class_sun_ids: [],
     class_pros: [],
     formData: {
       dataItem: {}
@@ -38,37 +34,39 @@ class RecommendDiscount extends React.Component {
     {
       title: "序号",
       dataIndex: "order",
-      width: "20%",
+      width: "25%",
     },
     {
       title: "商品名称",
-      dataIndex: "product_name",
-      width: "20%",
+      dataIndex: "productName",
+      width: "25%",
     },
-    {
-      title: "商品类型",
-      dataIndex: "product_type",
-      width: "20%",
-    },
+    // {
+    //   title: "商品类型",
+    //   dataIndex: "productType",
+    //   width: "20%",
+    // },
     {
       title: "添加时间",
       dataIndex: "addTime",
-      width: "20%",
+      width: "25%",
       render: (value) => {
         return (
-          <span>{new Date(value).toLocaleString()}</span>
+          <span>{value}</span>
         );
       }
     },
     {
       title: "操作",
-      dataIndex: "operation",
-      width: "20%",
+      dataIndex: "preferentialProductId",
+      width: "25%",
       render: (value, item) => {
         return (
           <div className="actions">
-            <a className='action' onClick={this.handleTableAction.bind(null, item, 'edit')}>编辑</a>
-            <a className='action' onClick={this.handleTableAction.bind(null, item, 'delete')}>删除</a>
+            {/* <a className='action' onClick={this.handleTableAction.bind(null, item, 'edit')}>编辑</a> */}
+            {value ?
+              <a className='action' onClick={this.handleTableAction.bind(null, item, 'delete')}>删除</a> :
+              <a className='action' onClick={this.showAdd.bind(null, false)}>添加</a>}
           </div>
         );
       },
@@ -77,7 +75,7 @@ class RecommendDiscount extends React.Component {
 
   componentDidMount() {
     this.searchList();
-    this.fetchClassIds();
+    this.fetchClassProducts();
   }
 
   handleChange = (type, e) => {
@@ -110,7 +108,11 @@ class RecommendDiscount extends React.Component {
         start: activePage - 1,
         limit: pageSize,
       });
-      (res.data.content || []).forEach((item, index) => {
+      // 不够四条，补充空数据
+      while (res.data.content.length < 4) {
+        res.data.content.push({})
+      }
+      res.data.content.forEach((item, index) => {
         item.order = (index + 1)
       })
       this.setState({
@@ -121,6 +123,18 @@ class RecommendDiscount extends React.Component {
           items: Math.floor((res.data.totalElements || 0) / this.state.dataSource.pageSize) + 1
         }
       });
+    } catch (err) {
+      message.error(err.message);
+    }
+  };
+
+  /* 分类 */
+  fetchClassProducts = async () => {
+    try {
+      const res = await makeAjaxRequest('/preferential/getSelectProduct', 'get');
+      this.setState({
+        class_pros: res.data || []
+      })
     } catch (err) {
       message.error(err.message);
     }
@@ -143,7 +157,9 @@ class RecommendDiscount extends React.Component {
       case 'confirmDelete': {
         try {
           this.hideDeleteModal();
-          await makeAjaxRequest(`/recommend/delRecommend/${item.productRecommendId}`, 'get');
+          await makeAjaxRequest(`/preferential/del`, 'post', {
+            id: item.preferentialProductId
+          });
           message.success('删除成功');
           this.searchList();
         } catch (err) {
@@ -186,18 +202,28 @@ class RecommendDiscount extends React.Component {
           [type]: e,
         }
       }
-    })
+    });
   }
 
   submit = async () => {
-    const { linksId, linksName, linksUrl, sort } = this.state.formData.dataItem;
+    const { preferentialProductId, productId, position } = this.state.formData.dataItem;
+    const product = this.state.class_pros.find(pro => {
+      return pro.productId === productId
+    })
     try {
       this.hideAddModal();
-      if (linksId) {
-        await makeAjaxRequest('/recommend/addRecommend', 'post', {}, {
+      if (preferentialProductId) {
+        await makeAjaxRequest('/link/updatePreferential', 'post', {}, {
+          preferentialProductId,
+          productId: productId,
+          productName: product.productName,
+          position: position || this.getCurrentPosition() //排列位置
         });
       } else {
-        await makeAjaxRequest('/recommend/addRecommend', 'post', {}, {
+        await makeAjaxRequest('/preferential/save', 'post', {}, {
+          productId: productId,
+          productName: product.productName,
+          position: this.getCurrentPosition() //排列位置
         });
       }
       message.success('操作成功');
@@ -217,23 +243,32 @@ class RecommendDiscount extends React.Component {
     this.handleTableAction(this.state.deleteItem, 'confirmDelete')
   }
 
+  getCurrentPosition() {
+    let position = 0;
+    this.state.dataSource.content.forEach(item => {
+      position = item.position > position ? item.position : position
+    });
+    return position + 1;
+  }
+
   render() {
     const {
       dataSource,
       formData,
       showDeleteModal,
+      class_pros,
     } = this.state;
-    const { activePage, content, total, items } = dataSource;
+    const { content } = dataSource;
     const { showAddModal, dataItem } = formData;
     return (
       <Fragment>
         <Header style={{ background: "#fff", padding: 0 }} title="特惠商品列表" />
         <Content className={this.props.className} style={{ width: "100%", overflowX: "auto" }}>
-          <div className='action-wrap'>
+          {/* <div className='action-wrap'>
             <Button colors="primary" onClick={this.showAdd.bind(this, false)}>新增</Button>
-          </div>
+          </div> */}
           <Table rowKey="order" columns={this.columns} data={content} />
-          <Pagination
+          {/* <Pagination
             first
             last
             prev
@@ -249,7 +284,7 @@ class RecommendDiscount extends React.Component {
             onDataNumSelect={this.dataNumSelect}
             total={total}
             items={items}
-          />
+          /> */}
         </Content>
         {/* 提示框 - 新增 */}
         <Modal
@@ -260,53 +295,24 @@ class RecommendDiscount extends React.Component {
           <Modal.Header closeButton>
             <Modal.Title>{formData.title}</Modal.Title>
           </Modal.Header>
-          <Modal.Body>
-            <FormList.Item label="选择分类" labelCol={100}>
-              <Select
-                placeholder="选择一级分类"
-                className="search-item"
-                onChange={this.handleFormDataChange.bind(null, "first")}
-                value={dataItem.first}
-              >
-                {[].map((item) => (
-                  <Option key={item.id} value={item.id}>
-                    {item.stat}
-                  </Option>
-                ))}
-              </Select>
-            </FormList.Item>
-            <FormList.Item label="选择分类" labelCol={100}>
-              <Select
-                placeholder="选择二级分类"
-                className="search-item"
-                onChange={this.handleFormDataChange.bind(null, "second")}
-                value={dataItem.second}
-              >
-                {[].map((item) => (
-                  <Option key={item.id} value={item.id}>
-                    {item.stat}
-                  </Option>
-                ))}
-              </Select>
-            </FormList.Item>
-            <FormList.Item label="选择商品" labelCol={100}>
-              <Select
-                placeholder="选择商品"
-                className="search-item"
-                onChange={this.handleFormDataChange.bind(null, "pro")}
-                value={dataItem.pro}
-              >
-                {[].map((item) => (
-                  <Option key={item.id} value={item.id}>
-                    {item.stat}
-                  </Option>
-                ))}
-              </Select>
-            </FormList.Item>
+          <Modal.Body><FormList.Item label="选择商品" labelCol={100}>
+            <Select
+              placeholder="选择商品"
+              className="search-item"
+              onChange={this.handleFormDataChange.bind(null, "productId")}
+              value={dataItem.productId}
+            >
+              {class_pros.map((item) => (
+                <Option key={item.productId} value={item.productId}>
+                  {item.productName}
+                </Option>
+              ))}
+            </Select>
+          </FormList.Item>
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.hideAddModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-            <Button onClick={this.submit} colors="primary">确认</Button>
+            <Button onClick={this.submit} colors="primary" disabled={!dataItem.productId}>确认</Button>
           </Modal.Footer>
         </Modal>
         {/* 提示框 - 删除 */}

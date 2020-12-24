@@ -1,4 +1,4 @@
-import { Table, Pagination, Button, Modal, FormControl, Select } from "tinper-bee";
+import { Table, Button, Modal, Select } from "tinper-bee";
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
@@ -22,6 +22,8 @@ class RecommendMicro extends React.Component {
       activePage: 1, // 当前页面
       pageSize: 10, // 每页多少
     },
+    class_sun_ids: [],
+    class_pros: [],
     formData: {
       dataItem: {}
     },
@@ -42,7 +44,7 @@ class RecommendMicro extends React.Component {
     },
     {
       title: "商品类型",
-      dataIndex: "type",
+      dataIndex: "categoryName",
       width: "20%",
     },
     {
@@ -51,19 +53,20 @@ class RecommendMicro extends React.Component {
       width: "20%",
       render: (value) => {
         return (
-          <span>{new Date(value).toLocaleString()}</span>
+          <span>{value}</span>
         );
       }
     },
     {
       title: "操作",
-      dataIndex: "operation",
+      dataIndex: "productRecommendId",
       width: "20%",
       render: (value, item) => {
         return (
           <div className="actions">
-            <a className='action' onClick={this.handleTableAction.bind(null, item, 'edit')}>编辑</a>
-            <a className='action' onClick={this.handleTableAction.bind(null, item, 'delete')}>删除</a>
+            {value ?
+              <a className='action' onClick={this.handleTableAction.bind(null, item, 'delete')}>删除</a> :
+              <a className='action' onClick={this.showAdd.bind(null, false)}>添加</a>}
           </div>
         );
       },
@@ -72,6 +75,7 @@ class RecommendMicro extends React.Component {
 
   componentDidMount() {
     this.searchList();
+    this.fetchClassIds2();
   }
 
   handleChange = (type, e) => {
@@ -105,6 +109,9 @@ class RecommendMicro extends React.Component {
         limit: pageSize,
         type: '2'
       });
+      while (res.data.content.length < 5) {
+        res.data.content.push({});
+      }
       (res.data.content || []).forEach((item, index) => {
         item.order = (index + 1)
       })
@@ -115,6 +122,33 @@ class RecommendMicro extends React.Component {
           total: res.data.totalElements || 0,
           items: Math.floor((res.data.totalElements || 0) / this.state.dataSource.pageSize) + 1
         }
+      });
+    } catch (err) {
+      message.error(err.message);
+    }
+  };
+
+  fetchClassIds2 = async () => {
+    try {
+      const res = await makeAjaxRequest('/recommend/getProductCategory2', 'get', {
+        category_name: "小微企业云"
+      });
+      this.setState({
+        class_sun_ids: res.data || [],
+        class_pros: []
+      })
+    } catch (err) {
+      message.error(err.message);
+    }
+  };
+  fetchClassProducts = async (class_sun_id) => {
+    try {
+      const res = await makeAjaxRequest('/hot/sale/selectProduct', 'get', {
+        product_name: "",
+        product_category2: class_sun_id
+      });
+      this.setState({
+        class_pros: res.data || []
       });
     } catch (err) {
       message.error(err.message);
@@ -182,17 +216,34 @@ class RecommendMicro extends React.Component {
         }
       }
     })
+    if (type === 'class_sun_id') {
+      this.fetchClassProducts(e);
+      this.state.formData.dataItem.product_id = "";
+      this.forceUpdate();
+    }
   }
 
   submit = async () => {
-    const { linksId, linksName, linksUrl, sort } = this.state.formData.dataItem;
+    const { productRecommendId, product_id, position } = this.state.formData.dataItem;
+    const product = this.state.class_pros.find(pro => {
+      return pro.product_id === product_id
+    });
     try {
       this.hideAddModal();
-      if (linksId) {
+      if (productRecommendId) {
         await makeAjaxRequest('/recommend/addRecommend', 'post', {}, {
+          productRecommendId,
+          type: "2",
+          position: position || this.getCurrentPosition(),
+          productId: product_id,
+          productName: product.product_name
         });
       } else {
         await makeAjaxRequest('/recommend/addRecommend', 'post', {}, {
+          type: "2",
+          position: this.getCurrentPosition(),
+          productId: product_id,
+          productName: product.product_name
         });
       }
       message.success('操作成功');
@@ -212,23 +263,33 @@ class RecommendMicro extends React.Component {
     this.handleTableAction(this.state.deleteItem, 'confirmDelete')
   }
 
+  getCurrentPosition() {
+    let position = 0;
+    this.state.dataSource.content.forEach(item => {
+      position = item.position > position ? item.position : position
+    });
+    return position + 1;
+  }
+
   render() {
     const {
       dataSource,
       formData,
       showDeleteModal,
+      class_sun_ids,
+      class_pros,
     } = this.state;
-    const { activePage, content, total, items } = dataSource;
+    const { content } = dataSource;
     const { showAddModal, dataItem } = formData;
     return (
       <Fragment>
         <Header style={{ background: "#fff", padding: 0 }} title="小微企业云产品推荐列表" />
         <Content className={this.props.className} style={{ width: "100%", overflowX: "auto" }}>
-          <div className='action-wrap'>
+          {/* <div className='action-wrap'>
             <Button colors="primary" onClick={this.showAdd.bind(this, false)}>新增</Button>
-          </div>
+          </div> */}
           <Table rowKey="order" columns={this.columns} data={content} />
-          <Pagination
+          {/* <Pagination
             first
             last
             prev
@@ -244,7 +305,7 @@ class RecommendMicro extends React.Component {
             onDataNumSelect={this.dataNumSelect}
             total={total}
             items={items}
-          />
+          /> */}
         </Content>
         {/* 提示框 - 新增 */}
         <Modal
@@ -256,30 +317,19 @@ class RecommendMicro extends React.Component {
             <Modal.Title>{formData.title}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <FormList.Item label="选择分类" labelCol={100}>
-              <Select
-                placeholder="选择一级分类"
-                className="search-item"
-                onChange={this.handleFormDataChange.bind(null, "first")}
-                value={dataItem.first}
-              >
-                {[].map((item) => (
-                  <Option key={item.id} value={item.id}>
-                    {item.stat}
-                  </Option>
-                ))}
-              </Select>
+            <FormList.Item label="一级分类" labelCol={100}>
+              <div>小微企业云</div>
             </FormList.Item>
             <FormList.Item label="选择分类" labelCol={100}>
               <Select
                 placeholder="选择二级分类"
                 className="search-item"
-                onChange={this.handleFormDataChange.bind(null, "second")}
-                value={dataItem.second}
+                onChange={this.handleFormDataChange.bind(null, "class_sun_id")}
+                value={dataItem.class_sun_id}
               >
-                {[].map((item) => (
-                  <Option key={item.id} value={item.id}>
-                    {item.stat}
+                {class_sun_ids.map((item) => (
+                  <Option key={item.category_id2} value={item.category_id2}>
+                    {item.category_name}
                   </Option>
                 ))}
               </Select>
@@ -288,12 +338,12 @@ class RecommendMicro extends React.Component {
               <Select
                 placeholder="选择商品"
                 className="search-item"
-                onChange={this.handleFormDataChange.bind(null, "pro")}
-                value={dataItem.pro}
+                onChange={this.handleFormDataChange.bind(null, "product_id")}
+                value={dataItem.product_id}
               >
-                {[].map((item) => (
-                  <Option key={item.id} value={item.id}>
-                    {item.stat}
+                {class_pros.map((item) => (
+                  <Option key={item.product_id} value={item.product_id}>
+                    {item.product_name}
                   </Option>
                 ))}
               </Select>
@@ -301,7 +351,7 @@ class RecommendMicro extends React.Component {
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.hideAddModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-            <Button onClick={this.submit} colors="primary">确认</Button>
+            <Button onClick={this.submit} colors="primary" disabled={!dataItem.product_id}>确认</Button>
           </Modal.Footer>
         </Modal>
         {/* 提示框 - 删除 */}

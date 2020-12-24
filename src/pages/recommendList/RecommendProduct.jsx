@@ -293,21 +293,28 @@ class RecommendProduct extends React.Component {
   }
 
   handleFormDataChange = (type, e) => {
+    let class_sun_id = this.state.formData.dataItem.class_sun_id;
+    let product_id = this.state.formData.dataItem.product_id;
+    if (type === 'class_id' && e) {
+      this.fetchClassIds2(e);
+      class_sun_id = "";
+      product_id = "";
+    }
+    if (type === 'class_sun_id' && e) {
+      this.fetchClassProducts(this.state.formData.dataItem.class_id, e);
+      product_id = "";
+    }
     this.setState({
       formData: {
         ...this.state.formData,
         dataItem: {
           ...this.state.formData.dataItem,
+          class_sun_id,
+          product_id,
           [type]: e,
         }
       }
     });
-    if (type === 'class_id') {
-      this.fetchClassIds2(e);
-    }
-    if (type === 'class_sun_id') {
-      this.fetchClassProducts(this.state.formData.dataItem.class_id, e);
-    }
   }
 
   submit = async () => {
@@ -459,6 +466,7 @@ class RecommendProduct extends React.Component {
             </FormList.Item>
             <FormList.Item label="选择分类" labelCol={100}>
               <Select
+                ref="categorySelect"
                 placeholder="选择二级分类"
                 className="search-item"
                 onChange={this.handleFormDataChange.bind(null, "class_sun_id")}
@@ -473,6 +481,7 @@ class RecommendProduct extends React.Component {
             </FormList.Item>
             <FormList.Item label="选择商品" labelCol={100}>
               <Select
+                ref="productSelect"
                 placeholder="选择商品"
                 className="search-item"
                 onChange={this.handleFormDataChange.bind(null, "product_id")}

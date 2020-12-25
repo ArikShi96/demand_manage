@@ -32,7 +32,11 @@ export default async function makeAjaxRequest(
   if (response.ok) {
     const contentType = response.headers.get("Content-type");
     if (contentType && contentType.includes("application/json")) {
-      return response.json();
+      const data = await response.json();
+      if (data.status !== 1) {
+        throw new Error(data.msg);
+      }
+      return data;
     } else {
       return response.text();
     }

@@ -1,4 +1,5 @@
-import { FormControl, Select, Pagination, Table, Modal, Button } from "tinper-bee";
+import moment from "moment";
+import { FormControl, Select, Pagination, Table, Modal, Button, Message } from "tinper-bee";
 import React, { Fragment } from "react";
 import styled from 'styled-components';
 import DatePicker from 'bee-datepicker'
@@ -29,8 +30,8 @@ class ActivityList extends React.Component {
     },
     activity_name: '',
     is_stop: '',
-    start_time: '',
-    end_time: '',
+    date_start: '',
+    date_end: '',
     formData: {
       dataItem: {}
     },
@@ -119,11 +120,11 @@ class ActivityList extends React.Component {
   changeDate = (moments) => {
     if (moments && moments.length > 0) {
       this.setState({
-        start_time: `${moments[0].format('YYYY-MM-DD')} 00:00:00`,
-        end_time: `${moments[1].format('YYYY-MM-DD')} 00:00:00`
+        date_start: `${moments[0].format('YYYY-MM-DD')} 00:00:00`,
+        date_end: `${moments[1].format('YYYY-MM-DD')} 00:00:00`
       });
     } else {
-      this.setState({ start_time: '', end_time: '' });
+      this.setState({ date_start: '', date_end: '' });
     }
   };
 
@@ -148,7 +149,12 @@ class ActivityList extends React.Component {
 
   /* 重置 */
   resetSearch() {
+    this.refs.rangePicker.clear();
     this.setState({
+      activity_name: "",
+      is_stop: "",
+      date_start: '',
+      date_end: '',
     }, () => {
       this.searchList();
     });
@@ -161,8 +167,8 @@ class ActivityList extends React.Component {
         dataSource,
         activity_name,
         is_stop,
-        start_time,
-        end_time,
+        date_start,
+        date_end,
       } = this.state;
       const { activePage, pageSize } = dataSource;
       const res = await makeAjaxRequest('/activity/operateActivityList', 'post', {
@@ -170,8 +176,8 @@ class ActivityList extends React.Component {
         pageSize,
         activity_name,
         is_stop,
-        start_time,
-        end_time,
+        date_start,
+        date_end,
       });
       const data = res.data.content || [];
       data.forEach((item, index) => {
@@ -229,9 +235,9 @@ class ActivityList extends React.Component {
         try {
           this.hideConfirmModal();
           const { confirmItem, confirmAction } = this.state;
-          await makeAjaxRequest('/activity/editOperateActivityStatus', 'get', {
+          await makeAjaxRequest('/activity/editOperateActivityStatus', 'post', {
             activity_id: confirmItem.activityId,
-            type: confirmAction === "open" ? "3" : "4",
+            status: confirmAction === "open" ? "3" : "4",
           });
           message.success('操作成功');
           this.searchList();
@@ -248,10 +254,11 @@ class ActivityList extends React.Component {
 
   showAdd = async (isEdit, item) => {
     let editItem = ""
-    // if (isEdit) {
-    //   const res = await makeAjaxRequest('/activity/getOperateActivityinfo', { activity_id: item.activityId });
-    //   editItem = res.data.data;
-    // }
+    if (isEdit) {
+      const res = await makeAjaxRequest('/activity/getOperateActivityinfo', 'get', { activity_id: item.activityId });
+      editItem = res.data.activityDto;
+      editItem.couponRuleList = res.data.couponDtoList;
+    }
     this.setState({
       formData: {
         ...this.state.formData,
@@ -260,13 +267,6 @@ class ActivityList extends React.Component {
         dataItem: editItem || item || {}
       }
     });
-    if (isEdit) {
-      // set init edit item
-      setTimeout(() => {
-        // this.refs.rangePicker2.defaultValue = []
-        // this.refs.rangePicker3.defaultValue = []
-      }, 0);
-    }
   }
 
   hideAddModal = () => {
@@ -337,6 +337,45 @@ class ActivityList extends React.Component {
     }
   }
 
+  checkValidations = () => {
+    let message = "";
+    const { dataItem } = this.state.formData;
+    const {
+      activityName,
+      activityDateStart,
+      activityDateEnd,
+      activityJoinStart,
+      activityJoinEnd,
+      couponRuleList
+    } = dataItem;
+    // 逆序
+    const reg = /^\d+(?=\.{0,1}\d+$|$)/;
+    (couponRuleList || []).some(rule => {
+      if (!reg.test(rule.couponMoney) || !reg.test(rule.limitMoney)) {
+        message = "满减条件的金额输入不合法"
+        return true
+      }
+    });
+    if (!couponRuleList || !couponRuleList.length) {
+      message = '请添加满减条件'
+    }
+    if (!activityJoinStart || !activityJoinEnd) {
+      message = "请选择报名ƒ时间"
+    }
+    if (!activityDateStart || !activityDateEnd) {
+      message = "请选择活动时间"
+    }
+    if (!activityName) {
+      message = "请输入活动名称"
+    }
+    if (message) {
+      Message.create({ content: message, color: "danger" });
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   submit = async () => {
     const { dataItem } = this.state.formData;
     const { activityId,
@@ -349,6 +388,9 @@ class ActivityList extends React.Component {
       productScope,
       couponRuleList
     } = dataItem;
+    if (!this.checkValidations()) {
+      return;
+    }
     try {
       this.hideAddModal();
       if (activityId) {
@@ -366,7 +408,7 @@ class ActivityList extends React.Component {
           activityJoinStart,
           activityJoinEnd,
           remarks,
-          productScope,
+          productScope: "0",
           couponRuleList: (couponRuleList || []).map(rule => {
             return {
               type: "1",
@@ -389,7 +431,7 @@ class ActivityList extends React.Component {
           activityJoinStart,
           activityJoinEnd,
           remarks,
-          productScope,
+          productScope: "0",
           couponRuleList: (couponRuleList || []).map(rule => {
             return {
               type: "1",
@@ -432,6 +474,7 @@ class ActivityList extends React.Component {
     return (
       <Fragment>
         <SearchPanel
+          reset={this.resetSearch.bind(this)}
           search={this.searchList.bind(this, 0, 10)}
         >
           <FormList layoutOpt={{ md: 4, xs: 4 }}>
@@ -493,7 +536,7 @@ class ActivityList extends React.Component {
         {/* 提示框 - 新增 */}
         <Modal
           show={showAddModal}
-          style={{ marginTop: '10vh' }}
+          style={{ marginTop: '10vh', width: '750px' }}
           onHide={this.hideAddModal}
         >
           <Modal.Header closeButton>
@@ -514,22 +557,26 @@ class ActivityList extends React.Component {
             </FormList.Item>
             <FormList.Item label="活动时间" labelCol={100}>
               <RangePicker
-                ref="rangePicker2"
                 className="search-item w-100"
                 placeholder={'开始时间 ~ 结束时间'}
                 format={format}
                 onChange={this.handleFormDataChange.bind(null, "activityDates")}
                 style={{ width: 250 }}
+                defaultValue={dataItem.activityDateStart && dataItem.activityDateEnd ?
+                  [new moment(dataItem.activityDateStart), new moment(dataItem.activityDateEnd)] :
+                  []}
               />
             </FormList.Item>
             <FormList.Item label="报名时间" labelCol={100}>
               <RangePicker
-                ref="rangePicker3"
                 className="search-item w-100"
                 placeholder={'开始时间 ~ 结束时间'}
                 format={format}
                 onChange={this.handleFormDataChange.bind(null, "activityJoins")}
                 style={{ width: 250 }}
+                defaultValue={dataItem.activityJoinStart && dataItem.activityJoinEnd ?
+                  [new moment(dataItem.activityJoinStart), new moment(dataItem.activityJoinEnd)] :
+                  []}
               />
             </FormList.Item>
             <FormList.Item label="活动说明" labelCol={100}>
@@ -542,11 +589,12 @@ class ActivityList extends React.Component {
             </FormList.Item>
             <FormList.Item label="活动范围" labelCol={100}>
               <Radio.Group
-                value={dataItem.productScope}
+                // value={dataItem.productScope}
+                value="0"
                 onChange={this.handleFormDataChange.bind(null, "productScope")}
               >
                 <Radio value='0'>全品类</Radio>
-                <Radio value='1'>部分品类</Radio>
+                {/* <Radio value='1'>部分品类</Radio> */}
               </Radio.Group>
             </FormList.Item>
             {dataItem.productScope === "1" && <FormList.Item label="请选择品类" labelCol={100}>
@@ -579,7 +627,7 @@ class ActivityList extends React.Component {
                     className="search-item"
                     value={item.limitMoney}
                     onChange={this.handleListDataChange.bind(null, "limitMoney", index)}
-                    style={{ width: 40, margin: "0 20px" }}
+                    style={{ width: 80, margin: "0 20px" }}
                   />
                   <span>元, </span>
                   <span>减</span>
@@ -587,7 +635,7 @@ class ActivityList extends React.Component {
                     className="search-item"
                     value={item.couponMoney}
                     onChange={this.handleListDataChange.bind(null, "couponMoney", index)}
-                    style={{ width: 40, margin: "0 20px" }}
+                    style={{ width: 80, margin: "0 20px" }}
                   />
                   <span>元, </span>
                   <span>平台分摊</span>
@@ -595,7 +643,7 @@ class ActivityList extends React.Component {
                     className="search-item"
                     value={this.calculatePercentage(item.couponMoney, item.limitMoney)}
                     disabled={true}
-                    style={{ width: 50, margin: "0 20px" }}
+                    style={{ width: 60, margin: "0 20px" }}
                   />
                   <span>%</span>
                   <a style={{ marginLeft: "10px" }} onClick={this.removeListData.bind(this, index)}>删除</a>

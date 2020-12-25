@@ -4,6 +4,7 @@ import { Button } from 'tinper-bee';
 import Header from "../common/Header";
 import "bee-button/build/Button.css";
 import { FormControl } from "tinper-bee";
+import DatePicker from 'bee-datepicker'
 import "bee-form-control/build/FormControl.css";
 import "bee-button/build/Button.css";
 import "bee-select/build/Select.css";
@@ -12,18 +13,24 @@ import "bee-pagination/build/Pagination.css";
 import "bee-tabs/build/Tabs.css";
 import makeAjaxRequest from '../../util/request';
 import { message, Radio, Checkbox } from 'antd';
+import moment from "moment";
+const { RangePicker } = DatePicker;
+const format = "YYYY-MM-DD";
 class IntegralManager extends React.Component {
   state = {
     gradeRuleId: "",
     newUserPoints: '',
     isTime: '',
-    isTimeStr: '',
+    isTimeStrLeft: '',
+    isTimeStrRight: '',
     loginPoints: '',
-    pointsProportion: '',
+    pointsProportionLeft: '',
+    pointsProportionRight: '',
     pointsCommentNum: '',
     pointsComment: '',
     clearRules: '',
-    sharePoints: ''
+    sharePoints: '',
+    flag: false
   };
 
   componentDidMount() {
@@ -35,12 +42,28 @@ class IntegralManager extends React.Component {
       const res = await makeAjaxRequest('/isvpoints/editQuery', 'get');
       this.setState({
         ...res.data,
-        isTime: res.data.isTime !== 0 && res.data.isTime !== '0'
+        flag: true,
+        isTime: res.data.isTime !== 0 && res.data.isTime !== '0',
+        isTimeStrLeft: (res.data.isTimeStr || "").split("~")[0] || "",
+        isTimeStrRight: (res.data.isTimeStr || "").split("~")[1] || "",
+        pointsProportionLeft: (res.data.pointsProportion || "").split("=")[0] || "",
+        pointsProportionRight: (res.data.pointsProportion || "").split("=")[1] || ""
       });
     } catch (err) {
       message.error(err.message);
     }
   }
+
+  changeDate = (moments) => {
+    if (moments && moments.length > 0) {
+      this.setState({
+        isTimeStrLeft: `${moments[0].format('YYYY-MM-DD')} 00:00:00`,
+        isTimeStrRight: `${moments[1].format('YYYY-MM-DD')} 00:00:00`
+      });
+    } else {
+      this.setState({ isTimeStrLeft: '', isTimeStrRight: '' });
+    }
+  };
 
   handleChange = (type, e) => {
     this.setState({
@@ -66,9 +89,11 @@ class IntegralManager extends React.Component {
         gradeRuleId,
         newUserPoints,
         isTime,
-        isTimeStr,
+        isTimeStrLeft,
+        isTimeStrRight,
         loginPoints,
-        pointsProportion,
+        pointsProportionLeft,
+        pointsProportionRight,
         pointsCommentNum,
         pointsComment,
         clearRules,
@@ -78,9 +103,9 @@ class IntegralManager extends React.Component {
         gradeRuleId,
         newUserPoints,
         isTime: isTime ? '1' : '0',
-        isTimeStr,
+        isTimeStr: isTimeStrLeft ? `${isTimeStrLeft}~${isTimeStrRight}` : '',
         loginPoints,
-        pointsProportion,
+        pointsProportion: `${pointsProportionLeft}=${pointsProportionRight}`,
         pointsCommentNum,
         pointsComment,
         clearRules,
@@ -98,13 +123,16 @@ class IntegralManager extends React.Component {
     const {
       newUserPoints,
       isTime,
-      isTimeStr,
+      isTimeStrLeft,
+      isTimeStrRight,
       loginPoints,
-      pointsProportion,
+      pointsProportionLeft,
+      pointsProportionRight,
       pointsCommentNum,
       pointsComment,
       clearRules,
       sharePoints,
+      flag,
     } = this.state;
     return (
       <div className={className}>
@@ -124,10 +152,15 @@ class IntegralManager extends React.Component {
             <span>固定时间注册赠送积分</span>
           </div>
           <div className='content'>
-            <FormControl className="search-item"
-              value={isTimeStr}
-              onChange={this.handleChange.bind(null, "isTimeStr")}
-            />
+            {flag && <RangePicker
+              ref="rangePicker"
+              className="search-item"
+              placeholder={'开始时间 ~ 结束时间'}
+              format={format}
+              onChange={this.changeDate}
+              style={{ width: 400 }}
+              defaultValue={isTimeStrLeft && isTimeStrRight ? [new moment(isTimeStrLeft), new moment(isTimeStrRight)] : []}
+            />}
           </div>
         </div>
         <div className='detail-wrap'>
@@ -154,8 +187,17 @@ class IntegralManager extends React.Component {
           <div className='label'>积分比例</div>
           <div className='content'>
             <FormControl className="search-item"
-              value={pointsProportion}
-              onChange={this.handleChange.bind(null, "pointsProportion")}
+              value={pointsProportionLeft}
+              onChange={this.handleChange.bind(null, "pointsProportionLeft")}
+              style={{ width: 200 }}
+            />
+            <span style={{ display: 'inline-flex', alignItems: 'center', marginRight: 20, height: 32 }}>
+              元 =
+            </span>
+            <FormControl className="search-item"
+              value={pointsProportionRight}
+              onChange={this.handleChange.bind(null, "pointsProportionRight")}
+              style={{ width: 200 }}
             />
           </div>
         </div>

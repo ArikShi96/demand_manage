@@ -7,14 +7,19 @@ import { message, Tag, Card } from 'antd';
 import makeAjaxRequest from '../../util/request';
 class QuestionDetail extends React.Component {
   state = {
-    detail: {}
+    detail: {
+      activityDto: {}
+    }
   };
 
   componentDidMount() {
     this.fetchDetail();
   }
 
-  fetchDetail = () => { }
+  fetchDetail = async () => {
+    const res = await makeAjaxRequest('/activity/getOperateActivityinfo', 'get', { activity_id: this.props.match.params.id });
+    this.setState({ detail: res.data });
+  }
 
   navigateBack = () => {
     this.props.history.push(`/FullReduction`);
@@ -39,51 +44,63 @@ class QuestionDetail extends React.Component {
     }
   }
 
+  getRuleList = () => {
+    if (this.state.detail.couponDtoList) {
+      return this.state.detail.couponDtoList.map(rule => {
+        return `满${rule.limitMoney}减${rule.couponMoney}`
+      }).join(",")
+    } else {
+      return ""
+    }
+  }
+
   render() {
     const { detail } = this.state;
+    const { activityDto } = detail;
     const { className } = this.props;
     return (
-      <div className={className}>
+      <div div className={className} >
         <Header title="详情" />
         {/* 活动信息 */}
         <div className="section-title">
           <Tag color="red">活动信息</Tag>
         </div>
         <div className='detail-wrap'>
-          <div className='label'>问答类型</div>
-          <div className='content'>123</div>
+          <div className='label'>活动名称</div>
+          <div className='content'>{activityDto.activityName}</div>
         </div>
         <div className='detail-wrap'>
-          <div className='label'>问答类型</div>
-          <div className='content'>123</div>
+          <div className='label'>活动描述</div>
+          <div className='content'>{activityDto.remarks}</div>
         </div>
         <div className='detail-wrap'>
-          <div className='label'>相关商品</div>
-          <div className='content'>123</div>
+          <div className='label'>报名时间</div>
+          <div className='content'>{`${activityDto.activityJoinStart} 至 ${activityDto.activityJoinEnd}`}</div>
         </div>
         <div className='detail-wrap'>
-          <div className='label'>提问时间</div>
-          <div className='content'>123</div>
+          <div className='label'>活动时间</div>
+          <div className='content'>{`${activityDto.activityDateStart} 至 ${activityDto.activityDateEnd}`}</div>
         </div>
         <div className='detail-wrap'>
-          <div className='label'>问题详情</div>
-          <div className='content'>123</div>
+          <div className='label'>活动范围</div>
+          {/* TODO 暂时全品类 */}
+          <div className='content'>全品类</div>
         </div>
         <div className='detail-wrap'>
-          <div className='label'>回答</div>
-          <div className='content'>123</div>
+          <div className='label'>活动规则</div>
+          <div className='content'>{this.getRuleList()}</div>
         </div>
-        {/* 活动信息 */}
+        {/* 店铺信息 */}
         <div className="section-title">
-          <Tag color="red">活动信息</Tag>
+          <Tag color="red">店铺信息</Tag>
         </div>
         <div className='detail-wrap'>
-          <div className='label'>问题详情</div>
-          <div className='content'>123</div>
+          <div className='label'>店铺名称</div>
+          <div className='content'></div>
         </div>
         <div className='detail-wrap'>
-          <div className='label'>回答</div>
-          <div className='content'>123</div>
+          <div className='label'>报名时间</div>
+          <div className='content'></div>
         </div>
         {/* 商品信息 */}
         <div className="section-title">
@@ -92,14 +109,14 @@ class QuestionDetail extends React.Component {
         <div className='card-wrap'>
           <Card
             style={{ width: 240 }}
-            cover={<img alt="example" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />}
+          // cover={<img alt="example" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />}
           >
             <div className='card-title'>商品名名称</div>
             <div className='card-price'>0.00</div>
           </Card>
           <Card
             style={{ width: 240 }}
-            cover={<img alt="example" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />}
+          // cover={<img alt="example" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />}
           >
             <div className='card-title'>商品名名称</div>
             <div className='card-price'>0.00</div>
@@ -107,10 +124,10 @@ class QuestionDetail extends React.Component {
         </div>
         <div className='action-wrap'>
           <Button colors="primary" onClick={this.navigateBack}>返回</Button>
-          <Button colors="primary" onClick={this.submit} style={{ margin: "0 40px" }}>通过</Button>
-          <Button colors="primary" onClick={this.reject}>拒绝</Button>
+          {/* <Button colors="primary" onClick={this.submit} style={{ margin: "0 40px" }}>通过</Button>
+          <Button colors="primary" onClick={this.reject}>拒绝</Button> */}
         </div>
-      </div>
+      </div >
     );
   }
 }

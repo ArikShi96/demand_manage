@@ -179,7 +179,7 @@ class SignUpList extends React.Component {
   handleTableAction = async (item, action) => {
     switch (action) {
       case 'view': {
-        this.props.history.push(`/FullReductionDetail/${item.id}`);
+        this.props.history.push(`/FullReductionDetail/${item.activityId}`);
         break;
       }
       case 'join': {
@@ -250,6 +250,7 @@ class SignUpList extends React.Component {
     return (
       <Fragment>
         <SearchPanel
+          reset={this.resetSearch.bind(this)}
           search={this.searchList.bind(this, 0, 10)}
         >
           <FormList layoutOpt={{ md: 4, xs: 4 }}>

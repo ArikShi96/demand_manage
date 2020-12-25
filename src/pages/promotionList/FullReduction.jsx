@@ -42,7 +42,7 @@ class FullReduction extends React.Component {
             <TabPane tab="报名列表" key="1">
             </TabPane>
           </Tabs>
-          {activeTabKey === "0" ? <ActivityList history={this.props.history} /> : <SignUpList />}
+          {activeTabKey === "0" ? <ActivityList history={this.props.history} /> : <SignUpList history={this.props.history} />}
         </Content>
       </Fragment>
     );

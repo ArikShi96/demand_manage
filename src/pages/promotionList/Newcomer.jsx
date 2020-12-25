@@ -1,4 +1,4 @@
-import { FormControl, Select, Pagination, Table, Modal, Button, Radio } from "tinper-bee";
+import { FormControl, Select, Pagination, Table, Modal, Button, Radio, Message } from "tinper-bee";
 import React, { Fragment } from "react";
 import styled from 'styled-components';
 import DatePicker from 'bee-datepicker'
@@ -16,10 +16,12 @@ import FormList from "../common/Form";
 import SearchPanel from "../common/SearchPanel";
 import makeAjaxRequest from '../../util/request';
 import { message } from 'antd';
+import moment from "moment";
 
 const { RangePicker } = DatePicker;
 const format = "YYYY-MM-DD";
 const Option = Select.Option;
+const IsStopMap = { "0": "未开始", "1": "报名中", "2": "报名结束", "3": "发放中", "4": "已暂停", "5": "已结束" };
 
 class Newcomer extends React.Component {
   state = {
@@ -30,10 +32,10 @@ class Newcomer extends React.Component {
       activePage: 1, // 当前页面
       pageSize: 10, // 每页多少
     },
-    startTime: '',
-    endTime: '',
+    date_start: '',
+    date_end: '',
     name: '',
-    status: '',
+    is_stop: '',
     formData: {
       dataItem: {}
     },
@@ -50,47 +52,58 @@ class Newcomer extends React.Component {
     // },
     {
       title: "优惠券名称",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "couponActivityName",
+      key: "couponActivityName",
       width: "20%",
     },
     {
       title: "已使用/已发放",
-      dataIndex: "statusCount",
-      key: "statusCount",
+      dataIndex: "getNum",
+      key: "getNum",
       width: "10%",
+      render: (value, item) => {
+        return (
+          <span>{item.usedNum}/{value}</span>
+        )
+      }
     },
     {
       title: "开始时间",
-      dataIndex: "startTime",
-      key: "startTime",
+      dataIndex: "activityDateStart",
+      key: "activityDateStart",
       width: "20%",
     },
     {
       title: "结束时间",
-      dataIndex: "endTime",
-      key: "endTime",
+      dataIndex: "activityDateEnd",
+      key: "activityDateEnd",
       width: "20%",
     },
     {
       title: "发放状态",
-      dataIndex: "status",
-      key: "status",
+      dataIndex: "isStop",
+      key: "isStop",
       width: "10%",
+      render: (value) => {
+        return (
+          <span>{IsStopMap[value] || ""}</span>
+        )
+      }
     },
     {
       title: "操作",
-      dataIndex: "commitTime",
-      key: "commitTime",
+      dataIndex: "isStop",
+      key: "action",
       width: "20%",
-      render: (value) => {
-        return value ? (
-          <div>
-            <a>查看</a>
-            <a>编辑</a>
-            <a>停止发放</a>
+      render: (value, item) => {
+        return (
+          <div className="actions">
+            <a className="action" onClick={this.handleTableAction.bind(this, item, 'view')}>查看</a>
+            {value === "0" && <a className="action" onClick={this.handleTableAction.bind(this, item, 'edit')}>编辑</a>}
+            {value === "3" && <a className="action" onClick={this.handleTableAction.bind(this, item, 'delete')}>停止发放</a>}
+            {value === "4" && <a className="action" onClick={this.handleTableAction.bind(this, item, 'confirmDelete')}>发放</a>}
           </div>
-        ) : null;
+        );
       },
     },
   ];
@@ -102,11 +115,11 @@ class Newcomer extends React.Component {
   changeDate = (moments) => {
     if (moments && moments.length > 0) {
       this.setState({
-        startTime: `${moments[0].format('YYYY-MM-DD')} 00:00:00`,
-        endTime: `${moments[1].format('YYYY-MM-DD')} 00:00:00`
+        date_start: `${moments[0].format('YYYY-MM-DD')} 00:00:00`,
+        date_end: `${moments[1].format('YYYY-MM-DD')} 00:00:00`
       });
     } else {
-      this.setState({ startTime: '', endTime: '' });
+      this.setState({ date_start: '', date_end: '' });
     }
   };
 
@@ -134,9 +147,9 @@ class Newcomer extends React.Component {
     this.refs.rangePicker.clear();
     this.setState({
       couponActivityName: '',
-      startTime: '',
-      endTime: '',
-      status: '',
+      date_start: '',
+      date_end: '',
+      is_stop: '',
     }, () => {
       this.searchList();
     });
@@ -147,20 +160,20 @@ class Newcomer extends React.Component {
     try {
       const {
         dataSource,
-        startTime,
-        endTime,
-        status,
+        date_start,
+        date_end,
+        is_stop,
         couponActivityName
       } = this.state;
       const { activePage, pageSize } = dataSource;
-      const res = await makeAjaxRequest('/activity/operateList', 'get', {
+      const res = await makeAjaxRequest('/activity/operateNewUserCAList', 'post', {
         // scope: "1",
         pageIndex: activePage - 1,
         pageSize,
-        activityName: couponActivityName,
-        status,
-        startTime,
-        endTime
+        activity_name: couponActivityName,
+        is_stop,
+        date_start,
+        date_end
       });
       const data = res.data.content || [];
       data.forEach((item, index) => {
@@ -186,6 +199,10 @@ class Newcomer extends React.Component {
         this.showAdd(false);
         break;
       }
+      case 'view': {
+        this.showAdd(true, item, true);
+        break;
+      }
       case 'edit': {
         this.showAdd(true, item);
         break;
@@ -200,8 +217,11 @@ class Newcomer extends React.Component {
       case 'confirmDelete': {
         try {
           this.hideDeleteModal();
-          await makeAjaxRequest('/xxx', 'get', { isv_recommend_id: item.isvId });
-          message.success('删除成功');
+          await makeAjaxRequest('/coupon/editNUStop', 'post', {
+            activity_id: item.couponActivityId,
+            is_stop: item.isStop === "3" ? "4" : "3"
+          });
+          message.success('操作成功');
           this.searchList();
         } catch (err) {
           message.error(err.message);
@@ -214,13 +234,19 @@ class Newcomer extends React.Component {
     }
   }
 
-  showAdd = (isEdit, item) => {
+  showAdd = async (isEdit, item, isViewMode) => {
+    let editItem = "";
+    if (isEdit) {
+      const res = await makeAjaxRequest('/coupon/getNUCouponInfo', 'get', { activity_id: item.couponActivityId });
+      editItem = res.data
+    }
     this.setState({
       formData: {
         ...this.state.formData,
         showAddModal: true,
-        title: isEdit ? '编辑新人专享' : '新增新人专享',
-        dataItem: item || {}
+        title: isEdit ? (isViewMode ? '查看新人专享' : '编辑新人专享') : '新增新人专享',
+        isViewMode: !!isViewMode,
+        dataItem: editItem || item || {}
       }
     })
   }
@@ -240,11 +266,11 @@ class Newcomer extends React.Component {
     }
     if (type === 'dates' || type === 'activityDates') {
       if (type === 'dates') {
-        this.state.formData.dataItem.dateStart = e[0] ? e[0].format('YYYY-MM-DD') : '';
-        this.state.formData.dataItem.dateEnd = e[1] ? e[1].format('YYYY-MM-DD') : '';
+        this.state.formData.dataItem.dateStart = e[0] ? `${e[0].format('YYYY-MM-DD')} 00:00:00` : '';
+        this.state.formData.dataItem.dateEnd = e[1] ? `${e[1].format('YYYY-MM-DD')} 00:00:00` : '';
       } else {
-        this.state.formData.dataItem.activityDateStart = e[0] ? e[0].format('YYYY-MM-DD') : '';
-        this.state.formData.dataItem.activityDateEnd = e[1] ? e[1].format('YYYY-MM-DD') : '';
+        this.state.formData.dataItem.activityDateStart = e[0] ? `${e[0].format('YYYY-MM-DD')} 00:00:00` : '';
+        this.state.formData.dataItem.activityDateEnd = e[1] ? `${e[1].format('YYYY-MM-DD')} 00:00:00` : '';
       }
     } else {
       this.setState({
@@ -256,6 +282,42 @@ class Newcomer extends React.Component {
           }
         }
       })
+    }
+  }
+
+  checkValidations = () => {
+    let message = "";
+    const { dataItem } = this.state.formData;
+    const {
+      couponActivityName,
+      dateType,
+      dateStart,
+      dateEnd,
+      activityDateStart,
+      activityDateEnd,
+      // remarks,
+      couponMoney,
+      limitMoney,
+    } = dataItem;
+    // 逆序
+    const reg = /^\d+(?=\.{0,1}\d+$|$)/
+    if (!reg.test(couponMoney) || !reg.test(limitMoney)) {
+      message = "输入的金额不合法"
+    }
+    if (!activityDateStart || !activityDateEnd) {
+      message = "请选择活动起止时间"
+    }
+    if (!dateType || dateType === '2' && (!dateStart || !dateEnd)) {
+      message = "请选择有效期"
+    }
+    if (!couponActivityName) {
+      message = "请输入优惠券名称"
+    }
+    if (message) {
+      Message.create({ content: message, color: "danger" });
+      return false;
+    } else {
+      return true;
     }
   }
 
@@ -273,16 +335,19 @@ class Newcomer extends React.Component {
       couponMoney,
       limitMoney,
     } = dataItem;
+    if (!this.checkValidations()) {
+      return;
+    }
     try {
       this.hideAddModal();
       if (couponActivityId) {
-        await makeAjaxRequest('/coupon/editNewuser', 'post', {
+        await makeAjaxRequest('/coupon/editnewuser', 'post', {}, {
           couponActivityId,
           busType: "1",
           couponActivityName,
           dateType,
-          dateStart,
-          dateEnd,
+          dateStart: dateType === "1" ? "" : dateStart,
+          dateEnd: dateType === "1" ? "" : dateEnd,
           activityDateStart,
           activityDateEnd,
           remarks,
@@ -290,12 +355,12 @@ class Newcomer extends React.Component {
           limitMoney,
         });
       } else {
-        await makeAjaxRequest('/coupon/addnewuser', 'post', {
+        await makeAjaxRequest('/coupon/addnewuser', 'post', {}, {
           busType: "1",
           couponActivityName,
           dateType,
-          dateStart,
-          dateEnd,
+          dateStart: dateType === "1" ? "" : dateStart,
+          dateEnd: dateType === "1" ? "" : dateEnd,
           activityDateStart,
           activityDateEnd,
           remarks,
@@ -324,12 +389,12 @@ class Newcomer extends React.Component {
     const {
       dataSource,
       couponActivityName,
-      status,
+      is_stop,
       formData,
       showDeleteModal,
     } = this.state;
     const { activePage, content, total, items } = dataSource;
-    const { showAddModal, dataItem } = formData;
+    const { showAddModal, dataItem, isViewMode } = formData;
     return (
       <Fragment>
         <Header style={{ background: "#limitMoney", padding: 0 }} title="新人专享" />
@@ -349,17 +414,14 @@ class Newcomer extends React.Component {
               <FormList.Item label="状态" labelCol={100}>
                 <Select
                   className="search-item"
-                  onChange={this.handleChange.bind(null, "status")}
-                  value={status}
+                  onChange={this.handleChange.bind(null, "is_stop")}
+                  value={is_stop}
                 >
-                  {[
-                    { id: "0", stat: "全部状态" },
-                    { id: "1", stat: "进行中" },
-                    { id: "2", stat: "已取消" }].map((item) => (
-                      <Option key={item.id} value={item.id}>
-                        {item.stat}
-                      </Option>
-                    ))}
+                  {Object.keys(IsStopMap).map((key) => (
+                    <Option key={key} value={key}>
+                      {IsStopMap[key]}
+                    </Option>
+                  ))}
                 </Select>
               </FormList.Item>
               <FormList.Item
@@ -409,72 +471,89 @@ class Newcomer extends React.Component {
           </Modal.Header>
           <Modal.Body>
             <FormList.Item label="优惠券名称" labelCol={100}>
-              <FormControl
-                className="search-item"
-                value={dataItem.couponActivityName}
-                onChange={this.handleFormDataChange.bind(null, "couponActivityName")}
-                style={{ width: 250 }}
-              />
+              {isViewMode ?
+                <div>{dataItem.couponActivityName}</div>
+                : <FormControl
+                  className="search-item"
+                  value={dataItem.couponActivityName}
+                  onChange={this.handleFormDataChange.bind(null, "couponActivityName")}
+                  style={{ width: 250 }}
+                />}
             </FormList.Item>
             <FormList.Item label="有效期" labelCol={100}>
-              <Radio.RadioGroup
-                value={dataItem.dateType}
-                onChange={this.handleFormDataChange.bind(null, "dateType")}
-              >
-                <Radio value='1'>一直有效</Radio>
-                <Radio value='2'>有效日期</Radio>
-              </Radio.RadioGroup>
+              {isViewMode ?
+                <div>{dataItem.dateType === "2" ? `${dataItem.dateStart} - ${dataItem.dateEnd}` : '一直有效'}</div> :
+                <Radio.RadioGroup
+                  value={dataItem.dateType}
+                  onChange={this.handleFormDataChange.bind(null, "dateType")}
+                >
+                  <Radio value='1'>一直有效</Radio>
+                  <Radio value='2'>有效日期</Radio>
+                </Radio.RadioGroup>}
             </FormList.Item>
-            {dataItem.dateType === '2' && <FormList.Item label="" labelCol={100}>
+            {dataItem.dateType === '2' && !isViewMode && <FormList.Item label="" labelCol={100}>
               <RangePicker
-                ref="rangePicker"
                 className="search-item w-100"
                 placeholder={'开始时间 ~ 结束时间'}
                 format={format}
                 onChange={this.handleFormDataChange.bind(null, "dates")}
                 style={{ width: 250 }}
+                defaultValue={dataItem.dateStart && dataItem.dateEnd
+                  ? [new moment(dataItem.dateStart), new moment(dataItem.dateEnd)] :
+                  []}
               />
             </FormList.Item>}
             <FormList.Item label="活动起止时间" labelCol={100}>
-              <RangePicker
-                ref="rangePicker"
-                className="search-item w-100"
-                placeholder={'开始时间 ~ 结束时间'}
-                format={format}
-                onChange={this.handleFormDataChange.bind(null, "activityDates")}
-                style={{ width: 250 }}
-              />
+              {isViewMode ?
+                <div>{`${dataItem.activityDateStart} - ${dataItem.activityDateEnd}`}</div> :
+                <RangePicker
+                  className="search-item w-100"
+                  placeholder={'开始时间 ~ 结束时间'}
+                  format={format}
+                  onChange={this.handleFormDataChange.bind(null, "activityDates")}
+                  style={{ width: 250 }}
+                  defaultValue={dataItem.activityDateStart && dataItem.activityDateEnd ?
+                    [new moment(dataItem.activityDateStart), new moment(dataItem.activityDateEnd)] :
+                    []}
+                />}
             </FormList.Item>
             <FormList.Item label="活动说明" labelCol={100}>
-              <FormControl
-                className="search-item"
-                value={dataItem.remarks}
-                onChange={this.handleFormDataChange.bind(null, "remarks")}
-                style={{ width: 250 }}
-              />
+              {isViewMode ?
+                <div>{dataItem.remarks}</div> :
+                <FormControl
+                  className="search-item"
+                  value={dataItem.remarks}
+                  onChange={this.handleFormDataChange.bind(null, "remarks")}
+                  style={{ width: 250 }}
+                />}
             </FormList.Item>
             <FormList.Item label="优惠金额" labelCol={100}>
-              <FormControl
-                className="search-item"
-                value={dataItem.couponMoney}
-                onChange={this.handleFormDataChange.bind(null, "couponMoney")}
-                style={{ width: 250 }}
-              />
-              <div>此类型的优惠可以抵销的金额</div>
+              {isViewMode ?
+                <div>{dataItem.couponMoney}</div> :
+                <FormControl
+                  className="search-item"
+                  value={dataItem.couponMoney}
+                  onChange={this.handleFormDataChange.bind(null, "couponMoney")}
+                  style={{ width: 250 }}
+                />}
+              {!isViewMode && <div style={{ position: 'absolute' }}>此类型的优惠可以抵销的金额</div>}
             </FormList.Item>
             <FormList.Item label="最小订单金额" labelCol={100}>
-              <FormControl
-                className="search-item"
-                value={dataItem.limitMoney}
-                onChange={this.handleFormDataChange.bind(null, "limitMoney")}
-                style={{ width: 250 }}
-              />
-              <div>只有商品总金额达到这个数的订单才能使用这种优惠</div>
+              {isViewMode ?
+                <div>{dataItem.limitMoney}</div> :
+                <FormControl
+                  className="search-item"
+                  value={dataItem.limitMoney}
+                  onChange={this.handleFormDataChange.bind(null, "limitMoney")}
+                  style={{ width: 250, marginTop: '10px' }}
+                />}
+              {!isViewMode && <div style={{ position: 'absolute' }}>只有商品总金额达到这个数的订单才能使用这种优惠</div>}
             </FormList.Item>
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.hideAddModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-            <Button onClick={this.submit} colors="primary">确认</Button>
+            {isViewMode && <Button onClick={this.hideAddModal} colors="primary">确认</Button>}
+            {!isViewMode && <Button onClick={this.submit} colors="primary">确认</Button>}
           </Modal.Footer>
         </Modal>
         {/* 提示框 */}

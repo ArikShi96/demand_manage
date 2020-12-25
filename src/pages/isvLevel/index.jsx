@@ -35,6 +35,13 @@ class IsvLevel extends React.Component {
       title: "等级名称",
       dataIndex: "gradeName",
       width: "30%",
+      render: (value, item) => {
+        return <Input
+          className="search-item"
+          value={value}
+          onChange={this.handleChange.bind(this, item, "gradeName")}
+        />
+      }
     },
     {
       title: "图标",
@@ -134,10 +141,25 @@ class IsvLevel extends React.Component {
     }
   };
 
+  checkPoints = () => {
+    let current = -1;
+    return this.state.dataSource.content.every(level => {
+      if (parseInt(level.pointsStart) !== current + 1) {
+        return false;
+      } else {
+        current = level.pointsEnd;
+        return true;
+      }
+    });
+  }
+
   submit = async () => {
     try {
+      if (!this.checkPoints()) {
+        throw new Error("积分范围在每一个等级中必须连续，否则无法保存")
+      }
       await Promise.all(this.state.dataSource.content.map(item => {
-        return makeAjaxRequest('/isv/level/update', 'post', { ...item });
+        return makeAjaxRequest('/isv/level/save', 'post', {}, { ...item });
       }));
       message.success('操作成功');
       this.searchList();

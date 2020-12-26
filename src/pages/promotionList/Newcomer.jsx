@@ -69,14 +69,14 @@ class Newcomer extends React.Component {
     },
     {
       title: "开始时间",
-      dataIndex: "activityDateStart",
-      key: "activityDateStart",
+      dataIndex: "dateStart",
+      key: "dateStart",
       width: "20%",
     },
     {
       title: "结束时间",
-      dataIndex: "activityDateEnd",
-      key: "activityDateEnd",
+      dataIndex: "dateEnd",
+      key: "dateEnd",
       width: "20%",
     },
     {
@@ -265,12 +265,12 @@ class Newcomer extends React.Component {
 
     }
     if (type === 'dates' || type === 'activityDates') {
-      if (type === 'dates') {
-        this.state.formData.dataItem.dateStart = e[0] ? `${e[0].format('YYYY-MM-DD')} 00:00:00` : '';
-        this.state.formData.dataItem.dateEnd = e[1] ? `${e[1].format('YYYY-MM-DD')} 00:00:00` : '';
-      } else {
+      if (type === 'activityDates') {
         this.state.formData.dataItem.activityDateStart = e[0] ? `${e[0].format('YYYY-MM-DD')} 00:00:00` : '';
         this.state.formData.dataItem.activityDateEnd = e[1] ? `${e[1].format('YYYY-MM-DD')} 00:00:00` : '';
+      } else {
+        this.state.formData.dataItem.dateStart = e[0] ? `${e[0].format('YYYY-MM-DD')} 00:00:00` : '';
+        this.state.formData.dataItem.dateEnd = e[1] ? `${e[1].format('YYYY-MM-DD')} 00:00:00` : '';
       }
     } else {
       this.setState({
@@ -291,10 +291,10 @@ class Newcomer extends React.Component {
     const {
       couponActivityName,
       dateType,
-      dateStart,
-      dateEnd,
       activityDateStart,
       activityDateEnd,
+      dateStart,
+      dateEnd,
       // remarks,
       couponMoney,
       limitMoney,
@@ -304,10 +304,10 @@ class Newcomer extends React.Component {
     if (!reg.test(couponMoney) || !reg.test(limitMoney)) {
       message = "输入的金额不合法"
     }
-    if (!activityDateStart || !activityDateEnd) {
+    if (!dateStart || !dateEnd) {
       message = "请选择活动起止时间"
     }
-    if (!dateType || dateType === '2' && (!dateStart || !dateEnd)) {
+    if (!dateType || dateType === '2' && (!activityDateStart || !activityDateEnd)) {
       message = "请选择有效期"
     }
     if (!couponActivityName) {
@@ -327,10 +327,10 @@ class Newcomer extends React.Component {
       couponActivityId,
       couponActivityName,
       dateType,
-      dateStart,
-      dateEnd,
       activityDateStart,
       activityDateEnd,
+      dateStart,
+      dateEnd,
       remarks,
       couponMoney,
       limitMoney,
@@ -346,10 +346,10 @@ class Newcomer extends React.Component {
           busType: "1",
           couponActivityName,
           dateType,
-          dateStart: dateType === "1" ? "" : dateStart,
-          dateEnd: dateType === "1" ? "" : dateEnd,
-          activityDateStart,
-          activityDateEnd,
+          activityDateStart: dateType === "1" ? "" : activityDateStart,
+          activityDateEnd: dateType === "1" ? "" : activityDateEnd,
+          dateStart,
+          dateEnd,
           remarks,
           couponMoney,
           limitMoney,
@@ -359,10 +359,10 @@ class Newcomer extends React.Component {
           busType: "1",
           couponActivityName,
           dateType,
-          dateStart: dateType === "1" ? "" : dateStart,
-          dateEnd: dateType === "1" ? "" : dateEnd,
-          activityDateStart,
-          activityDateEnd,
+          activityDateStart: dateType === "1" ? "" : activityDateStart,
+          activityDateEnd: dateType === "1" ? "" : activityDateEnd,
+          dateStart,
+          dateEnd,
           remarks,
           couponMoney,
           limitMoney,
@@ -482,7 +482,7 @@ class Newcomer extends React.Component {
             </FormList.Item>
             <FormList.Item label="有效期" labelCol={100}>
               {isViewMode ?
-                <div>{dataItem.dateType === "2" ? `${dataItem.dateStart} - ${dataItem.dateEnd}` : '一直有效'}</div> :
+                <div>{dataItem.dateType === "2" ? `${dataItem.activityDateStart} - ${dataItem.activityDateEnd}` : '一直有效'}</div> :
                 <Radio.RadioGroup
                   value={dataItem.dateType}
                   onChange={this.handleFormDataChange.bind(null, "dateType")}
@@ -496,24 +496,24 @@ class Newcomer extends React.Component {
                 className="search-item w-100"
                 placeholder={'开始时间 ~ 结束时间'}
                 format={format}
-                onChange={this.handleFormDataChange.bind(null, "dates")}
+                onChange={this.handleFormDataChange.bind(null, "activityDates")}
                 style={{ width: 250 }}
-                defaultValue={dataItem.dateStart && dataItem.dateEnd
-                  ? [new moment(dataItem.dateStart), new moment(dataItem.dateEnd)] :
+                defaultValue={dataItem.activityDateStart && dataItem.activityDateEnd
+                  ? [new moment(dataItem.activityDateStart), new moment(dataItem.activityDateEnd)] :
                   []}
               />
             </FormList.Item>}
             <FormList.Item label="活动起止时间" labelCol={100}>
               {isViewMode ?
-                <div>{`${dataItem.activityDateStart} - ${dataItem.activityDateEnd}`}</div> :
+                <div>{`${dataItem.dateStart} - ${dataItem.dateEnd}`}</div> :
                 <RangePicker
                   className="search-item w-100"
                   placeholder={'开始时间 ~ 结束时间'}
                   format={format}
-                  onChange={this.handleFormDataChange.bind(null, "activityDates")}
+                  onChange={this.handleFormDataChange.bind(null, "dates")}
                   style={{ width: 250 }}
-                  defaultValue={dataItem.activityDateStart && dataItem.activityDateEnd ?
-                    [new moment(dataItem.activityDateStart), new moment(dataItem.activityDateEnd)] :
+                  defaultValue={dataItem.dateStart && dataItem.dateEnd ?
+                    [new moment(dataItem.dateStart), new moment(dataItem.dateEnd)] :
                     []}
                 />}
             </FormList.Item>

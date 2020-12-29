@@ -57,11 +57,8 @@ class LiveList extends React.Component {
     },
     {
       title: "服务商",
-      dataIndex: "isvId",
-      width: "10%",
-      render: (value) => {
-        return this.state.isvMap[value]
-      }
+      dataIndex: "isvName",
+      width: "10%"
     },
     {
       title: "开始时间",
@@ -80,7 +77,7 @@ class LiveList extends React.Component {
       }
     },
     {
-      title: "直播状态", dataIndex: "ip_address", width: "10%",
+      title: "直播状态", dataIndex: "liveStatus", width: "10%",
       render: (value) => {
         if (value === 2 || value === '2') {
           return <span>直播中</span>
@@ -538,8 +535,8 @@ class LiveList extends React.Component {
                   value={isvId}
                 >
                   {isvList.map((item) => (
-                    <Option key={item.value} value={item.value}>
-                      {item.label}
+                    <Option key={item.isvId} value={item.isvId}>
+                      {item.isvName}
                     </Option>
                   ))}
                 </Select>

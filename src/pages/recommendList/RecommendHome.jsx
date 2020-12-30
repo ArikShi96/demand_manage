@@ -268,7 +268,7 @@ class RecommendHome extends React.Component {
       this.hideChangeModal();
       await makeAjaxRequest('/index/activity/operateRec', 'post', {
         new_indexActivityId: dataItem.indexActivityId,
-        old_indexActivityId: selected.indexActivityId || "",
+        old_indexActivityId: selected.index_activity_id || "",
         position: selected.position || currentPosition + 1
       });
       message.success('操作成功');

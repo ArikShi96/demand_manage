@@ -132,20 +132,22 @@ class LiveList extends React.Component {
         return (
           <div className="actions">
             <a className='action' onClick={this.handleTableAction.bind(null, item, 'view')}>查看</a>
-            {/* <Popover
+            {/* {item.auditStatus === "0" && <Popover
               content={
                 <div>
                   <a className='action' onClick={this.handleTableAction.bind(null, item, 'reviewApprove')} style={{ marginRight: '20px' }}>通过</a>
                   <a className='action' onClick={this.handleTableAction.bind(null, item, 'reviewReject')}>拒绝</a>
                 </div>
               }
-              trigger="click"
               visible={item.popoverVisible}
               onVisibleChange={this.handleVisibleChange}
             >
+            </Popover>} */}
+            {item.auditStatus === "0"
+              &&
               <a className='action' onClick={this.handleTableAction.bind(null, item, 'review')}>审核</a>
-            </Popover> */}
-            <a className='action' onClick={this.handleTableAction.bind(null, item, 'redirect')}>直播间</a>
+            }
+            {item.liveStatus === "2" && <a className='action' onClick={this.handleTableAction.bind(null, item, 'redirect')}>直播间</a>}
             <a className='action' onClick={this.handleTableAction.bind(null, item, 'delete')}>删除</a>
           </div>
         );
@@ -278,8 +280,19 @@ class LiveList extends React.Component {
 
   /* 新增/编辑/删除 */
   handleTableAction = async (item, action, event) => {
-    event.stopPropagation();
-    event.preventDefault();
+    if (event && event.stopPropagation) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    if (action === 'mulReviewApprove' || action === 'mulReviewReject') {
+      const find = this.state.selectedRows.find(row => {
+        return row.auditStatus !== "0"
+      });
+      if (find) {
+        message.error("只能操作审核状态为待审核的数据")
+        return;
+      }
+    }
     switch (action) {
       // 查看
       case 'view': {
@@ -316,17 +329,16 @@ class LiveList extends React.Component {
       }
       // 审查
       case 'review': {
-        item.popoverVisible = true
         this.setState({
-          popoverVisible: true
+          popoverVisible: true,
+          deleteItem: item
         })
         break;
       }
       // 审查通过
       case 'reviewApprove': {
-        item.popoverVisible = false
         this.setState({
-          popoverVisible: true
+          popoverVisible: false
         })
         try {
           await makeAjaxRequest(`/live/audit`, 'post', {
@@ -343,7 +355,9 @@ class LiveList extends React.Component {
       }
       // 审查拒绝
       case 'reviewReject': {
-        item.popoverVisible = false;
+        this.setState({
+          popoverVisible: false
+        });
         this.showReject(item);
         break;
       }
@@ -390,6 +404,7 @@ class LiveList extends React.Component {
               reason: '不符合直播标准'
             });
           }));
+          message.success('操作成功');
           this.searchList();
         } catch (err) {
           message.error(err.message);
@@ -425,6 +440,12 @@ class LiveList extends React.Component {
         break;
       }
     }
+  }
+
+  hidePopoverModal = () => {
+    this.setState({
+      popoverVisible: false
+    });
   }
 
   showReject = (item) => {
@@ -482,6 +503,8 @@ class LiveList extends React.Component {
       formData,
       showDeleteModal,
       isvList,
+      selectedRows,
+      popoverVisible,
     } = this.state;
     const MultiSelectTable = multiSelect(Table, Checkbox)
     const { showRejectModal, dataItem } = formData;
@@ -563,10 +586,10 @@ class LiveList extends React.Component {
               </FormList.Item>
             </FormList>
           </SearchPanel>
-          {/* <div className='action-wrap'>
-            <Button colors="primary" onClick={this.handleTableAction.bind(this, null, 'mulReviewApprove')}>批量通过</Button>
-            <Button colors="primary" onClick={this.handleTableAction.bind(this, null, 'mulReviewReject')}>批量拒绝</Button>
-          </div> */}
+          <div className='action-wrap'>
+            <Button colors="primary" onClick={this.handleTableAction.bind(this, null, 'mulReviewApprove')} disabled={!selectedRows.length}>批量通过</Button>
+            <Button colors="primary" onClick={this.handleTableAction.bind(this, null, 'mulReviewReject')} disabled={!selectedRows.length}>批量拒绝</Button>
+          </div>
           <MultiSelectTable
             getSelectedDataFunc={this.getSelectedDataFunc}
             rowKey="order"
@@ -623,6 +646,23 @@ class LiveList extends React.Component {
           <Modal.Footer>
             <Button onClick={this.hideDeleteModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
             <Button onClick={this.confirmDelete} colors="primary">确认</Button>
+          </Modal.Footer>
+        </Modal>
+        {/* 审核选择 */}
+        <Modal
+          show={popoverVisible}
+          style={{ marginTop: '20vh' }}
+          onHide={this.hidePopoverModal}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>审核</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            请选择需要执行的操作
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.handleTableAction.bind(null, this.state.deleteItem, 'reviewApprove')} colors="primary" style={{ marginRight: 8 }}>通过</Button>
+            <Button onClick={this.handleTableAction.bind(null, this.state.deleteItem, 'reviewReject')} colors="primary">拒绝</Button>
           </Modal.Footer>
         </Modal>
       </Fragment>

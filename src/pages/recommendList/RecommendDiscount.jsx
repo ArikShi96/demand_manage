@@ -124,6 +124,14 @@ class RecommendDiscount extends React.Component {
         }
       });
     } catch (err) {
+      this.setState({
+        dataSource: {
+          ...this.state.dataSource,
+          content: [],
+          total: 0,
+          items: 0
+        }
+      });
       message.error(err.message);
     }
   };
@@ -136,6 +144,9 @@ class RecommendDiscount extends React.Component {
         class_pros: res.data || []
       })
     } catch (err) {
+      this.setState({
+        class_pros: []
+      });
       message.error(err.message);
     }
   };
@@ -175,11 +186,16 @@ class RecommendDiscount extends React.Component {
 
   showAdd = (isEdit, item) => {
     this.setState({
+      class_pros: [],
       formData: {
         ...this.state.formData,
         showAddModal: true,
         title: isEdit ? '编辑商品' : '新增商品',
         dataItem: item || {}
+      }
+    }, async () => {
+      if (isEdit && item) {
+        await this.fetchClassProducts(item.class_sun_id);
       }
     })
   }
@@ -264,9 +280,9 @@ class RecommendDiscount extends React.Component {
       <Fragment>
         <Header style={{ background: "#fff", padding: 0 }} title="特惠商品列表" />
         <Content className={this.props.className} style={{ width: "100%", overflowX: "auto" }}>
-          {/* <div className='action-wrap'>
+          <div className='action-wrap'>
             <Button colors="primary" onClick={this.showAdd.bind(this, false)}>新增</Button>
-          </div> */}
+          </div>
           <Table rowKey="order" columns={this.columns} data={content} />
           {/* <Pagination
             first
@@ -298,6 +314,10 @@ class RecommendDiscount extends React.Component {
           <Modal.Body><FormList.Item label="选择商品" labelCol={100}>
             <Select
               placeholder="选择商品"
+              notFoundContent="暂无数据"
+              showSearch={true}
+              supportWrite={true}
+              optionFilterProp="children"
               className="search-item"
               onChange={this.handleFormDataChange.bind(null, "productId")}
               value={dataItem.productId}

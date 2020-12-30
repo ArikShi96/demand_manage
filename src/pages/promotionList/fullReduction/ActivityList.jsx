@@ -192,6 +192,14 @@ class ActivityList extends React.Component {
         }
       });
     } catch (err) {
+      this.setState({
+        dataSource: {
+          ...this.state.dataSource,
+          content: [],
+          total: 0,
+          items: 0
+        }
+      });
       message.error(err.message);
     }
   };
@@ -235,7 +243,7 @@ class ActivityList extends React.Component {
         try {
           this.hideConfirmModal();
           const { confirmItem, confirmAction } = this.state;
-          await makeAjaxRequest('/activity/editOperateActivityStatus', 'post', {
+          await makeAjaxRequest('/activity/editOperateActivityStatus', 'get', {
             activity_id: confirmItem.activityId,
             status: confirmAction === "open" ? "3" : "4",
           });

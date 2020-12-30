@@ -176,6 +176,14 @@ class RecommendProduct extends React.Component {
         }
       });
     } catch (err) {
+      this.setState({
+        dataSource: {
+          ...this.state.dataSource,
+          content: [],
+          total: 0,
+          items: 0
+        }
+      });
       message.error(err.message);
     }
   };
@@ -215,6 +223,10 @@ class RecommendProduct extends React.Component {
         class_pros: []
       })
     } catch (err) {
+      this.setState({
+        class_sun_ids: [],
+        class_pros: []
+      })
       message.error(err.message);
     }
   };
@@ -228,6 +240,9 @@ class RecommendProduct extends React.Component {
         class_pros: res.data || []
       })
     } catch (err) {
+      this.setState({
+        class_pros: []
+      });
       message.error(err.message);
     }
   };
@@ -391,6 +406,7 @@ class RecommendProduct extends React.Component {
               <FormList.Item label="一级分类" labelCol={100}>
                 <Select
                   placeholder="选择一级分类"
+                  notFoundContent="暂无数据"
                   className="search-item"
                   onChange={this.handleChange.bind(null, "class_id")}
                   value={class_id}
@@ -405,6 +421,7 @@ class RecommendProduct extends React.Component {
               <FormList.Item label="二级分类" labelCol={100}>
                 <Select
                   placeholder="选择二级分类"
+                  notFoundContent="暂无数据"
                   className="search-item"
                   onChange={this.handleChange.bind(null, "class_sun_id")}
                   value={class_sun_id}
@@ -453,6 +470,7 @@ class RecommendProduct extends React.Component {
             <FormList.Item label="选择分类" labelCol={100}>
               <Select
                 placeholder="选择一级分类"
+                notFoundContent="暂无数据"
                 className="search-item"
                 onChange={this.handleFormDataChange.bind(null, "class_id")}
                 value={dataItem.class_id}
@@ -467,6 +485,7 @@ class RecommendProduct extends React.Component {
             <FormList.Item label="选择分类" labelCol={100}>
               <Select
                 ref="categorySelect"
+                notFoundContent="暂无数据"
                 placeholder="选择二级分类"
                 className="search-item"
                 onChange={this.handleFormDataChange.bind(null, "class_sun_id")}
@@ -483,6 +502,10 @@ class RecommendProduct extends React.Component {
               <Select
                 ref="productSelect"
                 placeholder="选择商品"
+                notFoundContent="暂无数据"
+                showSearch={true}
+                supportWrite={true}
+                optionFilterProp="children"
                 className="search-item"
                 onChange={this.handleFormDataChange.bind(null, "product_id")}
                 value={dataItem.product_id}

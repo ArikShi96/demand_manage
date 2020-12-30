@@ -178,6 +178,14 @@ class ProductCom extends React.Component {
         }
       });
     } catch (err) {
+      this.setState({
+        dataSource: {
+          ...this.state.dataSource,
+          content: [],
+          total: 0,
+          items: 0
+        }
+      });
       message.error(err.message);
     }
   };

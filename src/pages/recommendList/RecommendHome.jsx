@@ -175,6 +175,14 @@ class RecommendHome extends React.Component {
         }
       });
     } catch (err) {
+      this.setState({
+        dataSource: {
+          ...this.state.dataSource,
+          content: [],
+          total: 0,
+          items: 0
+        }
+      });
       message.error(err.message);
     }
   };
@@ -183,7 +191,7 @@ class RecommendHome extends React.Component {
   handleTableAction = async (item, action) => {
     switch (action) {
       case 'view': {
-        this.props.history.push(`/RecommendHomeDetail/${item.isvId}?status=${item.status}}`);
+        this.props.history.push(`/RecommendHomeDetail/${item.isvId}?status=${item.status}&index_activity_id=${item.indexActivityId}`);
         break;
       }
       case 'home': {
@@ -216,6 +224,7 @@ class RecommendHome extends React.Component {
     this.setState({
       formData: {
         ...this.state.formData,
+        currentPosition: undefined,
         showChangeModal: false
       }
     })
@@ -224,10 +233,22 @@ class RecommendHome extends React.Component {
   fetchListFour = async () => {
     try {
       const res = await makeAjaxRequest('/index/activity/getListFour', 'get', {});
+      const list = res.data || [];
+      const allList = [];
+      [1, 2, 3, 4].forEach(po => {
+        const currentItem = list.find(item => {
+          return item.position === po;
+        });
+        if (currentItem) {
+          allList.push(currentItem);
+        } else {
+          allList.push({ position: po })
+        }
+      })
       this.setState({
         formData: {
           ...this.state.formData,
-          allList: res.data || []
+          allList
         }
       })
     } catch (err) {
@@ -236,21 +257,19 @@ class RecommendHome extends React.Component {
   }
 
   onRadioChange = (e) => {
-    this.state.formData.old_indexActivityId = e.target.value;
+    this.state.formData.currentPosition = e.target.value;
     this.forceUpdate();
   }
 
   confirmChange = async () => {
-    const { dataItem, old_indexActivityId } = this.state.formData;
-    const selected = this.state.formData.allList.find(item => {
-      return item.indexActivityId === old_indexActivityId
-    })
+    const { dataItem, currentPosition } = this.state.formData;
+    const selected = this.state.formData.allList[currentPosition];
     try {
       this.hideChangeModal();
       await makeAjaxRequest('/index/activity/operateRec', 'post', {
         new_indexActivityId: dataItem.indexActivityId,
-        old_indexActivityId,
-        position: selected.position
+        old_indexActivityId: selected.indexActivityId || "",
+        position: selected.position || currentPosition + 1
       });
       message.success('操作成功');
       this.searchList();
@@ -269,7 +288,7 @@ class RecommendHome extends React.Component {
       formData
     } = this.state;
     const { activePage, content, total, items } = dataSource;
-    const { allList, showChangeModal, old_indexActivityId } = formData;
+    const { allList, showChangeModal, currentPosition } = formData;
     return (
       <Fragment>
         <Header style={{ background: "#fff", padding: 0 }} title="首页活动推荐" />
@@ -303,6 +322,7 @@ class RecommendHome extends React.Component {
                     placeholder={'开始时间 ~ 结束时间'}
                     format={format}
                     onChange={this.changeDate}
+                    style={{ width: 250 }}
                   />
                 </div>
               </FormList.Item>
@@ -362,11 +382,11 @@ class RecommendHome extends React.Component {
             <Modal.Title>推荐到首页</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Radio.Group onChange={this.onRadioChange} value={old_indexActivityId}>
+            <Radio.Group onChange={this.onRadioChange} value={currentPosition}>
               {allList.map((item, index) => {
                 return (
-                  <Radio value={item.indexActivityId}>
-                    <span style={{ marginRight: "40px" }}>推荐位{index + 1}</span>{item.isvName || "空"}
+                  <Radio value={index} style={{ display: 'block', marginBottom: 10 }}>
+                    <span style={{ marginRight: "40px" }}>推荐位{index + 1}</span>{item.isv_name || "空"}
                   </Radio>
                 );
               })}
@@ -374,7 +394,7 @@ class RecommendHome extends React.Component {
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.hideChangeModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-            <Button onClick={this.confirmChange} colors="primary" disabled={!old_indexActivityId}>确认并替换</Button>
+            <Button onClick={this.confirmChange} colors="primary" disabled={currentPosition === undefined}>确认并替换</Button>
           </Modal.Footer>
         </Modal>
       </Fragment>
@@ -398,5 +418,8 @@ export default styled(RecommendHome)`
 }
 .time-select {
   display: flex;
+  .calendar-picker {
+    width: 220px !important;
+  }
 }
 `;

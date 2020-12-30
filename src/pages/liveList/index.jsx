@@ -132,7 +132,7 @@ class LiveList extends React.Component {
         return (
           <div className="actions">
             <a className='action' onClick={this.handleTableAction.bind(null, item, 'view')}>查看</a>
-            <Popover
+            {/* <Popover
               content={
                 <div>
                   <a className='action' onClick={this.handleTableAction.bind(null, item, 'reviewApprove')} style={{ marginRight: '20px' }}>通过</a>
@@ -144,7 +144,7 @@ class LiveList extends React.Component {
               onVisibleChange={this.handleVisibleChange}
             >
               <a className='action' onClick={this.handleTableAction.bind(null, item, 'review')}>审核</a>
-            </Popover>
+            </Popover> */}
             <a className='action' onClick={this.handleTableAction.bind(null, item, 'redirect')}>直播间</a>
             <a className='action' onClick={this.handleTableAction.bind(null, item, 'delete')}>删除</a>
           </div>
@@ -247,6 +247,14 @@ class LiveList extends React.Component {
         }
       });
     } catch (err) {
+      this.setState({
+        dataSource: {
+          ...this.state.dataSource,
+          content: [],
+          total: 0,
+          items: 0
+        }
+      });
       message.error(err.message);
     }
   };
@@ -269,7 +277,9 @@ class LiveList extends React.Component {
   };
 
   /* 新增/编辑/删除 */
-  handleTableAction = async (item, action) => {
+  handleTableAction = async (item, action, event) => {
+    event.stopPropagation();
+    event.preventDefault();
     switch (action) {
       // 查看
       case 'view': {
@@ -553,10 +563,10 @@ class LiveList extends React.Component {
               </FormList.Item>
             </FormList>
           </SearchPanel>
-          <div className='action-wrap'>
+          {/* <div className='action-wrap'>
             <Button colors="primary" onClick={this.handleTableAction.bind(this, null, 'mulReviewApprove')}>批量通过</Button>
             <Button colors="primary" onClick={this.handleTableAction.bind(this, null, 'mulReviewReject')}>批量拒绝</Button>
-          </div>
+          </div> */}
           <MultiSelectTable
             getSelectedDataFunc={this.getSelectedDataFunc}
             rowKey="order"

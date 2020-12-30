@@ -131,7 +131,13 @@ class SignUpList extends React.Component {
 
   /* 重置 */
   resetSearch() {
+    this.refs.rangePicker.clear();
     this.setState({
+      activity_name: '',
+      isv_name: '',
+      audit_status: '',
+      date_start: '',
+      date_end: '',
     }, () => {
       this.searchList();
     });
@@ -171,6 +177,14 @@ class SignUpList extends React.Component {
         }
       });
     } catch (err) {
+      this.setState({
+        dataSource: {
+          ...this.state.dataSource,
+          content: [],
+          total: 0,
+          items: 0
+        }
+      });
       message.error(err.message);
     }
   };
@@ -240,6 +254,7 @@ class SignUpList extends React.Component {
     const {
       dataSource,
       activity_name,
+      isv_name,
       audit_status,
       confirmAction,
       confirmTip,
@@ -264,7 +279,7 @@ class SignUpList extends React.Component {
             <FormList.Item label="服务商" labelCol={100}>
               <FormControl
                 className="search-item"
-                value={activity_name}
+                value={isv_name}
                 onChange={this.handleChange.bind(null, "isv_name")}
               />
             </FormList.Item>

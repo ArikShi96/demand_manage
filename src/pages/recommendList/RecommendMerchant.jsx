@@ -114,6 +114,14 @@ class RecommendMerchant extends React.Component {
         }
       });
     } catch (err) {
+      this.setState({
+        dataSource: {
+          ...this.state.dataSource,
+          content: [],
+          total: 0,
+          items: 0
+        }
+      });
       message.error(err.message);
     }
   };
@@ -191,9 +199,10 @@ class RecommendMerchant extends React.Component {
   submit = async () => {
     try {
       this.hideAddModal();
-      await makeAjaxRequest('/index/recommendisv/save', 'post', {
-        isv_id: this.state.formData.dataItem.isv_id
+      const select = this.state.allList.find(item => {
+        return item.isv_id === this.state.formData.dataItem.isv_id
       });
+      await makeAjaxRequest('/index/recommendisv/save', 'post', select || {});
       message.success('操作成功');
       this.searchList();
     } catch (err) {
@@ -258,8 +267,11 @@ class RecommendMerchant extends React.Component {
           <Modal.Body>
             <FormList.Item label="选择商家" labelCol={100}>
               <Select
-                showSearch
                 placeholder="选择商家"
+                notFoundContent="暂无数据"
+                showSearch={true}
+                supportWrite={true}
+                optionFilterProp="children"
                 className="search-item"
                 onChange={this.handleFormDataChange.bind(null, "isv_id")}
                 value={dataItem.isv_id}

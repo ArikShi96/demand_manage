@@ -1,4 +1,4 @@
-import { Table, Button, Modal, Select } from "tinper-bee";
+import { Table, Button, Modal, Select, Pagination } from "tinper-bee";
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
@@ -119,8 +119,8 @@ class RecommendMicro extends React.Component {
         dataSource: {
           ...this.state.dataSource,
           content: res.data.content || [],
-          total: res.data.totalElements || 0,
-          items: Math.floor((res.data.totalElements || 0) / this.state.dataSource.pageSize) + 1
+          total: res.data.totalCount || 0,
+          items: Math.floor((res.data.totalCount || 0) / this.state.dataSource.pageSize) + 1
         }
       });
     } catch (err) {
@@ -295,7 +295,7 @@ class RecommendMicro extends React.Component {
       class_sun_ids,
       class_pros,
     } = this.state;
-    const { content } = dataSource;
+    const { content, activePage, total, items } = dataSource;
     const { showAddModal, dataItem } = formData;
     return (
       <Fragment>
@@ -305,7 +305,7 @@ class RecommendMicro extends React.Component {
             <Button colors="primary" onClick={this.showAdd.bind(this, false)}>新增</Button>
           </div>
           <Table rowKey="order" columns={this.columns} data={content} />
-          {/* <Pagination
+          <Pagination
             first
             last
             prev
@@ -321,7 +321,7 @@ class RecommendMicro extends React.Component {
             onDataNumSelect={this.dataNumSelect}
             total={total}
             items={items}
-          /> */}
+          />
         </Content>
         {/* 提示框 - 新增 */}
         <Modal

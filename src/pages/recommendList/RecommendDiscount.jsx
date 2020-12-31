@@ -1,4 +1,4 @@
-import { Table, Button, Modal, Select } from "tinper-bee";
+import { Table, Button, Modal, Select, Pagination } from "tinper-bee";
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
@@ -274,7 +274,7 @@ class RecommendDiscount extends React.Component {
       showDeleteModal,
       class_pros,
     } = this.state;
-    const { content } = dataSource;
+    const { content, activePage, total, items } = dataSource;
     const { showAddModal, dataItem } = formData;
     return (
       <Fragment>
@@ -284,7 +284,7 @@ class RecommendDiscount extends React.Component {
             <Button colors="primary" onClick={this.showAdd.bind(this, false)}>新增</Button>
           </div>
           <Table rowKey="order" columns={this.columns} data={content} />
-          {/* <Pagination
+          <Pagination
             first
             last
             prev
@@ -300,7 +300,7 @@ class RecommendDiscount extends React.Component {
             onDataNumSelect={this.dataNumSelect}
             total={total}
             items={items}
-          /> */}
+          />
         </Content>
         {/* 提示框 - 新增 */}
         <Modal

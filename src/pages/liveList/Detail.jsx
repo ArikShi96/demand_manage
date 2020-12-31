@@ -151,7 +151,7 @@ class LiveDetail extends React.Component {
           <div className='content'>{detail.liveInfo}</div>
         </div>
         {/* 审核状态 */}
-        {/* <div className='select-wrap'>
+        {detail.auditStatus === "0" && <div className='select-wrap'>
           <Select
             placeholder="审核状态"
             className="search-item"
@@ -168,11 +168,11 @@ class LiveDetail extends React.Component {
                 </Select.Option>
               ))}
           </Select>
-        </div> */}
+        </div>}
         {/* button */}
         <div className='action-wrap'>
           <Button colors="primary" onClick={this.navigateBack}>返回</Button>
-          {/* <Button colors="primary" onClick={this.submit}>提交</Button> */}
+          {detail.auditStatus === "0" && <Button colors="primary" onClick={this.submit}>提交</Button>}
         </div>
         {/* 提示框 - 拒绝 */}
         <Modal

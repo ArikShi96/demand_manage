@@ -72,7 +72,7 @@ class IsvLevel extends React.Component {
         };
         return (
           <Upload {...uploadProps}>
-            {value ? <img className='grade-icon' src={value} /> : <a href="#" >添加</a>}
+            {value ? <img className='grade-icon' src={value} style={{ width: 20, height: 20 }} /> : <a href="#" >添加</a>}
           </Upload>
         );
       }

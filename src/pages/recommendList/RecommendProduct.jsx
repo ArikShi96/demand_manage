@@ -12,7 +12,7 @@ import Content from "../common/Content";
 import FormList from "../common/Form";
 import SearchPanel from "../common/SearchPanel";
 import makeAjaxRequest from '../../util/request';
-import { message } from 'antd';
+import { message, InputNumber } from 'antd';
 const Option = Select.Option;
 class RecommendProduct extends React.Component {
   state = {
@@ -58,11 +58,11 @@ class RecommendProduct extends React.Component {
       width: "10%",
       render: (value, item) => {
         return (
-          <FormControl
+          <InputNumber
             data-id={item.hot_sale_product_id}
-            className="search-item"
             value={value}
             onChange={this.handleSortChange.bind(null, item)}
+            onBlur={this.setSort.bind(this, item.hot_sale_product_id, item.sort)}
           />
         );
       }
@@ -191,7 +191,10 @@ class RecommendProduct extends React.Component {
   /* 排序 */
   setSort = async (id, sort) => {
     try {
-      const res = await makeAjaxRequest('/hot/sale/editSort', 'post', {}, {
+      if (!/^\d+$/.test(sort)) {
+        throw new Error("排序必须输入整数")
+      }
+      await makeAjaxRequest('/hot/sale/editSort', 'post', {}, {
         hotSaleProductId: id,
         sort
       });
@@ -199,6 +202,7 @@ class RecommendProduct extends React.Component {
       this.searchList();
     } catch (err) {
       message.error(err.message);
+      this.searchList()
     }
   };
 

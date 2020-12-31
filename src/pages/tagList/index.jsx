@@ -1,4 +1,4 @@
-import { FormControl, Select, Table, Pagination, Button, Modal } from "tinper-bee";
+import { FormControl, Select, Table, Pagination, Button, Modal, Message } from "tinper-bee";
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
@@ -213,7 +213,19 @@ class TagList extends React.Component {
     })
   }
 
+  checkValidation = () => {
+    this.state.formData.dataItem.labelName = this.state.formData.dataItem.labelName.trim();
+    if (!this.state.formData.dataItem.labelName) {
+      Message.create({ content: '请输入标签名称', color: 'danger' });
+      return false;
+    }
+    return true;
+  }
+
   submit = async () => {
+    if (!this.checkValidation()) {
+      return;
+    }
     const { dataItem } = this.state.formData;
     const { labelName, labelType, labelId } = dataItem;
     try {

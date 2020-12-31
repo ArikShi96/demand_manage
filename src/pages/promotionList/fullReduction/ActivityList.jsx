@@ -368,12 +368,12 @@ class ActivityList extends React.Component {
       message = '请添加满减条件'
     }
     if (!activityJoinStart || !activityJoinEnd) {
-      message = "请选择报名ƒ时间"
+      message = "请选择报名时间"
     }
     if (!activityDateStart || !activityDateEnd) {
       message = "请选择活动时间"
     }
-    if (!activityName) {
+    if (!activityName || !activityName.trim()) {
       message = "请输入活动名称"
     }
     if (message) {
@@ -410,12 +410,12 @@ class ActivityList extends React.Component {
           favProductIds: "",
           categoryStr: "",
           //
-          activityName,
+          activityName: activityName ? activityName.trim() : "",
           activityDateStart,
           activityDateEnd,
           activityJoinStart,
           activityJoinEnd,
-          remarks,
+          remarks: remarks ? remarks.trim() : "",
           productScope: "0",
           couponRuleList: (couponRuleList || []).map(rule => {
             return {
@@ -433,12 +433,12 @@ class ActivityList extends React.Component {
           favProductIds: "",
           categoryStr: "",
           //
-          activityName,
+          activityName: activityName ? activityName.trim() : "",
           activityDateStart,
           activityDateEnd,
           activityJoinStart,
           activityJoinEnd,
-          remarks,
+          remarks: remarks ? remarks.trim() : "",
           productScope: "0",
           couponRuleList: (couponRuleList || []).map(rule => {
             return {

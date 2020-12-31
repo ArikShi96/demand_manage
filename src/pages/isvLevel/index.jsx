@@ -149,6 +149,15 @@ class IsvLevel extends React.Component {
     }
   };
 
+  checkValidation = () => {
+    this.state.dataSource.content.forEach(item => {
+      item.gradeName = item.gradeName.trim();
+    });
+    return this.state.dataSource.content.every(item => {
+      return item.gradeName;
+    });
+  }
+
   checkPoints = () => {
     let current = -1;
     return this.state.dataSource.content.every(level => {
@@ -163,6 +172,9 @@ class IsvLevel extends React.Component {
 
   submit = async () => {
     try {
+      if (!this.checkValidation()) {
+        throw new Error("请输入等级名称");
+      }
       if (!this.checkPoints()) {
         throw new Error("积分范围在每一个等级中必须连续，否则无法保存")
       }

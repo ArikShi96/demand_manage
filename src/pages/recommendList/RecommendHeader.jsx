@@ -1,4 +1,4 @@
-import { Table, Button, Modal, FormControl } from "tinper-bee";
+import { Table, Button, Modal, FormControl, Message } from "tinper-bee";
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
@@ -201,7 +201,24 @@ class RecommendMerchant extends React.Component {
     })
   }
 
+  checkValidation = () => {
+    this.state.formData.dataItem.name = this.state.formData.dataItem.name.trim();
+    this.state.formData.dataItem.navigationUrl = this.state.formData.dataItem.navigationUrl.trim();
+    if (!this.state.formData.dataItem.name) {
+      Message.create({ content: '请输入顶部导航名称', color: 'danger' });
+      return false;
+    }
+    if (!this.state.formData.dataItem.navigationUrl) {
+      Message.create({ content: '请输入跳转链接', color: 'danger' });
+      return false;
+    }
+    return true;
+  }
+
   submit = async () => {
+    if (!this.checkValidation()) {
+      return;
+    }
     const { dataItem } = this.state.formData;
     const { indexNavigationId, name, navigationUrl } = dataItem;
     try {

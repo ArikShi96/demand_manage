@@ -43,7 +43,23 @@ class RecommendFooter extends React.Component {
     }
   };
 
+  checkValidation = () => {
+    this.state.copyright = this.state.copyright.trim();
+    this.state.company = this.state.company.trim();
+    this.state.beianhao = this.state.beianhao.trim();
+    this.state.anbei = this.state.anbei.trim();
+    const { copyright, company, beianhao, anbei } = this.state;
+    if (!(copyright && company && beianhao && anbei)) {
+      message.error("请输入底部信息");
+      return false;
+    }
+    return true;
+  }
+
   submit = async () => {
+    if (!this.checkValidation()) {
+      return;
+    }
     const { footId, copyright, company, beianhao, anbei } = this.state;
     try {
       await makeAjaxRequest('/foot/save', 'post', {

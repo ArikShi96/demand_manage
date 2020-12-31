@@ -48,7 +48,19 @@ class IntegralManager extends React.Component {
     });
   };
 
+  checkValidation = () => {
+    Object.keys(this.state).forEach(key => {
+      if (this.state[key] && this.state[key].trim) {
+        this.state[key] = this.state[key].trim();
+      }
+    });
+    return true;
+  }
+
   submit = async () => {
+    if (!this.checkValidation()) {
+      return;
+    }
     try {
       const {
         homeTitle,

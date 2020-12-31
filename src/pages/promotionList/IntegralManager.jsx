@@ -83,7 +83,48 @@ class IntegralManager extends React.Component {
     })
   }
 
+  checkValidation = () => {
+    Object.keys(this.state).forEach(key => {
+      if (this.state[key] && this.state[key].trim) {
+        this.state[key] = this.state[key].trim();
+      }
+    });
+    const {
+      newUserPoints,
+      isTime,
+      isTimeStrLeft,
+      isTimeStrRight,
+      loginPoints,
+      pointsProportionLeft,
+      pointsProportionRight,
+      pointsCommentNum,
+      pointsComment,
+      sharePoints,
+    } = this.state;
+    if (isTime && !(isTimeStrLeft && isTimeStrRight)) {
+      message.error("请选择赠送积分的时间段");
+      return false;
+    }
+    const validate = [newUserPoints,
+      loginPoints,
+      pointsProportionLeft,
+      pointsProportionRight,
+      pointsCommentNum,
+      pointsComment,
+      sharePoints].every(num => {
+        return !num || (/^\d+$/.test(num) && num >= 0)
+      });
+    if (!validate) {
+      message.error("积分输入不合法");
+      return false;
+    }
+    return true
+  }
+
   submit = async () => {
+    if (!this.checkValidation()) {
+      return;
+    }
     try {
       const {
         gradeRuleId,

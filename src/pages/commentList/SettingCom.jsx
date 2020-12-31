@@ -1,6 +1,6 @@
 import React from "react";
 import styled from 'styled-components';
-import { Button, Tabs, Modal } from 'tinper-bee';
+import { Button, Tabs, Modal, Message } from 'tinper-bee';
 import Header from "../common/Header";
 import Content from '../common/Content';
 import FormList from "../common/Form";
@@ -78,8 +78,12 @@ class SettingCom extends React.Component {
   }
 
   submit = async () => {
-    const { comment_set, comment_set_id } = this.state;
+    let { comment_set, comment_set_id } = this.state;
     try {
+      comment_set = comment_set.trim();
+      if (!/^\d+$/.test(comment_set) || comment_set <= 0) {
+        throw new Error("晒单/评价有效期需为正整数");
+      }
       await makeAjaxRequest('/newcomment/saveCommentSet', 'post', { comment_set, comment_set_id });
       message.success('操作成功');
       this.fetchDetail();
@@ -207,7 +211,19 @@ class SettingCom extends React.Component {
     })
   }
 
+  checkValidation = () => {
+    this.state.formData.dataItem.evaluationName = this.state.formData.dataItem.evaluationName.trim();
+    if (!this.state.formData.dataItem.evaluationName) {
+      Message.create({ content: '请输入敏感词', color: 'danger' });
+      return false;
+    }
+    return true;
+  }
+
   submitAddOrEdit = async () => {
+    if (!this.checkValidation()) {
+      return;
+    }
     const { evaluationSensitiveId, evaluationName } = this.state.formData.dataItem
     try {
       this.hideAddModal()

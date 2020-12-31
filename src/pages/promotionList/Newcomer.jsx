@@ -318,7 +318,7 @@ class Newcomer extends React.Component {
     if (!dateType || dateType === '2' && (!activityDateStart || !activityDateEnd)) {
       message = "请选择有效期"
     }
-    if (!couponActivityName) {
+    if (!couponActivityName || !couponActivityName.trim()) {
       message = "请输入优惠券名称"
     }
     if (message) {
@@ -352,26 +352,26 @@ class Newcomer extends React.Component {
         await makeAjaxRequest('/coupon/editnewuser', 'post', {}, {
           couponActivityId,
           busType: "1",
-          couponActivityName,
+          couponActivityName: couponActivityName ? couponActivityName.trim() : "",
           dateType,
           activityDateStart: dateType === "1" ? "" : activityDateStart,
           activityDateEnd: dateType === "1" ? "" : activityDateEnd,
           dateStart,
           dateEnd,
-          remarks,
+          remarks: remarks ? remarks.trim() : "",
           couponMoney,
           limitMoney,
         });
       } else {
         await makeAjaxRequest('/coupon/addnewuser', 'post', {}, {
           busType: "1",
-          couponActivityName,
+          couponActivityName: couponActivityName ? couponActivityName.trim() : "",
           dateType,
           activityDateStart: dateType === "1" ? "" : activityDateStart,
           activityDateEnd: dateType === "1" ? "" : activityDateEnd,
           dateStart,
           dateEnd,
-          remarks,
+          remarks: remarks ? remarks.trim() : "",
           couponMoney,
           limitMoney,
         });

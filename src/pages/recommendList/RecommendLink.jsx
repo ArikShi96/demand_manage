@@ -1,4 +1,4 @@
-import { Table, Pagination, Button, Modal, FormControl } from "tinper-bee";
+import { Table, Pagination, Button, Modal, FormControl, Message } from "tinper-bee";
 import styled from 'styled-components';
 import React, { Fragment } from "react";
 import "bee-form-control/build/FormControl.css";
@@ -180,7 +180,29 @@ class RecommendMerchant extends React.Component {
     })
   }
 
+  checkValidation = () => {
+    this.state.formData.dataItem.linksName = this.state.formData.dataItem.linksName.trim();
+    this.state.formData.dataItem.linksUrl = this.state.formData.dataItem.linksUrl.trim();
+    this.state.formData.dataItem.sort = this.state.formData.dataItem.sort.trim();
+    if (!this.state.formData.dataItem.linksName) {
+      Message.create({ content: '请输入名称', color: 'danger' });
+      return false;
+    }
+    if (!this.state.formData.dataItem.linksUrl) {
+      Message.create({ content: '请输入链接', color: 'danger' });
+      return false;
+    }
+    if (!/^\d+$/.test(this.state.formData.dataItem.sort)) {
+      Message.create({ content: '排序必须输入整数', color: 'danger' });
+      return false;
+    }
+    return true;
+  }
+
   submit = async () => {
+    if (!this.checkValidation()) {
+      return;
+    }
     const { linksId, linksName, linksUrl, sort } = this.state.formData.dataItem;
     try {
       this.hideAddModal();

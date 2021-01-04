@@ -263,12 +263,13 @@ class OrderCom extends React.Component {
               </FormList.Item>
               <FormList.Item label="评分" labelCol={100}>
                 <Select
-                  placeholder="全部评分"
+                  // placeholder="全部评分"
                   className="search-item"
                   onChange={this.handleChange.bind(null, "average")}
                   value={average}
                 >
                   {[
+                    { id: "", stat: "全部" },
                     { id: "1", stat: "1" },
                     { id: "2", stat: "2" },
                     { id: "3", stat: "3" },
@@ -282,12 +283,13 @@ class OrderCom extends React.Component {
               </FormList.Item>
               <FormList.Item label="状态" labelCol={100}>
                 <Select
-                  placeholder="全部状态"
+                  // placeholder="全部状态"
                   className="search-item"
                   onChange={this.handleChange.bind(null, "show_status")}
                   value={show_status}
                 >
                   {[
+                    { id: "", stat: "全部" },
                     { id: "0", stat: "显示" },
                     { id: "1", stat: "隐藏" }].map((item) => (
                       <Option key={item.id} value={item.id}>

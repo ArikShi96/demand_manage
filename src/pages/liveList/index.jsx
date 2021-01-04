@@ -528,12 +528,13 @@ class LiveList extends React.Component {
               </FormList.Item>
               <FormList.Item label="直播状态" labelCol={100}>
                 <Select
-                  placeholder="直播状态"
+                  // placeholder="直播状态"
                   className="search-item"
                   onChange={this.handleChange.bind(null, "liveStatus")}
                   value={liveStatus}
                 >
                   {[
+                    { id: "", stat: "全部" },
                     { id: "1", stat: "未开始" },
                     { id: "2", stat: "直播中" },
                     { id: "3", stat: "已结束" }].map((item) => (
@@ -545,12 +546,13 @@ class LiveList extends React.Component {
               </FormList.Item>
               <FormList.Item label="审核状态" labelCol={100}>
                 <Select
-                  placeholder="审核状态"
+                  // placeholder="审核状态"
                   className="search-item"
                   onChange={this.handleChange.bind(null, "auditStatus")}
                   value={auditStatus}
                 >
                   {[
+                    { id: "", stat: "全部" },
                     { id: "0", stat: "待审核" },
                     { id: "1", stat: "已通过" },
                     { id: "2", stat: "已拒绝" }].map((item) => (
@@ -562,12 +564,12 @@ class LiveList extends React.Component {
               </FormList.Item>
               <FormList.Item label="服务商" labelCol={100}>
                 <Select
-                  placeholder="服务商"
+                  // placeholder="服务商"
                   className="search-item"
                   onChange={this.handleChange.bind(null, "isvId")}
                   value={isvId}
                 >
-                  {isvList.map((item) => (
+                  {[{ isvId: "", isvName: "全部" }, ...isvList].map((item) => (
                     <Option key={item.isvId} value={item.isvId}>
                       {item.isvName}
                     </Option>

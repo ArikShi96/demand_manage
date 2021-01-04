@@ -260,12 +260,12 @@ class QuestionList extends React.Component {
               </FormList.Item>
               <FormList.Item label="问题类型" labelCol={100}>
                 <Select
-                  placeholder="选择类型"
+                  // placeholder="选择类型"
                   className="search-item"
                   onChange={this.handleChange.bind(null, "question_type")}
                   value={question_type}
                 >
-                  {[{ id: "0", stat: "商品问答" }, { id: "1", stat: "店铺问答" }].map((item) => (
+                  {[{ id: "", stat: "全部" }, { id: "0", stat: "商品问答" }, { id: "1", stat: "店铺问答" }].map((item) => (
                     <Option key={item.id} value={item.id}>
                       {item.stat}
                     </Option>
@@ -274,12 +274,12 @@ class QuestionList extends React.Component {
               </FormList.Item>
               <FormList.Item label="问题状态" labelCol={100}>
                 <Select
-                  placeholder="选择状态"
+                  // placeholder="选择状态"
                   className="search-item"
                   onChange={this.handleChange.bind(null, "question_status")}
                   value={question_status}
                 >
-                  {[{ id: "1", stat: "已回答" }, { id: "0", stat: "待回答" }].map((item) => (
+                  {[{ id: "", stat: "全部" }, { id: "1", stat: "已回答" }, { id: "0", stat: "待回答" }].map((item) => (
                     <Option key={item.id} value={item.id}>
                       {item.stat}
                     </Option>

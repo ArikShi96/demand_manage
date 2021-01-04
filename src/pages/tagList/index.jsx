@@ -287,12 +287,13 @@ class TagList extends React.Component {
               </FormList.Item>
               <FormList.Item label="标签类型" labelCol={100}>
                 <Select
-                  placeholder="选择标签类型"
+                  // placeholder="选择标签类型"
                   className="search-item"
                   onChange={this.handleChange.bind(null, "labelType")}
                   value={labelType}
                 >
                   {[
+                    { id: "", stat: "全部" },
                     { id: "1", stat: "产品标签" },
                     { id: "2", stat: "服务标签" },
                     { id: "3", stat: "行业标签" }].map((item) => (

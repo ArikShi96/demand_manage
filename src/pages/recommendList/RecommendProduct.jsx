@@ -409,13 +409,13 @@ class RecommendProduct extends React.Component {
               </FormList.Item>
               <FormList.Item label="一级分类" labelCol={100}>
                 <Select
-                  placeholder="选择一级分类"
+                  // placeholder="选择一级分类"
                   notFoundContent="暂无数据"
                   className="search-item"
                   onChange={this.handleChange.bind(null, "class_id")}
                   value={class_id}
                 >
-                  {class_ids.map((item) => (
+                  {[{ category_id1: "", category_name: "全部" }, ...class_ids].map((item) => (
                     <Option key={item.category_id1} value={item.category_id1}>
                       {item.category_name}
                     </Option>
@@ -424,13 +424,13 @@ class RecommendProduct extends React.Component {
               </FormList.Item>
               <FormList.Item label="二级分类" labelCol={100}>
                 <Select
-                  placeholder="选择二级分类"
+                  // placeholder="选择二级分类"
                   notFoundContent="暂无数据"
                   className="search-item"
                   onChange={this.handleChange.bind(null, "class_sun_id")}
                   value={class_sun_id}
                 >
-                  {class_sun_ids.map((item) => (
+                  {[{ category_id2: "", category_name: "全部" }, ...class_sun_ids].map((item) => (
                     <Option key={item.category_id2} value={item.category_id2}>
                       {item.category_name}
                     </Option>

@@ -301,12 +301,13 @@ class RecommendHome extends React.Component {
               <FormList.Item className='time-select-wrap' label="" labelCol={0}>
                 <div className='time-select'>
                   <Select
-                    placeholder="选择时间类型"
+                    // placeholder="选择时间类型"
                     className="search-item"
                     onChange={this.handleChange.bind(null, "select_time")}
                     value={select_time}
                   >
                     {[
+                      { id: "", stat: "全部" },
                       { id: "1", stat: "申请时间" },
                       { id: "2", stat: "推荐时间" },
                       { id: "3", stat: "移除时间" }].map((item) => (
@@ -335,12 +336,13 @@ class RecommendHome extends React.Component {
               </FormList.Item>
               <FormList.Item label="状态" labelCol={100}>
                 <Select
-                  placeholder="请选择审核状态"
+                  // placeholder="请选择审核状态"
                   className="search-item"
                   onChange={this.handleChange.bind(null, "status")}
                   value={status}
                 >
                   {[
+                    { id: "", stat: "全部" },
                     { id: "1", stat: "待审核" },
                     { id: "2", stat: "已通过" },
                     { id: "3", stat: "已拒绝" },

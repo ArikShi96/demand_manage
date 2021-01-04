@@ -360,8 +360,12 @@ class ActivityList extends React.Component {
     const reg = /^\d+(?=\.{0,1}\d+$|$)/;
     (couponRuleList || []).some(rule => {
       if (!reg.test(rule.couponMoney) || !reg.test(rule.limitMoney)) {
-        message = "满减条件的金额输入不合法"
-        return true
+        message = "满减条件的金额输入不合法";
+        return true;
+      }
+      if (rule.couponMoney > rule.limitMoney) {
+        message = "满减的金额不能大于总金额";
+        return true;
       }
     });
     if (!couponRuleList || !couponRuleList.length) {
@@ -496,6 +500,7 @@ class ActivityList extends React.Component {
             <FormList.Item label="状态" labelCol={100}>
               <Select
                 className="search-item"
+                placeholder="请选择状态"
                 onChange={this.handleChange.bind(null, "is_stop")}
                 value={is_stop}
               >

@@ -111,14 +111,14 @@ class QuestionDetail extends React.Component {
             style={{ width: 240 }}
           // cover={<img alt="example" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />}
           >
-            <div className='card-title'>商品名名称</div>
+            <div className='card-title'>商品名称</div>
             <div className='card-price'>0.00</div>
           </Card>
           <Card
             style={{ width: 240 }}
           // cover={<img alt="example" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />}
           >
-            <div className='card-title'>商品名名称</div>
+            <div className='card-title'>商品名称</div>
             <div className='card-price'>0.00</div>
           </Card>
         </div>

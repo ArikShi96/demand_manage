@@ -32,7 +32,7 @@ class ProductCom extends React.Component {
     start_time: '',
     end_time: '',
     product_score: '',
-    comment_type: '',
+    show_status: '',
     showDeleteModal: false,
     deleteItem: '',
   };
@@ -138,7 +138,7 @@ class ProductCom extends React.Component {
       start_time: '',
       end_time: '',
       product_score: '',
-      comment_type: '',
+      show_status: '',
     }, () => {
       this.searchList();
     });
@@ -153,7 +153,7 @@ class ProductCom extends React.Component {
         start_time,
         end_time,
         product_score,
-        comment_type,
+        show_status,
         dataSource
       } = this.state;
       const { activePage } = dataSource;
@@ -164,7 +164,7 @@ class ProductCom extends React.Component {
         start_time,
         end_time,
         product_score,
-        comment_type
+        show_status
       });
       (res.data || []).forEach((item, index) => {
         item.order = (index + 1)
@@ -250,7 +250,7 @@ class ProductCom extends React.Component {
       product_name,
       comment,
       product_score,
-      comment_type,
+      show_status,
       showDeleteModal,
     } = this.state;
     const { activePage, content, total, items } = dataSource;
@@ -279,12 +279,13 @@ class ProductCom extends React.Component {
               </FormList.Item>
               <FormList.Item label="评分" labelCol={100}>
                 <Select
-                  placeholder="全部评分"
+                  // placeholder="全部评分"
                   className="search-item"
                   onChange={this.handleChange.bind(null, "product_score")}
                   value={product_score}
                 >
                   {[
+                    { id: "", stat: "全部" },
                     { id: "1", stat: "1" },
                     { id: "2", stat: "2" },
                     { id: "3", stat: "3" },
@@ -298,12 +299,13 @@ class ProductCom extends React.Component {
               </FormList.Item>
               <FormList.Item label="状态" labelCol={100}>
                 <Select
-                  placeholder="全部状态"
+                  // placeholder="全部状态"
                   className="search-item"
-                  onChange={this.handleChange.bind(null, "comment_type")}
-                  value={comment_type}
+                  onChange={this.handleChange.bind(null, "show_status")}
+                  value={show_status}
                 >
                   {[
+                    { id: "", stat: "全部" },
                     { id: "0", stat: "显示" },
                     { id: "1", stat: "隐藏" },
                     { id: "2", stat: "待审核" },

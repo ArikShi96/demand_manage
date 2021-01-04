@@ -135,10 +135,10 @@ class QuestionDetail extends React.Component {
         }
         <div className='action-wrap'>
           <Button colors="primary" onClick={this.navigateBack}>返回</Button>
-          {/* <Button colors="primary" onClick={this.submit}>审核通过</Button>
-          <Button colors="primary" onClick={this.reject}>审核拒绝</Button> */}
-          {status === '1' && <Button colors="primary" onClick={this.submit}>审核通过</Button>}
-          {status === '1' && <Button colors="primary" onClick={this.reject}>审核拒绝</Button>}
+          <Button colors="primary" onClick={this.submit}>审核通过</Button>
+          <Button colors="primary" onClick={this.reject}>审核拒绝</Button>
+          {/* {status === '1' && <Button colors="primary" onClick={this.submit}>审核通过</Button>}
+          {status === '1' && <Button colors="primary" onClick={this.reject}>审核拒绝</Button>} */}
         </div>
       </div>
     );

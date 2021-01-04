@@ -249,14 +249,14 @@ class ArticleList extends React.Component {
                   onChange={this.handleChange.bind(null, "isv_name")}
                 />
               </FormList.Item>
-              <FormList.Item label="" labelCol={100}>
+              <FormList.Item label="文章类型" labelCol={100}>
                 <Select
-                  placeholder="选择类型"
+                  // placeholder="选择类型"
                   className="search-item"
                   onChange={this.handleChange.bind(null, "article_type")}
                   value={article_type}
                 >
-                  {[{ id: "0", stat: "动态" }, { id: "1", stat: "文库" }].map((item) => (
+                  {[{ id: "", stat: "全部" }, { id: "0", stat: "动态" }, { id: "1", stat: "文库" }].map((item) => (
                     <Option key={item.id} value={item.id}>
                       {item.stat}
                     </Option>

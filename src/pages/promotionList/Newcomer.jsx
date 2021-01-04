@@ -422,6 +422,7 @@ class Newcomer extends React.Component {
               <FormList.Item label="状态" labelCol={100}>
                 <Select
                   className="search-item"
+                  placeholder="请选择状态"
                   onChange={this.handleChange.bind(null, "is_stop")}
                   value={is_stop}
                 >

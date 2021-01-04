@@ -307,9 +307,7 @@ class ProductCom extends React.Component {
                   {[
                     { id: "", stat: "全部" },
                     { id: "0", stat: "显示" },
-                    { id: "1", stat: "隐藏" },
-                    { id: "2", stat: "待审核" },
-                    { id: "3", stat: "已拒绝" }].map((item) => (
+                    { id: "1", stat: "隐藏" }].map((item) => (
                       <Option key={item.id} value={item.id}>
                         {item.stat}
                       </Option>

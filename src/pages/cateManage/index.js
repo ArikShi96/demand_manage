@@ -78,6 +78,7 @@ class CateModel extends React.Component {
   }
 
   getlistinfo(e = 0, ps = 10) {
+    let that = this;
     fetch(myapi.BASE_URL + `/market/requirement/domain/list?pn=${e}&ps=${ps}`, {
       method: "GET",
       headers: {
@@ -240,7 +241,7 @@ class CateModel extends React.Component {
                 this.close();
               }
             } else {
-              Message.create({ content: "新增成功", color: "danger" });
+              Message.create({ content: response.msg, color: "danger" });
             }
           });
       }

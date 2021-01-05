@@ -620,7 +620,7 @@ class SearchModel extends React.Component {
                   onChange={this.handleChange.bind(null, "statuid")}
                   value={this.statuid}
                 >
-                  <Option value="0">全部</Option>
+                  <Option value="">全部</Option>
                   {this.statusBox.map((item, index) => (
                     <Option key={index} value={item.id}>
                       {item.stat}

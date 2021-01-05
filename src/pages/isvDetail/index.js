@@ -431,9 +431,7 @@ class IsvDetail extends React.Component {
                 <img
                   className="isv-detail-zone-item-value"
                   src={
-                    isNew
-                      ? allValue.data.licencePic
-                      : allValue.basInfo.custCertPath
+                    isNew ? allValue.data.licencePic : allValue.basInfo.custCertPath
                   }
                 />
               </div>

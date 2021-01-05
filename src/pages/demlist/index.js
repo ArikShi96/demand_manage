@@ -59,7 +59,7 @@ class SearchModel extends React.Component {
       ],
       contactPhone: "", //电话号码
       domainid: "", //领域id
-      statuid: "0", //状态id
+      statuid: "", //状态id
       defautDomain: "所属领域",
       defautStats: "审核状态",
       domainlist: [],
@@ -542,7 +542,7 @@ class SearchModel extends React.Component {
       contactPhone: "",
       defautDomain: "所属领域",
       defautStats: "审核状态",
-      statuid: "0",
+      statuid: "",
       domainid: "",
     });
     this.componentDidMount();

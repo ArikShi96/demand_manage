@@ -26,7 +26,7 @@ import SearchPanel from "../common/SearchPanel";
 import { message } from "antd";
 const Option = Select.Option;
 const { RangePicker } = DatePicker;
-const format = "YYYY-MM-DD";
+const format = "YYYY-MM-DD HH:mm:ss";
 class IsvModel extends React.Component {
   constructor(props) {
     super(props);

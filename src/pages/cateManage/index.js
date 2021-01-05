@@ -240,7 +240,7 @@ class CateModel extends React.Component {
                 this.close();
               }
             } else {
-              Message.create({ content: response.msg, color: "danger" });
+              Message.create({ content: "新增成功", color: "danger" });
             }
           });
       }

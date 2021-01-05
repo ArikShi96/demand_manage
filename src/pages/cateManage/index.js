@@ -78,7 +78,6 @@ class CateModel extends React.Component {
   }
 
   getlistinfo(e = 0, ps = 10) {
-    let that = this;
     fetch(myapi.BASE_URL + `/market/requirement/domain/list?pn=${e}&ps=${ps}`, {
       method: "GET",
       headers: {
@@ -122,6 +121,7 @@ class CateModel extends React.Component {
       showEditModal: false,
       showViewModal: false,
     });
+    this.getlistinfo();
   };
 
   changePageNum(e) {

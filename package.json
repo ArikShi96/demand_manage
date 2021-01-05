@@ -36,6 +36,7 @@
     "html-webpack-plugin": "4.0.0-beta.5",
     "http-proxy-middleware": "^0.19.1",
     "identity-obj-proxy": "3.0.0",
+    "increase-memory-limit": "^1.0.7",
     "is-wsl": "^1.1.0",
     "jest": "24.9.0",
     "jest-environment-jsdom-fourteen": "0.1.0",
@@ -78,7 +79,7 @@
     "workbox-webpack-plugin": "4.2.0"
   },
   "scripts": {
-    "start": "react-app-rewired start",
+    "start": "set NODE_OPTIONS=--max_old_space_size=4096&&react-app-rewired start",
     "build": "react-app-rewired build NODE_ENV=production",
     "builddev": "NODE_ENV=development react-app-rewired build",
     "buildtest": "NODE_ENV=test react-app-rewired build",

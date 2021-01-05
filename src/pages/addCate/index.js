@@ -47,10 +47,6 @@ class Addcate extends React.Component {
             if (response.status === 1) {
               Message.create({ content: "新增成功", color: "success" });
               this.props.close();
-              let res = await this.props.getlistinfo();
-              if (res) {
-                
-              }
             } else {
               Message.create({ content: response.msg, color: "danger" });
             }

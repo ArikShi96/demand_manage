@@ -85,9 +85,9 @@ class ProductCom extends React.Component {
         return (
           <div className="actions">
             <a className='action' onClick={this.handleTableAction.bind(null, item, 'view')}>查看</a>
-            <a className='action' onClick={this.handleTableAction.bind(null, item, 'toggle')}>
+            {/* <a className='action' onClick={this.handleTableAction.bind(null, item, 'toggle')}>
               {item.show_status === 0 || item.show_status === '0' ? '显示' : '隐藏'}
-            </a>
+            </a> */}
             <a className='action' onClick={this.handleTableAction.bind(null, item, 'delete')}>删除</a>
           </div>
         );
@@ -306,8 +306,8 @@ class ProductCom extends React.Component {
                 >
                   {[
                     { id: "", stat: "全部" },
-                    { id: "0", stat: "显示" },
-                    { id: "1", stat: "隐藏" }].map((item) => (
+                    { id: "0", stat: "隐藏" },
+                    { id: "1", stat: "显示" }].map((item) => (
                       <Option key={item.id} value={item.id}>
                         {item.stat}
                       </Option>

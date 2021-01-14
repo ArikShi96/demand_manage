@@ -183,7 +183,7 @@ class RecommendMerchant extends React.Component {
   checkValidation = () => {
     this.state.formData.dataItem.linksName = this.state.formData.dataItem.linksName.trim();
     this.state.formData.dataItem.linksUrl = this.state.formData.dataItem.linksUrl.trim();
-    this.state.formData.dataItem.sort = this.state.formData.dataItem.sort.trim();
+    this.state.formData.dataItem.sort = this.state.formData.dataItem.sort;
     if (!this.state.formData.dataItem.linksName) {
       Message.create({ content: '请输入名称', color: 'danger' });
       return false;

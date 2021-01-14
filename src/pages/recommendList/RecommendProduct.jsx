@@ -49,7 +49,7 @@ class RecommendProduct extends React.Component {
     },
     {
       title: "商品类型",
-      dataIndex: "class_name",
+      dataIndex: "categoryName",
       width: "20%",
     },
     {
@@ -73,7 +73,7 @@ class RecommendProduct extends React.Component {
       width: "20%",
       render: (value) => {
         return (
-          <span>{new Date(value).toLocaleString()}</span>
+          <span>{value}</span>
         );
       }
     },

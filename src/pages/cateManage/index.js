@@ -55,12 +55,12 @@ class CateModel extends React.Component {
         return (
           <Fragment>
             <a onClick={this.showView.bind(null, record.id)}>查看</a>
-            <a
+            {/* <a
               style={{ marginLeft: "10px" }}
               onClick={this.showEdit.bind(null, record.id)}
             >
               编辑
-            </a>
+            </a> */}
             <a
               style={{ marginLeft: "10px" }}
               onClick={this.delelistfun.bind(this, record.id, index)}

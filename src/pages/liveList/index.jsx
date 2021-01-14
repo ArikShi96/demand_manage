@@ -17,7 +17,7 @@ import makeAjaxRequest from '../../util/request';
 import { message, Popover, Input, Checkbox } from 'antd';
 import multiSelect from "bee-table/build/lib/multiSelect.js"
 const { RangePicker } = DatePicker;
-const format = "YYYY-MM-DD";
+const format = "YYYY-MM-DD HH:mm:ss";
 const Option = Select.Option;
 class LiveList extends React.Component {
   state = {
@@ -65,7 +65,7 @@ class LiveList extends React.Component {
       dataIndex: "liveStarttime",
       width: "15%",
       render: (value) => {
-        return new Date(value).toLocaleString()
+        return value;
       }
     },
     {
@@ -73,7 +73,7 @@ class LiveList extends React.Component {
       dataIndex: "liveEndtime",
       width: "15%",
       render: (value) => {
-        return new Date(value).toLocaleString()
+        return value;
       }
     },
     {
@@ -118,9 +118,9 @@ class LiveList extends React.Component {
       width: "8%",
       render: (value, item) => {
         if (value === 0 || value === '0') {
-          return <a onClick={this.handleTableAction.bind(this, item, 'toggleRecommend')}>取消推荐</a>
-        } else {
           return <a onClick={this.handleTableAction.bind(this, item, 'toggleRecommend')}>推荐</a>
+        } else {
+          return <a onClick={this.handleTableAction.bind(this, item, 'toggleRecommend')}>取消推荐</a>
         }
       }
     },
@@ -163,8 +163,8 @@ class LiveList extends React.Component {
   changeDate = (moments) => {
     if (moments && moments.length > 0) {
       this.setState({
-        liveStarttime: `${moments[0].format('YYYY-MM-DD')} 00:00:00`,
-        liveEndtime: `${moments[1].format('YYYY-MM-DD')} 00:00:00`
+        liveStarttime: `${moments[0].format('YYYY-MM-DD HH:mm:ss')}`,
+        liveEndtime: `${moments[1].format('YYYY-MM-DD HH:mm:ss')}`
       });
     } else {
       this.setState({ liveStarttime: '', liveEndtime: '' });

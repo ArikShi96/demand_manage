@@ -129,7 +129,7 @@ class LiveDetail extends React.Component {
         <div className='detail-wrap'>
           <div className='label'>直播时间</div>
           <div className='content'>
-            {detail.liveTelecastId && `${new Date(detail.liveStarttime).toLocaleString()} 至 ${new Date(detail.liveEndtime).toLocaleString()}`}
+            {detail.liveTelecastId && `${detail.liveStarttime} 至 ${detail.liveEndtime}`}
           </div>
         </div>
         <div className='detail-wrap'>
@@ -151,7 +151,8 @@ class LiveDetail extends React.Component {
           <div className='content'>{detail.liveInfo}</div>
         </div>
         {/* 审核状态 */}
-        {detail.auditStatus === "0" && <div className='select-wrap'>
+        {detail.auditStatus === "0" && <div className='detail-wrap'>
+        <div className='label'>审核状态</div>
           <Select
             placeholder="审核状态"
             className="search-item"

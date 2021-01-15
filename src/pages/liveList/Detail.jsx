@@ -141,8 +141,7 @@ class LiveDetail extends React.Component {
         <div className='detail-wrap'>
           <div className='label'>直播预告</div>
           <div className='content'>
-            <video controls>
-              <source src={detail.noticeUrl} />
+            <video controls src={detail.noticeUrl}>
             </video>
           </div>
         </div>

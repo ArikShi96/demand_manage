@@ -285,7 +285,6 @@ class RecommendProduct extends React.Component {
   showAdd = (isEdit, item) => {
     this.setState({
       class_sun_ids: [],
-      class_pros: [],
       formData: {
         ...this.state.formData,
         showAddModal: true,

@@ -141,7 +141,7 @@ class RecommendDiscount extends React.Component {
     try {
       const res = await makeAjaxRequest('/preferential/getSelectProduct', 'get');
       this.setState({
-        class_pros: res.data || []
+        class_pros: res.data ? res.data : []
       })
     } catch (err) {
       this.setState({
@@ -186,7 +186,6 @@ class RecommendDiscount extends React.Component {
 
   showAdd = (isEdit, item) => {
     this.setState({
-      class_pros: [],
       formData: {
         ...this.state.formData,
         showAddModal: true,

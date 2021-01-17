@@ -75,7 +75,7 @@ class ArticleDetail extends React.Component {
           <div className='label'>发布时间:</div>
           <div className='content'>{detail.updateTime}</div>
         </div>
-        <div className={`detail-content visible`}>{detail.content}</div>
+        <div className={`detail-content visible`} dangerouslySetInnerHTML={{ __html: detail.content }}></div>
         <div className='status-wrap'>{`当前状态: ${detail.isdisplay ? '显示' : '隐藏'}`}</div>
         <div className='button-action'>
           <Button colors="primary" onClick={this.toggleHide}>{detail.isdisplay ? '隐藏' : '显示'}</Button>

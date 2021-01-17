@@ -312,15 +312,15 @@ class RecommendProduct extends React.Component {
 
   handleFormDataChange = (type, e) => {
     let class_sun_id = this.state.formData.dataItem.class_sun_id;
-    let product_id = this.state.formData.dataItem.product_id;
+    let dbId = this.state.formData.dataItem.dbId;
     if (type === 'class_id' && e) {
       this.fetchClassIds2(e);
       class_sun_id = "";
-      product_id = "";
+      dbId = "";
     }
     if (type === 'class_sun_id' && e) {
       this.fetchClassProducts(this.state.formData.dataItem.class_id, e);
-      product_id = "";
+      dbId = "";
     }
     this.setState({
       formData: {
@@ -328,7 +328,7 @@ class RecommendProduct extends React.Component {
         dataItem: {
           ...this.state.formData.dataItem,
           class_sun_id,
-          product_id,
+          dbId,
           [type]: e,
         }
       }
@@ -337,15 +337,16 @@ class RecommendProduct extends React.Component {
 
   submit = async () => {
     const { hot_sale_product_id } = this.state.formData.dataItem;
-    const { class_id, class_sun_id, product_id } = this.state.formData.dataItem;
+    const { class_id, class_sun_id, dbId } = this.state.formData.dataItem;
     const product = this.state.class_pros.find(pro => {
-      return pro.product_id === product_id
+      return pro.dbId === dbId
     })
     try {
       this.hideAddModal();
       if (hot_sale_product_id) {
         await makeAjaxRequest('/hot/sale/updateHotSale', 'post', {}, {
-          productId: product_id,
+          dbId: dbId,
+          productId: product.product_id,
           productName: product.product_name,
           hotSaleProductId: hot_sale_product_id,
           classId: class_id,
@@ -353,7 +354,8 @@ class RecommendProduct extends React.Component {
         });
       } else {
         await makeAjaxRequest('/hot/sale/addHotSale', 'post', {}, {
-          productId: product_id,
+          dbId: dbId,
+          productId: product.product_id,
           productName: product.product_name,
           classId: class_id,
           classSunId: class_sun_id,
@@ -510,11 +512,11 @@ class RecommendProduct extends React.Component {
                 supportWrite={true}
                 optionFilterProp="children"
                 className="search-item"
-                onChange={this.handleFormDataChange.bind(null, "product_id")}
-                value={dataItem.product_id}
+                onChange={this.handleFormDataChange.bind(null, "dbId")}
+                value={dataItem.dbId}
               >
                 {class_pros.map((item) => (
-                  <Option key={item.product_id} value={item.product_id}>
+                  <Option key={item.dbId} value={item.dbId}>
                     {item.product_name}
                   </Option>
                 ))}
@@ -523,7 +525,7 @@ class RecommendProduct extends React.Component {
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.hideAddModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-            <Button onClick={this.submit} colors="primary" disabled={!dataItem.class_id || !dataItem.class_sun_id || !dataItem.product_id}>确认</Button>
+            <Button onClick={this.submit} colors="primary" disabled={!dataItem.class_id || !dataItem.class_sun_id || !dataItem.dbId}>确认</Button>
           </Modal.Footer>
         </Modal>
         {/* 提示框 - 删除 */}

@@ -233,31 +233,33 @@ class RecommendApp extends React.Component {
     });
     if (type === 'class_sun_id') {
       this.fetchClassProducts(e);
-      this.state.formData.dataItem.product_id = "";
+      this.state.formData.dataItem.dbId = "";
       this.forceUpdate();
     }
   }
 
   submit = async () => {
-    const { productRecommendId, product_id, position } = this.state.formData.dataItem;
+    const { productRecommendId, product_id, position, dbId } = this.state.formData.dataItem;
     const product = this.state.class_pros.find(pro => {
-      return pro.product_id === product_id
+      return pro.dbId === dbId
     });
     try {
       this.hideAddModal();
       if (productRecommendId) {
         await makeAjaxRequest('/recommend/updateRecommend', 'post', {}, {
+          dbId:dbId,
           productRecommendId,
           type: "0",
           position: position || this.getCurrentPosition(), //排列位置
-          productId: product_id,
+          productId: product.product_id,
           productName: product.product_name
         });
       } else {
         await makeAjaxRequest('/recommend/addRecommend', 'post', {}, {
+          dbId:dbId,
           type: "0",
           position: this.getCurrentPosition(), //排列位置
-          productId: product_id,
+          productId: product.product_id,
           productName: product.product_name
         });
       }
@@ -358,11 +360,11 @@ class RecommendApp extends React.Component {
                 supportWrite={true}
                 optionFilterProp="children"
                 className="search-item"
-                onChange={this.handleFormDataChange.bind(null, "product_id")}
-                value={dataItem.product_id}
+                onChange={this.handleFormDataChange.bind(null, "dbId")}
+                value={dataItem.dbId}
               >
                 {class_pros.map((item) => (
-                  <Option key={item.product_id} value={item.product_id}>
+                  <Option key={item.dbId} value={item.dbId}>
                     {item.product_name}
                   </Option>
                 ))}
@@ -371,7 +373,7 @@ class RecommendApp extends React.Component {
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={this.hideAddModal} colors="secondary" style={{ marginRight: 8 }}>取消</Button>
-            <Button onClick={this.submit} colors="primary" disabled={!dataItem.product_id}>确认</Button>
+            <Button onClick={this.submit} colors="primary" disabled={!dataItem.dbId}>确认</Button>
           </Modal.Footer>
         </Modal>
         {/* 提示框 - 删除 */}

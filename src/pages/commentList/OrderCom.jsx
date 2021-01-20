@@ -46,7 +46,7 @@ class OrderCom extends React.Component {
     {
       title: "评价分数（交付速度、交付质量、商家服务）",
       dataIndex: "average",
-      width: "25%",
+      width: "26%",
       render: (value, item) => {
         return <span>{`${value} ( ${item.speed_score} 、 ${item.quality_score} 、 ${item.attitude_score} )`}</span>
       }

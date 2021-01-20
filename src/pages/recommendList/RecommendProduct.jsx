@@ -55,7 +55,7 @@ class RecommendProduct extends React.Component {
     {
       title: "排序",
       dataIndex: "sort",
-      width: "10%",
+      width: "15%",
       render: (value, item) => {
         return (
           <InputNumber

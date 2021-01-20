@@ -73,7 +73,7 @@ class RecommendHome extends React.Component {
     {
       title: "操作",
       dataIndex: "operation",
-      width: "20%",
+      width: "25%",
       render: (value, item) => {
         return (
           <div className="actions">
@@ -95,6 +95,7 @@ class RecommendHome extends React.Component {
   ];
 
   componentDidMount() {
+    // window.document.querySelector('.ucg-search-content .u-col-md-4.u-col-xs-4').className = 'u-col-md-12 u-col-xs-12';
     this.searchList();
     this.fetchListFour();
   }
@@ -297,8 +298,8 @@ class RecommendHome extends React.Component {
             reset={this.resetSearch.bind(this)}
             search={this.searchList.bind(this)}
           >
-            <FormList layoutOpt={{ md: 4, xs: 4 }}>
-              <FormList.Item className='time-select-wrap' label="" labelCol={0}>
+            <FormList layoutOpt={{ md: 6, xs: 6 }}>
+              <FormList.Item className='time-select-wrap' label="时间" labelCol={100}>
                 <div className='time-select'>
                   <Select
                     // placeholder="选择时间类型"
@@ -323,7 +324,6 @@ class RecommendHome extends React.Component {
                     placeholder={'开始时间 ~ 结束时间'}
                     format={format}
                     onChange={this.changeDate}
-                    style={{ width: 250 }}
                   />
                 </div>
               </FormList.Item>
@@ -417,6 +417,9 @@ export default styled(RecommendHome)`
 .pagination-wrap {
   margin-top:40px;
   text-align: center;
+}
+.ucg-search-content {
+  padding-right: 0;
 }
 .time-select {
   display: flex;

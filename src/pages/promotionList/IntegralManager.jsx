@@ -187,7 +187,7 @@ class IntegralManager extends React.Component {
             />
           </div>
         </div>
-        <div className='detail-wrap'>
+        <div className='detail-wrap' style={{ flexWrap: 'nowrap' }}>
           <div className='label'>
             <Checkbox onChange={this.handleCheckboxChange} checked={isTime} />
             <span>固定时间注册赠送积分</span>
@@ -224,15 +224,15 @@ class IntegralManager extends React.Component {
             <div className='tip'>0或空表示不赠送积分</div>
           </div>
         </div>
-        <div className='detail-wrap'>
+        <div className='detail-wrap' style={{ flexWrap: 'nowrap' }}>
           <div className='label'>积分比例</div>
-          <div className='content'>
+          <div className='content' style={{ display: 'flex' }}>
             <FormControl className="search-item"
               value={pointsProportionLeft}
               onChange={this.handleChange.bind(null, "pointsProportionLeft")}
               style={{ width: 200 }}
             />
-            <span style={{ display: 'inline-flex', alignItems: 'center', marginRight: 20, height: 32 }}>
+            <span style={{ flexShrink: '0', display: 'inline-flex', alignItems: 'center', marginRight: 20, height: 32 }}>
               元 =
             </span>
             <FormControl className="search-item"

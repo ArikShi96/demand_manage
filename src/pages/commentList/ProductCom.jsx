@@ -56,7 +56,7 @@ class ProductCom extends React.Component {
     {
       title: "评论内容",
       dataIndex: "comment",
-      width: "20%",
+      width: "21%",
     },
     {
       title: "评分",

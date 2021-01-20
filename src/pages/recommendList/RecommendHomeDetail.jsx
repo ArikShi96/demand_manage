@@ -79,7 +79,7 @@ class QuestionDetail extends React.Component {
               <div className="content">
                 <img src={data.grade_icon} className='grade-icon' alt="" />
                 <span>{data.grade_name}</span>
-                <Progress percent={(parseInt(data.points_start) / parseInt(data.points_end).toFixed(2) * 100)} />
+                <Progress percent={(parseInt(data.points_start) / parseInt(data.points_end)).toFixed(2) * 100} />
               </div>
             </div>
             <div className='info-row'>

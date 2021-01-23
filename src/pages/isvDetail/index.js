@@ -103,7 +103,7 @@ class IsvDetail extends React.Component {
     this.setState({
       isvId: id,
     });
-    fetch(myapi.BASE_URL + `/market/isv/info?isvId=${id}`, {
+    fetch(myapi.BASE_URL + `/market/isv/info?isv_id=${id}`, {
       method: "GET",
       mode: "cors",
       headers: {

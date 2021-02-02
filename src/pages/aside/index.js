@@ -197,12 +197,12 @@ class AsideModel extends React.Component {
                 热销商品管理
               </Link>
             </Menu.Item>
-            <Menu.Item key="17">
+            {/* <Menu.Item key="17">
               <Link to="/RecommendDiscount">
                 <i className="iconfont icon-xuqiuliebiao"></i>
                 特惠产品设置
               </Link>
-            </Menu.Item>
+            </Menu.Item> */}
             <Menu.Item key="18">
               <Link to="/RecommendApp">
                 <i className="iconfont icon-xuqiuliebiao"></i>
@@ -291,12 +291,12 @@ class AsideModel extends React.Component {
                 活动管理
               </Link>
             </Menu.Item>
-            <Menu.Item key="26">
+            {/* <Menu.Item key="26">
               <Link to="/IntegralManager">
                 <i className="iconfont icon-xuqiuliebiao"></i>
                 积分管理
               </Link>
-            </Menu.Item>
+            </Menu.Item> */}
           </SubMenu>
           {/* 文章管理 */}
           <SubMenu

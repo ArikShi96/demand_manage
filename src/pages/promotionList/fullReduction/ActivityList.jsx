@@ -15,6 +15,7 @@ import FormList from "../../common/Form";
 import SearchPanel from "../../common/SearchPanel";
 import { message, Radio, Checkbox, Tooltip } from 'antd';
 import makeAjaxRequest from '../../../util/request';
+import myapi from "../../../api";
 const { RangePicker } = DatePicker;
 const format = "YYYY-MM-DD";
 const Option = Select.Option;
@@ -28,10 +29,10 @@ class ActivityList extends React.Component {
       activePage: 1, // 当前页面
       pageSize: 10, // 每页多少
     },
-    activity_name: '',
-    is_stop: '',
-    date_start: '',
-    date_end: '',
+    activityName: '',
+    status: '',
+    startTime: '',
+    endTime: '',
     formData: {
       dataItem: {}
     },
@@ -151,10 +152,10 @@ class ActivityList extends React.Component {
   resetSearch() {
     this.refs.rangePicker.clear();
     this.setState({
-      activity_name: "",
-      is_stop: "",
-      date_start: '',
-      date_end: '',
+      activityName: "",
+      status: "",
+      startTime: '',
+      endTime: '',
     }, () => {
       this.searchList();
     });
@@ -162,46 +163,98 @@ class ActivityList extends React.Component {
 
   /* 搜索 */
   searchList = async () => {
-    try {
-      const {
-        dataSource,
-        activity_name,
-        is_stop,
-        date_start,
-        date_end,
-      } = this.state;
-      const { activePage, pageSize } = dataSource;
-      const res = await makeAjaxRequest('/activity/operateActivityList', 'post', {
-        pageIndex: activePage - 1,
-        pageSize,
-        activity_name,
-        is_stop,
-        date_start,
-        date_end,
-      });
-      const data = res.data.content || [];
-      data.forEach((item, index) => {
-        item.order = (index + 1)
-      })
-      this.setState({
-        dataSource: {
-          ...this.state.dataSource,
-          content: data,
-          total: res.data.totalCount || 0,
-          items: Math.floor((res.data.totalCount || 0) / this.state.dataSource.pageSize) + 1
+    const {
+      dataSource,
+      activityName,
+      status,
+      startTime,
+      endTime,
+    } = this.state;
+    const { activePage, pageSize } = dataSource;
+    fetch(
+      myapi.BASE_URL +
+        `/market/operate/activity/operateList?pageIndex=${activePage-1}&pageSize=${pageSize}`,
+      {
+        method: "GET",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json;charset=UTF-8",
+          // 'Access-Control-Allow-Credentials': 'true',
+          // 'Access-Control-Allow-Headers': 'X-Requested-With',
+          // 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+          // 'Access--Allow-Origin': '*',
+        },
+        credentials: "include",
+      }
+    )
+      .then((res) => res.json())
+      .then((response) => {
+        console.log(response);
+        if (response.status === 1) {
+          const data = response.data.content || [];
+          data.forEach((item, index) => {
+            item.order = (index + 1)
+          })
+          this.setState({
+            dataSource: {
+              ...this.state.dataSource,
+              content: data,
+              total: response.data.totalCount || 0,
+              items: Math.floor((response.data.totalCount || 0) / this.state.dataSource.pageSize) + 1
+            }
+          });
+        } else {
+          this.setState({
+            dataSource: {
+              ...this.state.dataSource,
+              content: [],
+              total: 0,
+              items: 0
+            }
+          });
+          message.error(response.message);
         }
       });
-    } catch (err) {
-      this.setState({
-        dataSource: {
-          ...this.state.dataSource,
-          content: [],
-          total: 0,
-          items: 0
-        }
-      });
-      message.error(err.message);
-    }
+    // try {
+    //   const {
+    //     dataSource,
+    //     activityName,
+    //     status,
+    //     startTime,
+    //     endTime,
+    //   } = this.state;
+    //   const { activePage, pageSize } = dataSource;
+    //   const res = await makeAjaxRequest('/operate/activity/operateList', 'get', {
+    //     pageIndex: activePage - 1,
+    //     pageSize,
+    //     activityName,
+    //     status,
+    //     startTime,
+    //     endTime,
+    //   });
+    //   const data = res.data.content || [];
+    //   data.forEach((item, index) => {
+    //     item.order = (index + 1)
+    //   })
+    //   this.setState({
+    //     dataSource: {
+    //       ...this.state.dataSource,
+    //       content: data,
+    //       total: res.data.totalCount || 0,
+    //       items: Math.floor((res.data.totalCount || 0) / this.state.dataSource.pageSize) + 1
+    //     }
+    //   });
+    // } catch (err) {
+    //   this.setState({
+    //     dataSource: {
+    //       ...this.state.dataSource,
+    //       content: [],
+    //       total: 0,
+    //       items: 0
+    //     }
+    //   });
+    //   message.error(err.message);
+    // }
   };
 
   /* 查看/隐藏/删除 */
@@ -243,9 +296,9 @@ class ActivityList extends React.Component {
         try {
           this.hideConfirmModal();
           const { confirmItem, confirmAction } = this.state;
-          await makeAjaxRequest('/activity/editOperateActivityStatus', 'get', {
-            activity_id: confirmItem.activityId,
-            status: confirmAction === "open" ? "3" : "4",
+          await makeAjaxRequest('/operate/activity/status', 'POST', {
+            activityId: confirmItem.activityId,
+            type: confirmAction === "open" ? "recovery" : "stop",
           });
           message.success('操作成功');
           this.searchList();
@@ -263,7 +316,7 @@ class ActivityList extends React.Component {
   showAdd = async (isEdit, item) => {
     let editItem = ""
     if (isEdit) {
-      const res = await makeAjaxRequest('/activity/getOperateActivityinfo', 'get', { activity_id: item.activityId });
+      const res = await makeAjaxRequest('/operate/activity/getOperateActivityinfo', 'get', { activity_id: item.activityId });
       editItem = res.data.activityDto;
       editItem.couponRuleList = res.data.couponDtoList;
     }
@@ -363,7 +416,7 @@ class ActivityList extends React.Component {
         message = "满减条件的金额输入不合法";
         return true;
       }
-      if (rule.couponMoney > rule.limitMoney) {
+      if (Number(rule.couponMoney) > Number(rule.limitMoney)) {
         message = "满减的金额不能大于总金额";
         return true;
       }
@@ -406,7 +459,7 @@ class ActivityList extends React.Component {
     try {
       this.hideAddModal();
       if (activityId) {
-        await makeAjaxRequest('/activity/editOperate', 'post', {}, {
+        await makeAjaxRequest('/operate/activity/editOperate', 'post', {}, {
           activityId,
           busType: "3",
           favType: "1",
@@ -420,7 +473,8 @@ class ActivityList extends React.Component {
           activityJoinStart,
           activityJoinEnd,
           remarks: remarks ? remarks.trim() : "",
-          productScope: "0",
+          productScope: "1",
+          activityScope: "1",
           couponRuleList: (couponRuleList || []).map(rule => {
             return {
               type: "1",
@@ -430,7 +484,7 @@ class ActivityList extends React.Component {
           })
         });
       } else {
-        await makeAjaxRequest('/activity/addOperate', 'post', {}, {
+        await makeAjaxRequest('/operate/activity/addOperate', 'post', {}, {
           busType: "3",
           favType: "1",
           productIds: "",
@@ -443,7 +497,8 @@ class ActivityList extends React.Component {
           activityJoinStart,
           activityJoinEnd,
           remarks: remarks ? remarks.trim() : "",
-          productScope: "0",
+          productScope: "1",
+          activityScope: "1",
           couponRuleList: (couponRuleList || []).map(rule => {
             return {
               type: "1",
@@ -473,8 +528,8 @@ class ActivityList extends React.Component {
   render() {
     const {
       dataSource,
-      activity_name,
-      is_stop,
+      activityName,
+      status,
       formData,
       confirmAction,
       confirmTip,
@@ -493,16 +548,16 @@ class ActivityList extends React.Component {
             <FormList.Item label="活动名称" labelCol={100}>
               <FormControl
                 className="search-item"
-                value={activity_name}
-                onChange={this.handleChange.bind(null, "activity_name")}
+                value={activityName}
+                onChange={this.handleChange.bind(null, "activityName")}
               />
             </FormList.Item>
             <FormList.Item label="状态" labelCol={100}>
               <Select
                 className="search-item"
                 placeholder="请选择状态"
-                onChange={this.handleChange.bind(null, "is_stop")}
-                value={is_stop}
+                onChange={this.handleChange.bind(null, "status")}
+                value={status}
               >
                 {Object.keys(IsStopMap).map((key) => (
                   <Option key={key} value={key}>
@@ -603,28 +658,28 @@ class ActivityList extends React.Component {
             <FormList.Item label="活动范围" labelCol={100}>
               <Radio.Group
                 // value={dataItem.productScope}
-                value="0"
+                value="1"
                 onChange={this.handleFormDataChange.bind(null, "productScope")}
               >
-                <Radio value='0'>全品类</Radio>
+                <Radio value='1'>全品类</Radio>
                 {/* <Radio value='1'>部分品类</Radio> */}
               </Radio.Group>
             </FormList.Item>
-            {dataItem.productScope === "1" && <FormList.Item label="请选择品类" labelCol={100}>
+            {/* {dataItem.productScope === "1" && <FormList.Item label="请选择品类" labelCol={100}>
               <Checkbox.Group onChange={this.onFormCheckBoxChange}>
                 <Checkbox value="0">1</Checkbox>
                 <Checkbox value="1">2</Checkbox>
               </Checkbox.Group>
-            </FormList.Item>}
+            </FormList.Item>} */}
             <div className='section-title'>
               {/* <Tag color="default">活动规则</Tag> */}
                 活动规则
               </div>
             <FormList.Item label="活动类型" labelCol={100}>
               <Radio.Group
-                value="0"
+                value="1"
               >
-                <Radio value='0'>满减</Radio>
+                <Radio value='1'>满减</Radio>
               </Radio.Group>
             </FormList.Item>
             <FormList.Item label="满减条件" labelCol={100}>
